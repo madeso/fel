@@ -2,6 +2,8 @@
 Fast Embedded Lightweight scripting engine. Despite it stands for something it is also a same so you should spell it like fel and not like F.E.L or something.
 Fel also means wrong/error/bad in swedish. It is a bad thing to create your own language, why not use an existing language? One aim of the language is also to generate errors at "compile" time instead of at run time.
 
+[![Build Status](https://travis-ci.org/madeso/fel.svg?branch=master)](https://travis-ci.org/madeso/fel)
+
 # Main features
   * 0 based arrays (as opposed to luas 1)
   * optional/gradual typesafety
