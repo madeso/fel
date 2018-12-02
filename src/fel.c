@@ -63,15 +63,27 @@ void fel_delete(fel_context* ctx)
   }
 }
 
+typedef struct {
+  fel_file file;
+  char peek;
+} fel_parse_status;
+
+fel_error fel_parse_and_run(fel_context* ctx, fel_parse_status* f)
+{
+  return FEL_NO_ERROR;
+}
+
 fel_error fel_load_and_run_file(fel_context* ctx, fel_syntax* s, char* file)
 {
-  fel_file f;
-  if(!ctx->file_open(ctx->file_data, &f, file))
+  fel_parse_status f;
+  f.peek = 0;
+  if(!ctx->file_open(ctx->file_data, &f.file, file))
   {
     fel_report_error(ctx, "Failed to open file: %s", file);
     return FEL_FAILED_TO_OPEN_FILE;
   }
-  ctx->file_close(ctx->file_data, &f);
-  return FEL_NO_ERROR;
+  fel_error err = fel_parse_and_run(ctx, &f);
+  ctx->file_close(ctx->file_data, &f.file);
+  return err;
 }
 
