@@ -27,7 +27,9 @@ void fel_default_file_close(void* data, fel_file* file)
 
 char fel_default_file_read(void* data, fel_file* file)
 {
-  return fgetc(file->file);
+  char r = fgetc(file->file);
+  if(r == EOF) return 0;
+  else return r;
 }
 
 fel_context* fel_new()
@@ -68,10 +70,55 @@ typedef struct {
   char peek;
 } fel_parse_status;
 
+char fel_parse_read(fel_context* ctx, fel_parse_status* f)
+{
+  if(f->peek != 0)
+  {
+    char r = f->peek;
+    f->peek = 0;
+    return r;
+  }
+  return ctx->file_read(ctx->file_data, &f->file);
+}
+
+char fel_parse_peek(fel_context* ctx, fel_parse_status* f)
+{
+  if(f->peek == 0)
+  {
+    f->peek = fel_parse_read(ctx, f);
+  }
+  return f->peek;
+}
+
+void fel_parse_skip_spaces(fel_context* ctx, fel_parse_status* f)
+{
+  while(1)
+  {
+    switch(fel_parse_peek(ctx, f))
+    {
+      case ' ':
+      case '\t':
+      case '\n':
+      case '\r':
+        // skip space...
+        fel_parse_read(ctx, f);
+        break;
+      default:
+        return;
+    }
+  }
+}
+
 fel_error fel_parse_and_run(fel_context* ctx, fel_parse_status* f)
 {
+  fel_parse_skip_spaces(ctx, f);
+  if(fel_parse_peek(ctx, f) != 0)
+  {
+    fel_report_error(ctx, "File is not empty...");
+  }
   return FEL_NO_ERROR;
 }
+
 
 fel_error fel_load_and_run_file(fel_context* ctx, fel_syntax* s, char* file)
 {
