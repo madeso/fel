@@ -1,0 +1,5 @@
+language: c
+dist:
+  - trusty
+  - xenial
+script: mkdir build && cd build && cmake .. && make
