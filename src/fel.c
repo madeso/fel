@@ -10,10 +10,35 @@ void fel_syntax_default(fel_syntax* s)
   s->arg_sep = ",";
 }
 
+typedef struct {
+  FILE file;
+} fel_default_file;
+
+int fel_default_file_open(void* data, fel_file* file, char* path)
+{
+  file->file = fopen(path, "rb");
+  return file->file != 0;
+}
+
+void fel_default_file_close(void* data, fel_file* file)
+{
+  fclose(file->file);
+}
+
+char fel_default_file_read(void* data, fel_file* file)
+{
+  return fgetc(file->file);
+}
+
 fel_context* fel_new()
 {
   fel_context* ctx = (fel_context*)malloc(sizeof(fel_context));
   ctx->error_callback = 0;
+  ctx->error_callback_data = 0;
+  ctx->file_open = &fel_default_file_open;
+  ctx->file_close = &fel_default_file_close;
+  ctx->file_read = &fel_default_file_read;
+  ctx->file_data = 0;
   return ctx;
 }
 
@@ -40,13 +65,13 @@ void fel_delete(fel_context* ctx)
 
 fel_error fel_load_and_run_file(fel_context* ctx, fel_syntax* s, char* file)
 {
-  FILE* f = fopen(file, "rb");
-  if(f == 0)
+  fel_file f;
+  if(!ctx->file_open(ctx->file_data, &f, file))
   {
     fel_report_error(ctx, "Failed to open file: %s", file);
     return FEL_FAILED_TO_OPEN_FILE;
   }
-  fclose(f);
+  ctx->file_close(ctx->file_data, &f);
   return FEL_NO_ERROR;
 }
 
