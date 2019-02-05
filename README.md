@@ -9,7 +9,12 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * 0 based arrays (as opposed to luas 1)
   * optional/gradual typesafety
   * JIT as a feature, not as a external library
-  * Embedable by design, grab the C source and add it to your favorite buildsystem.
-  * Customaizable syntax. Don't like {}, switch them out in a header before building
+  * Embedable by design, grab the source and add it to your favorite buildsystem.
   * Editor/intellisense support(mainly having a [LSP](https://github.com/Microsoft/language-server-protocol)-enabled server).
   * Operator overloading support. (like lua, unlike js)
+
+# Todo
+  * Make sure the basic features work.
+  * Switch from c++ to c
+  * Customaizable syntax. Don't like {}, switch them out in a header before building
+
