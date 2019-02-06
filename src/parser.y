@@ -11,25 +11,63 @@ void yyerror(yyscan_t scanner, const char* err);
   typedef void* yyscan_t;
 }
 
+%define parse.error verbose
+
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
 
 %union {
+  std::string* string;
   std::string* ident;
   int ival;
 }
 
 %token <ident> IDENT 
+%token <string> STRING
+%token LET WHILE FUNCTION DOT DOTDOT ASSIGN EQUAL TERM ";"
 %start input
 
 %%
 
 input
-  : IDENT input
-  { std::cout << "ident: " << *$1 << "\n"; delete $1; }
-  | IDENT
-  { std::cout << "ident: " << *$1 << "\n"; delete $1; }
+  : statement input
+  | 
 ;
+
+statement
+  : call_statement
+  | assign_statement
+  | body_statement
+;
+
+body_statement
+  : WHILE
+;
+
+call_statement
+  : IDENT '(' function_arguments ')' TERM
+  {std::cout << "Calling function " << *$1 << "\n"; delete $1; }
+;
+
+assign_statement
+  : IDENT ASSIGN value TERM
+  { std::cout << "Assign " << *$1 << "\n"; delete $1; }
+;
+
+function_arguments
+  : value function_arguments
+  |
+;
+
+value
+  : STRING
+  { std::cout << "string value " << *$1 << "\n"; delete $1; }
+  | IDENT
+  { std::cout << "ident" << *$1 << "\n"; delete $1; }
+  | call_statement
+  | value EQUAL value
+;
+
 
 %%
 void yyerror(yyscan_t scanner, const char* err)
