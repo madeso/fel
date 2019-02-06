@@ -1,3 +1,18 @@
 cmake_minimum_required(VERSION 3.6)
 project(fel)
-add_executable(fel src/fel.cc src/main.cc)
+
+find_package(BISON)
+find_package(FLEX)
+
+bison_target(MyParser src/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
+flex_target(MyScanner src/lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
+add_flex_bison_dependency(MyScanner MyParser)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(fel
+  ${BISON_MyParser_OUTPUTS}
+  ${FLEX_MyScanner_OUTPUTS}
+  src/fel.cc
+  src/main.cc
+  )
