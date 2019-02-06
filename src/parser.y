@@ -2,12 +2,17 @@
 #include <iostream>
 #include <string>
 
-extern int yylex();
-extern int yyparse();
-extern FILE* yyin;
+#include "lexer.hh"
 
-void yyerror(const char* err);
+void yyerror(yyscan_t scanner, const char* err);
 %}
+
+%code requires {
+  typedef void* yyscan_t;
+}
+
+%lex-param   { yyscan_t scanner }
+%parse-param { yyscan_t scanner }
 
 %union {
   std::string* ident;
@@ -27,7 +32,7 @@ input
 ;
 
 %%
-void yyerror(const char* err)
+void yyerror(yyscan_t scanner, const char* err)
 {
    std::cerr << "Error: " << err << "\n";
 }

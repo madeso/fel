@@ -1,10 +1,9 @@
 %{
 #include <string>
 #include "parser.hh"
-extern int yylex();
 %}
 
-%option noyywrap never-interactive nounistd
+%option reentrant noyywrap never-interactive nounistd
 
 %%
 

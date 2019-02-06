@@ -5,7 +5,7 @@ find_package(BISON)
 find_package(FLEX)
 
 bison_target(MyParser src/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
-flex_target(MyScanner src/lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
+flex_target(MyScanner src/lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc COMPILE_FLAGS "--header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.hh")
 add_flex_bison_dependency(MyScanner MyParser)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
