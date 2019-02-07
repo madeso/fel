@@ -22,6 +22,7 @@ void yyerror(yyscan_t scanner, const char* err);
   int ival;
 }
 
+%token END 0 "end of file"
 %token <ident> IDENT 
 %token <string> STRING
 %token LET "let"
