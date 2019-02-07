@@ -5,6 +5,7 @@
 #include <fstream>
 #include <streambuf>
 
+#include "felparser.h"
 #include "parser.hh"
 #include "lexer.hh"
 
@@ -22,7 +23,8 @@ namespace fel
 
     state = yy_scan_string(str.c_str(), scanner);
 
-    if (yyparse(scanner)) {
+    FelState fel;
+    if (yyparse(scanner, &fel)) {
         /* error parsing */
         return;
     }

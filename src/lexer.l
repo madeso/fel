@@ -1,8 +1,8 @@
 %{
 #include <string>
+#include "felparser.h"
 #include "parser.hh"
 #include <iostream>
-#include "felparser.h"
 
 void count(yyscan_t scanner);
 #define COUNT_CHARS count(yyscanner)
