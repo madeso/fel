@@ -19,7 +19,8 @@
 "=" { return ASSIGN; }
 "==" { return EQUAL; }
 ";" { return TERM; }
-[\(\)] { return yytext[0]; }
+"(" { return LPAREN; }
+")" { return RPAREN; }
 
 [a-zA-Z][a-zA-Z0-9]* {
   yylval.ident = new std::string(yytext);

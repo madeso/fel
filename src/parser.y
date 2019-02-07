@@ -24,7 +24,17 @@ void yyerror(yyscan_t scanner, const char* err);
 
 %token <ident> IDENT 
 %token <string> STRING
-%token LET WHILE FUNCTION DOT DOTDOT ASSIGN EQUAL TERM ";"
+%token LET "let"
+  WHILE "while"
+  FUNCTION "function"
+  DOT "."
+  DOTDOT ".."
+  ASSIGN "assign ="
+  EQUAL "=="
+  TERM ";"
+  LPAREN "("
+  RPAREN ")"
+
 %start input
 
 %%
@@ -45,7 +55,7 @@ body_statement
 ;
 
 call_statement
-  : IDENT '(' function_arguments ')' TERM
+  : IDENT LPAREN function_arguments RPAREN TERM
   {std::cout << "Calling function " << *$1 << "\n"; delete $1; }
 ;
 
