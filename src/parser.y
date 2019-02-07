@@ -2,7 +2,9 @@
 #include <iostream>
 #include <string>
 
+#include "parser_defines.hh"
 #include "lexer.hh"
+#include "felparser.h"
 
 void yyerror(yyscan_t scanner, const char* err);
 %}
@@ -11,6 +13,7 @@ void yyerror(yyscan_t scanner, const char* err);
   typedef void* yyscan_t;
 }
 
+%define api.pure full
 %define parse.error verbose
 
 %lex-param   { yyscan_t scanner }

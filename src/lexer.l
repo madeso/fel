@@ -2,6 +2,7 @@
 #include <string>
 #include "parser.hh"
 #include <iostream>
+#include "felparser.h"
 
 void count(yyscan_t scanner);
 #define COUNT_CHARS count(yyscanner)
@@ -9,6 +10,7 @@ void count(yyscan_t scanner);
 %}
 
 %option reentrant noyywrap never-interactive nounistd
+%option bison-bridge
 
 %%
 
@@ -30,13 +32,13 @@ void count(yyscan_t scanner);
 
 [a-zA-Z][a-zA-Z0-9]* {
   COUNT_CHARS;
-  yylval.ident = new std::string(yytext);
+  yylval->ident = new std::string(yytext);
   return IDENT;
 }
 
 \"(\\.|[^\\"\n])*\"	{
   COUNT_CHARS;
-  yylval.string = new std::string(yytext);
+  yylval->string = new std::string(yytext);
   return STRING;
 }
 
