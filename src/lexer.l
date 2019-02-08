@@ -9,6 +9,7 @@ void count(yyscan_t scanner);
 
 %}
 
+%option yylineno bison-locations
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
@@ -19,7 +20,7 @@ void count(yyscan_t scanner);
   COUNT_CHARS;
 }
 
-"let" { COUNT_CHARS; return LET; }
+"var" { COUNT_CHARS; return VAR; }
 "while" { COUNT_CHARS; return WHILE; }
 "function" { COUNT_CHARS; return FUNCTION; }
 "." { COUNT_CHARS; return DOT; }

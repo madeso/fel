@@ -6,7 +6,7 @@
 #include "parser.hh"
 #include "lexer.hh"
 
-void yyerror(yyscan_t scanner, FelState* fel, const char* err);
+void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 %}
 
 %code requires {
@@ -15,6 +15,7 @@ void yyerror(yyscan_t scanner, FelState* fel, const char* err);
 
 %define api.pure full
 %define parse.error verbose
+%locations
 
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
@@ -30,7 +31,7 @@ void yyerror(yyscan_t scanner, FelState* fel, const char* err);
 %token <ident> IDENT 
 %printer { frpintf(yyo, "%s", $$->c_str()); } IDENT
 %token <string> STRING
-%token LET "let"
+%token VAR "var"
   WHILE "while"
   FUNCTION "function"
   DOT "."
@@ -86,7 +87,7 @@ value
 
 
 %%
-void yyerror(yyscan_t scanner, FelState* state, const char* err)
+void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* state, const char* err)
 {
-   std::cerr << "Error: " << err << "\n";
+    std::cerr << "file:" << loc->first_line << ":" << loc->first_column << ": syntax error: " << err << "\n";
 }
