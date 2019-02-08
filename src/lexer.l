@@ -14,6 +14,7 @@
 
 "//"[^\n]* {
   // ignore single line comments
+std::cout << "single line comment\n";
 }
 
 "var" { return VAR; }
@@ -27,7 +28,7 @@
 "(" { return LPAREN; }
 ")" { return RPAREN; }
 
-[a-zA-Z][a-zA-Z0-9]* {
+[a-zA-Z_][a-zA-Z_0-9]* {
   
   yylval->ident = new std::string(yytext);
   return IDENT;
@@ -41,9 +42,11 @@
 
 
 \n {
+std::cout << "newline\n";
 }
 
 [ \r\t\v\f] {
+std::cout << "space\n";
 }
 
 . {
