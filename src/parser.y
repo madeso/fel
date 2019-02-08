@@ -28,6 +28,7 @@ void yyerror(yyscan_t scanner, FelState* fel, const char* err);
 
 %token END 0 "end of file"
 %token <ident> IDENT 
+%printer { frpintf(yyo, "%s", $$->c_str()); } IDENT
 %token <string> STRING
 %token LET "let"
   WHILE "while"
