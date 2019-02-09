@@ -89,5 +89,5 @@ value
 %%
 void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* state, const char* err)
 {
-    std::cerr << "file:" << loc->first_line << ":" << loc->first_column << ": syntax error: " << err << "\n";
+    std::cerr << state->file << ":" << loc->first_line << ":" << loc->first_column << ": syntax error: " << err << "\n";
 }

@@ -11,7 +11,7 @@
 
 namespace fel
 {
-  void Fel::LoadAndRunString(const std::string& str, Log* log)
+  void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
   {
     yyscan_t scanner;
     YY_BUFFER_STATE state;
@@ -22,6 +22,7 @@ namespace fel
     }
 
     FelState fel;
+    fel.file = filename;
     yyset_extra(&fel, scanner);
 
     state = yy_scan_string(str.c_str(), scanner);
@@ -43,7 +44,7 @@ namespace fel
     std::ifstream t(file.c_str());
     std::string str((std::istreambuf_iterator<char>(t)),
                     std::istreambuf_iterator<char>());
-    LoadAndRunString(str, log);
+    LoadAndRunString(str, file, log);
   }
 }
 

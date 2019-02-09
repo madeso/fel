@@ -11,7 +11,7 @@ namespace fel
 
   struct Fel
   {
-    void LoadAndRunString(const std::string& str, Log* log);
+    void LoadAndRunString(const std::string& str, const std::string& filename, Log* log);
     void LoadAndRunFile(const std::string& file, Log* log);
   };
 }
