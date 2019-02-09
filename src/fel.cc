@@ -27,7 +27,6 @@ namespace fel
 
     state = yy_scan_string(str.c_str(), scanner);
     yyset_lineno(1, scanner);
-    yyset_column(0, scanner);
 
     if (yyparse(scanner, &fel)) {
         /* error parsing */
