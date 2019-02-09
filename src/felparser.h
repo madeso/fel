@@ -3,7 +3,8 @@
 
 struct FelState
 {
-  int column = 0;
+  int first_column = 0;
+  int last_column = 0;
 };
 
 #endif // FEL_PARSER_H

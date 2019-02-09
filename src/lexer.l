@@ -3,11 +3,19 @@
 #include "felparser.h"
 #include "parser.hh"
 #include <iostream>
+
 #define YY_USER_ACTION \
-          yylloc->first_line = yylloc->last_line = yylineno;\
-          yylloc->first_column = yylloc->last_column = yycolumn;
+  yyextra->first_column = yyextra->last_column; \
+  for(char* c=yytext; *c; ++c) { \
+    yyextra->last_column = *c=='\n' ? 0 : yyextra->last_column + 1; \
+  } \
+  yylloc->first_line = yylloc->last_line = yylineno;\
+  yylloc->first_column = yyextra->first_column; \
+  yylloc->last_column = yyextra->last_column;
+
 %}
 
+%option extra-type="FelState*"
 %option yylineno bison-locations
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
@@ -16,7 +24,6 @@
 
 "//"[^\n]* {
   // ignore single line comments
-std::cout << "single line comment\n";
 }
 
 "var" { return VAR; }
@@ -44,15 +51,13 @@ std::cout << "single line comment\n";
 
 
 \n {
-std::cout << "newline\n";
 }
 
 [ \r\t\v\f] {
-std::cout << "space\n";
 }
 
 . {
-  std::cerr << "file" << ":" << yylineno << ":" << yycolumn << ": Invalid character : " << yytext << "\n";
+  std::cerr << "file" << ":" << yylineno << ":" << yyextra->first_column << ": Invalid character : " << yytext << "\n";
 }
 %%
 

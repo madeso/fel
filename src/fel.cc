@@ -21,11 +21,13 @@ namespace fel
         return;
     }
 
+    FelState fel;
+    yyset_extra(&fel, scanner);
+
     state = yy_scan_string(str.c_str(), scanner);
     yyset_lineno(1, scanner);
     yyset_column(0, scanner);
 
-    FelState fel;
     if (yyparse(scanner, &fel)) {
         /* error parsing */
         return;
