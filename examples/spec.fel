@@ -1,5 +1,5 @@
 // same
-var foo1 = function() {}
+var foo1 = function() {};
 function foo2() {}
 
 function test_variables()
@@ -22,7 +22,7 @@ function test_variables()
 
     // integers are implicitly cast to floats when needed
     var a_int = 3;
-    var a_float = 3.0
+    var a_float = 3.0;
     var also_a_float = a_int + a_float
 
     // todo: figure out how to handle a_int / another_int, if both should be converted to float or it should be a integer division
