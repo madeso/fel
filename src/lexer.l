@@ -57,7 +57,7 @@
 }
 
 . {
-  std::cerr << yyextra->file << ":" << yylineno << ":" << yyextra->first_column << ": Invalid character : " << yytext << "\n";
+  std::cerr << yyextra->file << ":" << yylineno << ":" << yyextra->first_column << ": Invalid character: " << yytext << "\n";
 }
 %%
 
