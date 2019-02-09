@@ -3,7 +3,9 @@
 #include "felparser.h"
 #include "parser.hh"
 #include <iostream>
-
+#define YY_USER_ACTION \
+          yylloc->first_line = yylloc->last_line = yylineno;\
+          yylloc->first_column = yylloc->last_column = yycolumn;
 %}
 
 %option yylineno bison-locations
