@@ -101,7 +101,18 @@ declare_statement
 ;
 
 assign_statement
-  : IDENT ASSIGN value TERM { delete $1; }
+  : var ASSIGN value TERM
+;
+
+var
+  : var_dot
+  | var_dot LBRACK STRING RBRACK { delete $3; }
+  | var_dot LBRACK INT RBRACK
+;
+
+var_dot
+  : IDENT { delete $1; }
+  | var_dot DOT IDENT { delete $3; }
 ;
 
 function_arguments
@@ -115,12 +126,24 @@ function_declared_arguments
 
 value
   : STRING { delete $1; }
-  | IDENT { delete $1; }
+  | var
   | call_statement
   | INT
   | FLOAT
   | KWNULL
+  | LBRACE RBRACE
+  | LBRACK RBRACK
   | value OPEQUAL value
+  | value OPNOTEQUAL value
+  | value OPLSEQUAL value
+  | value OPGREQUAL value
+  | value OPLESS value
+  | value OPGREATER value
+  | value OPPLUS value
+  | value OPMINUS value
+  | value OPDIV value
+  | value OPMULT value
+  | OPNOT value
   | KWFUNCTION function_declared_arguments body
 ;
 

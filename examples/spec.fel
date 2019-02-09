@@ -23,7 +23,7 @@ function test_variables()
     // integers are implicitly cast to floats when needed
     var a_int = 3;
     var a_float = 3.0;
-    var also_a_float = a_int + a_float
+    var also_a_float = a_int + a_float;
 
     // todo: figure out how to handle a_int / another_int, if both should be converted to float or it should be a integer division
 
@@ -35,7 +35,7 @@ function test_variables()
     // table1.value = 3;
 
     // declare variable on the table
-    var table1.value = 3;
+    // var table1.value = 3;
 
     // need to set it as a string index instead, keys are always strings!
     table1['value'] = 3;
