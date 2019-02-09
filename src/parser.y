@@ -124,6 +124,38 @@ function_declared_arguments
   : LPAREN RPAREN
 ;
 
+object_argument_list
+  :
+  | object_argument_list_p
+;
+
+object_argument_list_p
+  : object_argument
+  | object_argument COMMA object_argument
+  | object_argument COMMA DOTDOT IDENT { delete $4; }
+;
+
+object_argument
+  : IDENT ASSIGN value { delete $1; }
+;
+
+array_argument_list
+  :
+  | array_argument_list_p
+;
+
+array_argument_list_p
+  : array_argument
+  | array_argument COMMA array_argument_list_p
+;
+
+array_argument
+  : value
+  | INT DOTDOT INT
+;
+
+
+
 value
   : STRING { delete $1; }
   | var
@@ -131,8 +163,8 @@ value
   | INT
   | FLOAT
   | KWNULL
-  | LBRACE RBRACE
-  | LBRACK RBRACK
+  | LBRACE object_argument_list RBRACE
+  | LBRACK array_argument_list RBRACK
   | value OPEQUAL value
   | value OPNOTEQUAL value
   | value OPLSEQUAL value
