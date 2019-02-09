@@ -32,10 +32,36 @@
 "." { return DOT; }
 ".." { return DOTDOT; }
 "=" { return ASSIGN; }
-"==" { return EQUAL; }
 ";" { return TERM; }
 "(" { return LPAREN; }
 ")" { return RPAREN; }
+"{" { return LBRACE; }
+"}" { return RBRACE; }
+"[" { return LBRACK; }
+"]" { return RBRACK; }
+":" { return COLON; }
+"," { return COMMA; }
+
+"+" { return OPPLUS; }
+"-" { return OPMINUS; }
+"/" { return OPDIV; }
+"*" { return OPMULT; }
+
+"==" { return OPEQUAL; }
+"!=" { return OPNOTEQUAL; }
+"<=" { return OPLSEQUAL; }
+">=" { return OPGREQUAL; }
+"<" { return OPLESS; }
+">" { return OPGREATER; }
+"!" { return OPNOT; }
+
+[0-9]+ {
+  return INT;
+}
+
+[0-9]+\.[0-9]+ {
+  return FLOAT;
+}
 
 [a-zA-Z_][a-zA-Z_0-9]* {
   
@@ -44,7 +70,11 @@
 }
 
 \"(\\.|[^\\"\n])*\"	{
-  
+  yylval->string = new std::string(yytext);
+  return STRING;
+}
+
+\'(\\.|[^\\'\n])*\'	{
   yylval->string = new std::string(yytext);
   return STRING;
 }

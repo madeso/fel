@@ -31,23 +31,42 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 %token <ident> IDENT 
 %printer { frpintf(yyo, "%s", $$->c_str()); } IDENT
 %token <string> STRING
+%token INT
+%token FLOAT
 %token VAR "var"
   WHILE "while"
   FUNCTION "function"
   DOT "."
   DOTDOT ".."
-  ASSIGN "assign ="
-  EQUAL "=="
+  ASSIGN "="
   TERM ";"
   LPAREN "("
   RPAREN ")"
+  LBRACE "{"
+  RBRACE "}"
+  LBRACK "["
+  RBRACK "]"
+  COLON ":"
+  COMMA ","
+  OPPLUS "+"
+  OPMINUS "-"
+  OPDIV "/"
+  OPMULT "*"
+  OPEQUAL "=="
+  OPNOTEQUAL "!="
+  OPLSEQUAL "<="
+  OPGREQUAL ">="
+  OPLESS "<"
+  OPGREATER ">"
+  OPNOT "!"
 
-%start input
+
+%start statementlist
 
 %%
 
-input
-  : statement input
+statementlist
+  : statement statementlist
   | 
 ;
 
@@ -55,6 +74,7 @@ statement
   : call_statement
   | assign_statement
   | body_statement
+  | error TERM
 ;
 
 body_statement
@@ -82,7 +102,7 @@ value
   | IDENT
   { std::cout << "ident" << *$1 << "\n"; delete $1; }
   | call_statement
-  | value EQUAL value
+  | value OPEQUAL value
 ;
 
 
