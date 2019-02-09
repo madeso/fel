@@ -26,9 +26,11 @@
   // ignore single line comments
 }
 
-"var" { return VAR; }
-"while" { return WHILE; }
-"function" { return FUNCTION; }
+"var" { return KWVAR; }
+"while" { return KWWHILE; }
+"function" { return KWFUNCTION; }
+"null" { return KWNULL; }
+
 "." { return DOT; }
 ".." { return DOTDOT; }
 "=" { return ASSIGN; }
