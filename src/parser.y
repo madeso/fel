@@ -76,7 +76,7 @@ statement
   : call_statement
   | declare_statement
   | assign_statement
-  | function_statement
+  | func_statement
   | body_statement
   | return_statement
   | error TERM
@@ -90,15 +90,19 @@ body_statement
   : KWWHILE body
 ;
 
-function_statement
-  : KWFUNCTION IDENT function_declared_arguments body
+func_statement
+  : KWFUNCTION IDENT func_decl_arguments body
 
 body
   : LBRACE statementlist RBRACE
 ;
 
+function_call
+  : IDENT LPAREN func_arguments RPAREN {delete $1; }
+;
+
 call_statement
-  : IDENT LPAREN function_arguments RPAREN TERM {delete $1; }
+  : function_call TERM
 ;
 
 declare_statement
@@ -121,13 +125,32 @@ var_dot
   | var_dot DOT IDENT { delete $3; }
 ;
 
-function_arguments
-  : value function_arguments
-  |
+func_arguments
+  :
+  | func_arguments_p
 ;
 
-function_declared_arguments
-  : LPAREN RPAREN
+func_arguments_p
+  : value
+  | func_arguments_p COMMA value
+;
+
+func_decl_arguments
+  : LPAREN func_decl_argument_list RPAREN
+;
+
+func_decl_argument_list
+  :
+  | func_decl_argument_list_p
+;
+
+func_decl_argument_list_p
+  : func_decl_argument_list_p COMMA func_decl_argument
+  | func_decl_argument
+;
+
+func_decl_argument
+  : IDENT { delete $1; }
 ;
 
 object_argument_list
@@ -165,7 +188,7 @@ array_argument
 value
   : STRING { delete $1; }
   | var
-  | call_statement
+  | function_call
   | INT
   | FLOAT
   | KWNULL
@@ -182,7 +205,7 @@ value
   | value OPDIV value
   | value OPMULT value
   | OPNOT value
-  | KWFUNCTION function_declared_arguments body
+  | KWFUNCTION func_decl_arguments body
 ;
 
 
