@@ -3,6 +3,7 @@
 #include "felparser.h"
 #include "parser.hh"
 #include <iostream>
+#include <sstream>
 
 #define YY_USER_ACTION \
   yyextra->first_column = yyextra->last_column; \
@@ -97,7 +98,9 @@
 }
 
 . {
-  std::cerr << yyextra->file << ":" << yylineno << ":" << yyextra->first_column << ": Invalid character: " << yytext << "\n";
+  std::stringstream ss;
+  ss << "Invalid character: " << yytext;
+  yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, ss.str());
 }
 %%
 

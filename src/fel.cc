@@ -9,6 +9,16 @@
 #include "parser.hh"
 #include "lexer.hh"
 
+void FelState::AddLog(const std::string& file, int line, int col, const std::string& message)
+{
+  fel::LogEntry entry;
+  entry.file = file;
+  entry.message = message;
+  entry.line = line;
+  entry.column = col;
+  log->entries.push_back(entry);
+}
+  
 namespace fel
 {
   void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
@@ -23,6 +33,7 @@ namespace fel
 
     FelState fel;
     fel.file = filename;
+    fel.log = log;
     yyset_extra(&fel, scanner);
 
     state = yy_scan_string(str.c_str(), scanner);

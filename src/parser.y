@@ -254,5 +254,5 @@ value
 %%
 void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* state, const char* err)
 {
-    std::cerr << state->file << ":" << loc->first_line << ":" << loc->first_column << ": " << err << "\n";
+    state->AddLog(state->file, loc->first_line, loc->first_column, err);
 }
