@@ -30,6 +30,7 @@
 "while" { return KWWHILE; }
 "function" { return KWFUNCTION; }
 "null" { return KWNULL; }
+"return" { return KWRETURN; }
 
 "." { return DOT; }
 ".." { return DOTDOT; }

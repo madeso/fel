@@ -36,6 +36,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 %token KWVAR "var"
   KWWHILE "while"
   KWNULL "null"
+  KWRETURN "return"
   KWFUNCTION "function"
   DOT "."
   DOTDOT ".."
@@ -77,7 +78,12 @@ statement
   | assign_statement
   | function_statement
   | body_statement
+  | return_statement
   | error TERM
+;
+
+return_statement
+  : KWRETURN value TERM
 ;
 
 body_statement
