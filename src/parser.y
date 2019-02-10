@@ -98,7 +98,7 @@ body
 ;
 
 function_call
-  : IDENT LPAREN func_arguments RPAREN {delete $1; }
+  : value LPAREN func_arguments RPAREN
 ;
 
 call_statement
