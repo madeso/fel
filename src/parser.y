@@ -151,6 +151,7 @@ func_decl_argument_list_p
 
 func_decl_argument
   : IDENT { delete $1; }
+  | IDENT ASSIGN value { delete $1; }
 ;
 
 object_argument_list
