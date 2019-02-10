@@ -34,7 +34,14 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 %token INT
 %token FLOAT
 %token KWVAR "var"
+  KWIN "in"
+  KWBREAK "break"
+  KWIF "if"
+  KWELSE "else"
+  KWSCOPE "scope"
   KWWHILE "while"
+  KWFOR "for"
+  KWLOOP "loop"
   KWNULL "null"
   KWRETURN "return"
   KWFUNCTION "function"
@@ -79,7 +86,12 @@ statement
   | func_statement
   | body_statement
   | return_statement
+  | break_statement
   | error TERM
+;
+
+break_statement
+  : KWBREAK TERM
 ;
 
 return_statement
@@ -87,11 +99,26 @@ return_statement
 ;
 
 body_statement
-  : KWWHILE body
+  : KWWHILE LPAREN value RPAREN body
+  | KWIF LPAREN value RPAREN body
+  | KWFOR LPAREN for_argument RPAREN body
+  | KWSCOPE body
+  | KWLOOP body
+  | KWIF LPAREN value RPAREN body KWELSE body
+;
+
+for_argument
+  : KWVAR for_value KWIN value
+;
+
+for_value
+  : IDENT { delete $1; }
+  | LPAREN IDENT COMMA IDENT RPAREN { delete $2; delete $4; }
 ;
 
 func_statement
   : KWFUNCTION IDENT func_decl_arguments body
+;
 
 body
   : LBRACE statementlist RBRACE
@@ -186,15 +213,18 @@ array_argument_list_p
 
 array_argument
   : value
-  | INT DOTDOT INT
+  | iterator_value 
 ;
 
-
+iterator_value
+  : INT DOTDOT INT
+;
 
 value
   : STRING { delete $1; }
   | var
   | function_call
+  | iterator_value
   | INT
   | FLOAT
   | KWNULL

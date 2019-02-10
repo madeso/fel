@@ -27,7 +27,14 @@
 }
 
 "var" { return KWVAR; }
+"if" { return KWIF; }
+"in" { return KWIN; }
+"break" { return KWBREAK; }
+"else" { return KWELSE; }
+"scope" { return KWSCOPE; }
 "while" { return KWWHILE; }
+"for" { return KWFOR; }
+"loop" { return KWLOOP; }
 "function" { return KWFUNCTION; }
 "null" { return KWNULL; }
 "return" { return KWRETURN; }
