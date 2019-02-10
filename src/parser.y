@@ -133,8 +133,14 @@ call_statement
 ;
 
 declare_statement
-  : KWVAR IDENT ASSIGN value TERM { delete $2; }
-  | KWVAR IDENT TERM { delete $2; }
+  : KWVAR IDENT value_type ASSIGN value TERM { delete $2; }
+  | KWVAR IDENT value_type TERM { delete $2; }
+;
+
+value_type
+  : 
+  | COLON IDENT { delete $2; }
+  | COLON LBRACK IDENT RBRACK { delete $3; }
 ;
 
 assign_statement
@@ -193,8 +199,8 @@ object_argument_list
 
 object_argument_list_p
   : object_argument
-  | object_argument COMMA object_argument
-  | object_argument COMMA DOTDOT IDENT { delete $4; }
+  | object_argument_list_p COMMA object_argument
+  | object_argument_list_p COMMA DOTDOT IDENT { delete $4; }
 ;
 
 object_argument
