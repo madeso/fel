@@ -131,8 +131,13 @@ func_arguments
 ;
 
 func_arguments_p
+  : func_argument_value
+  | func_arguments_p COMMA func_argument_value
+;
+
+func_argument_value
   : value
-  | func_arguments_p COMMA value
+  | IDENT ASSIGN value { delete $1; }
 ;
 
 func_decl_arguments
