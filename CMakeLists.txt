@@ -4,6 +4,10 @@ project(fel)
 find_package(BISON)
 find_package(FLEX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 bison_target(MyParser src/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
 flex_target(MyScanner src/lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc COMPILE_FLAGS "--header-file=${CMAKE_CURRENT_BINARY_DIR}/lexer.hh")
 add_flex_bison_dependency(MyScanner MyParser)
