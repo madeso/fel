@@ -20,12 +20,28 @@ TEST_CASE("basic", "[fel]")
   std::vector<std::string> output;
   f.SetFunction("print", [&output](const std::string& arg) { output.push_back(arg); } );
 
-  SECTION("print")
+  SECTION("print basic")
   {
     f.LoadAndRunString("print(\"hello world\");", "filename.fel", &log);
     CHECK(log.entries == no_entries);
 
     const auto expected = std::vector<std::string>{"hello world"};
+    CHECK(output == expected);
+  }
+  SECTION("print with quotes")
+  {
+    f.LoadAndRunString("print(\"hello 'world'\");", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"hello 'world'"};
+    CHECK(output == expected);
+  }
+  SECTION("print with double quotes")
+  {
+    f.LoadAndRunString("print(\"hello \\\"world\\\"\");", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"hello \"world\""};
     CHECK(output == expected);
   }
 }

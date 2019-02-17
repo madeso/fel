@@ -83,7 +83,7 @@
 
 \"      { yyextra->str.resize(0); BEGIN(str_state); }
 
-<str_state>\"        { /* saw closing quote - all done */
+<str_state>\"        {
         BEGIN(INITIAL);
         yyextra->str.push_back(0);
         yylval->string = new std::string(&yyextra->str[0]);
@@ -95,7 +95,6 @@
         }
 
 <str_state>\\[0-7]{1,3} {
-        /* octal escape sequence */
         int result;
 
         (void) sscanf( yytext + 1, "%o", &result );
@@ -108,9 +107,6 @@
         }
 
 <str_state>\\[0-9]+ {
-        /* generate error - bad escape sequence; something
-         * like '\48' or '\0777777'
-         */
           yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Bad escape sequence");
         }
 
