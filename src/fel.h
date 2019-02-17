@@ -24,9 +24,23 @@ namespace fel
     std::vector<LogEntry> entries;
   };
 
+  struct Entry
+  {
+    std::string str;
+  };
+  
+  struct State
+  {
+    std::vector<Entry> stack;
+    const Entry& from_index(int index) const;
+
+    bool is_string(int index) const;
+    const std::string& as_string(int index) const;
+  };
+
   struct Fel
   {
-    using Callback = std::function<void(const std::string&)>;
+    using Callback = std::function<void(int arguments, State* state)>;
 
     std::map<std::string, Callback> functions;
 

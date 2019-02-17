@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
+#include <cassert>
 
 #include "felparser.h"
 #include "parser.hh"
@@ -35,6 +36,29 @@ namespace fel
     return o;
   }
 
+  const Entry& State::from_index(int index) const
+  {
+    assert(!stack.empty());
+    assert(abs(index) < stack.size());
+    const int i = (index >= 0)
+      ? index
+      : static_cast<int>(stack.size())-index
+      ;
+    assert(i >= 0 && i < stack.size());
+    return stack[i];
+  }
+
+  bool State::is_string(int index) const
+  {
+    return true;
+  }
+
+  const std::string& State::as_string(int index) const
+  {
+    const auto& e = from_index(index);
+    return e.str;
+  }
+  
   void Fel::SetFunction(const std::string& name, Fel::Callback callback)
   {
     functions[name] = callback;
@@ -68,6 +92,7 @@ namespace fel
     
     // run ast
     // this is some ugly shit, it's highly temporary but it works for now...
+    fel::State run_state;
     const auto& program = fel.program;
     for(const auto& st : program.statements)
     {
@@ -79,7 +104,9 @@ namespace fel
       }
       else
       {
-        found->second(static_cast<StringValue*>(fc->arguments.get())->value);
+        run_state.stack.push_back(Entry{static_cast<StringValue*>(fc->arguments.get())->value});
+        found->second(1, &run_state);
+        run_state.stack.pop_back();
       }
     }
   }

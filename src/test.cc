@@ -1,5 +1,6 @@
 #include "catch.hpp"
 
+#include <sstream>
 #include "fel.h"
 
 TEST_CASE("empty", "[fel]" )
@@ -18,7 +19,14 @@ TEST_CASE("basic", "[fel]")
   const auto no_entries = std::vector<fel::LogEntry>{};
 
   std::vector<std::string> output;
-  f.SetFunction("print", [&output](const std::string& arg) { output.push_back(arg); } );
+  f.SetFunction("print", [&output](int args, fel::State* state) {
+      std::stringstream ss;
+      for(int i=0; i<args; ++i)
+      {
+        ss << state->as_string(args-(i+1));
+      }
+      output.push_back(ss.str());
+  });
 
   // double quoted string
 
