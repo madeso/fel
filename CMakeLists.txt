@@ -29,6 +29,7 @@ target_link_libraries(felapp fel)
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
+  src/testmain.cc
   src/test.cc
   )
 
