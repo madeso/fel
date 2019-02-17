@@ -4,12 +4,15 @@
 #include <string>
 
 #include "fel.h"
+#include "ast.h"
 
 struct FelState
 {
   int first_column = 0;
   int last_column = 0;
   std::string file;
+
+  StatementList program;
 
   void AddLog(const std::string& file, int line, int col, const std::string& message);
 

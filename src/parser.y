@@ -25,6 +25,10 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
   std::string* string;
   std::string* ident;
   int ival;
+
+  Statement* statement;
+  StatementList* statementlist;
+  Value* value;
 }
 
 %token END 0 "end of file"
@@ -69,16 +73,32 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
   OPGREATER ">"
   OPNOT "!"
 
+%type <statementlist> statementlist
+%type <statement> statement call_statement
+%type <value> value
 
-%start statementlist
+%start program
 
 %%
 
-statementlist
-  : statementlist statement 
-  | 
+program
+  : statementlist { state->program = *$1; delete $1; } 
 ;
 
+statementlist
+  : statementlist statement { $$ = $1; $$->statements.push_back(std::shared_ptr<Statement>($2)); } 
+  |  { $$ = new StatementList(); }
+;
+
+statement
+  : call_statement { $$ = $1; }
+;
+
+call_statement
+  : IDENT[I] LPAREN value[V] RPAREN TERM { $$ = new FunctionCall{*$I, std::shared_ptr<Value>($V)}; delete $I; }
+;
+
+/*
 statement
   : call_statement
   | declare_statement
@@ -225,7 +245,13 @@ array_argument
 iterator_value
   : INT DOTDOT INT
 ;
+*/
 
+value
+  : STRING { $$ = new StringValue{*$1}; delete $1; }
+;
+
+/*
 value
   : STRING { delete $1; }
   | var
@@ -249,7 +275,7 @@ value
   | OPNOT value
   | KWFUNCTION func_decl_arguments body
 ;
-
+*/
 
 %%
 void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* state, const char* err)
