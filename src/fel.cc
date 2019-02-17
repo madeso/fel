@@ -58,8 +58,24 @@ namespace fel
     }
 
     yy_delete_buffer(state, scanner);
-
     yylex_destroy(scanner);
+    
+    // run ast
+    // this is some ugly shit, it's highly temporary but it works for now...
+    const auto& program = fel.program;
+    for(const auto& st : program.statements)
+    {
+      auto* fc = static_cast<FunctionCall*>(st.get());
+      auto found = functions.find(fc->name);
+      if(found == functions.end())
+      {
+        fel.AddLog(filename, -1, -1, "Unknown function");
+      }
+      else
+      {
+        found->second(static_cast<StringValue*>(fc->arguments.get())->value);
+      }
+    }
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
