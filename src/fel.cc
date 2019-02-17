@@ -21,6 +21,14 @@ void FelState::AddLog(const std::string& file, int line, int col, const std::str
   
 namespace fel
 {
+  bool LogEntry::operator==(const LogEntry& rhs) const
+  {
+    return file == rhs.file
+      && message == rhs.message
+      && line == rhs.line
+      && column == rhs.column;
+  }
+
   void Fel::SetFunction(const std::string& name, Fel::Callback callback)
   {
     functions[name] = callback;

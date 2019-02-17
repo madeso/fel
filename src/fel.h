@@ -15,13 +15,7 @@ namespace fel
     int line = 0;
     int column = 0;
 
-    bool operator==(const LogEntry& rhs) const
-    {
-      return file == rhs.file
-        && message == rhs.message
-        && line == rhs.line
-        && column == rhs.column;
-    }
+    bool operator==(const LogEntry& rhs) const;
   };
 
   struct Log
