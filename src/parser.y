@@ -75,7 +75,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 %%
 
 statementlist
-  : statement statementlist
+  : statementlist statement 
   | 
 ;
 
