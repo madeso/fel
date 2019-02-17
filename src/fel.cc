@@ -21,6 +21,11 @@ void FelState::AddLog(const std::string& file, int line, int col, const std::str
   
 namespace fel
 {
+  void Fel::SetFunction(const std::string& name, Fel::Callback callback)
+  {
+    functions[name] = callback;
+  }
+
   void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
   {
     yyscan_t scanner;

@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <functional>
 
 namespace fel
 {
@@ -12,6 +14,14 @@ namespace fel
     std::string message;
     int line = 0;
     int column = 0;
+
+    bool operator==(const LogEntry& rhs) const
+    {
+      return file == rhs.file
+        && message == rhs.message
+        && line == rhs.line
+        && column == rhs.column;
+    }
   };
 
   struct Log
@@ -21,6 +31,11 @@ namespace fel
 
   struct Fel
   {
+    using Callback = std::function<void(const std::string&)>;
+
+    std::map<std::string, Callback> functions;
+
+    void SetFunction(const std::string& name, Callback callback);
     void LoadAndRunString(const std::string& str, const std::string& filename, Log* log);
     void LoadAndRunFile(const std::string& file, Log* log);
   };
