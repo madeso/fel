@@ -15,9 +15,25 @@ add_flex_bison_dependency(MyScanner MyParser)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)
 
-add_executable(fel
+add_library(fel STATIC
   ${BISON_MyParser_OUTPUTS}
   ${FLEX_MyScanner_OUTPUTS}
   src/fel.cc
+  )
+
+add_executable(felapp
   src/main.cc
   )
+target_link_libraries(felapp fel)
+
+include_directories(SYSTEM external/catch/)
+
+add_executable(tests
+  src/test.cc
+  )
+
+enable_testing()
+add_test(tests tests)
+
+target_link_libraries(tests fel ${CMAKE_THREAD_LIBS_INIT})
+
