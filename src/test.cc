@@ -28,6 +28,7 @@ TEST_CASE("basic", "[fel]")
     const auto expected = std::vector<std::string>{"hello world"};
     CHECK(output == expected);
   }
+
   SECTION("print with quotes")
   {
     f.LoadAndRunString("print(\"hello 'world'\");", "filename.fel", &log);
@@ -36,6 +37,7 @@ TEST_CASE("basic", "[fel]")
     const auto expected = std::vector<std::string>{"hello 'world'"};
     CHECK(output == expected);
   }
+
   SECTION("print with double quotes")
   {
     f.LoadAndRunString("print(\"hello \\\"world\\\"\");", "filename.fel", &log);
@@ -43,6 +45,15 @@ TEST_CASE("basic", "[fel]")
 
     const auto expected = std::vector<std::string>{"hello \"world\""};
     CHECK(output == expected);
-  }
+  } 
+
+  SECTION("print string with singel quoted string")
+  {
+    f.LoadAndRunString("print('hello world');", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"hello world"};
+    CHECK(output == expected);
+  } 
 }
 

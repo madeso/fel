@@ -22,6 +22,7 @@
 %option bison-bridge
 
 %x str_state
+%x chr_state
 %%
 
 "//"[^\n]* {
@@ -82,7 +83,14 @@
 }
 
 \"      { yyextra->str.resize(0); BEGIN(str_state); }
+'       { yyextra->str.resize(0); BEGIN(chr_state); }
 
+<chr_state>'        {
+        BEGIN(INITIAL);
+        yyextra->str.push_back(0);
+        yylval->string = new std::string(&yyextra->str[0]);
+        return STRING;
+        }
 <str_state>\"        {
         BEGIN(INITIAL);
         yyextra->str.push_back(0);
@@ -90,37 +98,34 @@
         return STRING;
         }
 
-<str_state>\n        {
+<str_state,chr_state>\n        {
         yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Newline in progress inside string");
         }
-
-<str_state>\\[0-7]{1,3} {
+<str_state,chr_state>\\[0-7]{1,3} {
         int result;
-
         (void) sscanf( yytext + 1, "%o", &result );
-
         if ( result > 0xff ) {
           yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Invalid octal escape sequence");
         }
-
         yyextra->str.push_back(result);
         }
-
-<str_state>\\[0-9]+ {
+<str_state,chr_state>\\[0-9]+ {
           yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Bad escape sequence");
         }
+<str_state,chr_state>\\n  yyextra->str.push_back('\n');
+<str_state,chr_state>\\t  yyextra->str.push_back('\t');
+<str_state,chr_state>\\r  yyextra->str.push_back('\r');
+<str_state,chr_state>\\b  yyextra->str.push_back('\b');
+<str_state,chr_state>\\f  yyextra->str.push_back('\f');
+<str_state,chr_state>\\(.|\n)  yyextra->str.push_back(yytext[1]);
 
-<str_state>\\n  yyextra->str.push_back('\n');
-<str_state>\\t  yyextra->str.push_back('\t');
-<str_state>\\r  yyextra->str.push_back('\r');
-<str_state>\\b  yyextra->str.push_back('\b');
-<str_state>\\f  yyextra->str.push_back('\f');
-
-<str_state>\\(.|\n)  yyextra->str.push_back(yytext[1]);
-
+<chr_state>[^\\\n']+        {
+        char *yptr = yytext;
+        while ( *yptr )
+                yyextra->str.push_back(*yptr++);
+        }
 <str_state>[^\\\n\"]+        {
         char *yptr = yytext;
-
         while ( *yptr )
                 yyextra->str.push_back(*yptr++);
         }
