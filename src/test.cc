@@ -20,7 +20,9 @@ TEST_CASE("basic", "[fel]")
   std::vector<std::string> output;
   f.SetFunction("print", [&output](const std::string& arg) { output.push_back(arg); } );
 
-  SECTION("print basic")
+  // double quoted string
+
+  SECTION("print double quoted string")
   {
     f.LoadAndRunString("print(\"hello world\");", "filename.fel", &log);
     CHECK(log.entries == no_entries);
@@ -29,7 +31,7 @@ TEST_CASE("basic", "[fel]")
     CHECK(output == expected);
   }
 
-  SECTION("print with quotes")
+  SECTION("print double quoted string with single quotes")
   {
     f.LoadAndRunString("print(\"hello 'world'\");", "filename.fel", &log);
     CHECK(log.entries == no_entries);
@@ -38,7 +40,7 @@ TEST_CASE("basic", "[fel]")
     CHECK(output == expected);
   }
 
-  SECTION("print with double quotes")
+  SECTION("print double quoted string with double quotes")
   {
     f.LoadAndRunString("print(\"hello \\\"world\\\"\");", "filename.fel", &log);
     CHECK(log.entries == no_entries);
@@ -47,12 +49,32 @@ TEST_CASE("basic", "[fel]")
     CHECK(output == expected);
   } 
 
-  SECTION("print string with singel quoted string")
+  // single quoted string
+
+  SECTION("print single quoted string")
   {
     f.LoadAndRunString("print('hello world');", "filename.fel", &log);
     CHECK(log.entries == no_entries);
 
     const auto expected = std::vector<std::string>{"hello world"};
+    CHECK(output == expected);
+  } 
+
+  SECTION("print single quoted string with single quotes")
+  {
+    f.LoadAndRunString("print('hello \\'world\\'');", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"hello 'world'"};
+    CHECK(output == expected);
+  }
+
+  SECTION("print single quoted string with double quotes")
+  {
+    f.LoadAndRunString("print('hello \"world\"');", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"hello \"world\""};
     CHECK(output == expected);
   } 
 }
