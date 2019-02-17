@@ -29,6 +29,12 @@ namespace fel
       && column == rhs.column;
   }
 
+  std::ostream& operator<<(std::ostream& o, const LogEntry& entry)
+  {
+    o << entry.file << ":" << entry.line << ":" << entry.column << ": " << entry.message;
+    return o;
+  }
+
   void Fel::SetFunction(const std::string& name, Fel::Callback callback)
   {
     functions[name] = callback;

@@ -17,6 +17,7 @@ namespace fel
 
     bool operator==(const LogEntry& rhs) const;
   };
+  std::ostream& operator<<(std::ostream& o, const LogEntry& entry);
 
   struct Log
   {
