@@ -21,6 +21,7 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
+%x str_state
 %%
 
 "//"[^\n]* {
@@ -80,16 +81,53 @@
   return IDENT;
 }
 
-\"(\\.|[^\\"\n])*\"	{
-  yylval->string = new std::string(yytext);
-  return STRING;
-}
+\"      { yyextra->str.resize(0); BEGIN(str_state); }
 
-\'(\\.|[^\\'\n])*\'	{
-  yylval->string = new std::string(yytext);
-  return STRING;
-}
+<str_state>\"        { /* saw closing quote - all done */
+        BEGIN(INITIAL);
+        yyextra->str.push_back(0);
+        yylval->string = new std::string(&yyextra->str[0]);
+        return STRING;
+        }
 
+<str_state>\n        {
+        yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Newline in progress inside string");
+        }
+
+<str_state>\\[0-7]{1,3} {
+        /* octal escape sequence */
+        int result;
+
+        (void) sscanf( yytext + 1, "%o", &result );
+
+        if ( result > 0xff ) {
+          yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Invalid octal escape sequence");
+        }
+
+        yyextra->str.push_back(result);
+        }
+
+<str_state>\\[0-9]+ {
+        /* generate error - bad escape sequence; something
+         * like '\48' or '\0777777'
+         */
+          yyextra->AddLog(yyextra->file, yylineno, yyextra->first_column, "Bad escape sequence");
+        }
+
+<str_state>\\n  yyextra->str.push_back('\n');
+<str_state>\\t  yyextra->str.push_back('\t');
+<str_state>\\r  yyextra->str.push_back('\r');
+<str_state>\\b  yyextra->str.push_back('\b');
+<str_state>\\f  yyextra->str.push_back('\f');
+
+<str_state>\\(.|\n)  yyextra->str.push_back(yytext[1]);
+
+<str_state>[^\\\n\"]+        {
+        char *yptr = yytext;
+
+        while ( *yptr )
+                yyextra->str.push_back(*yptr++);
+        }
 
 \n {
 }

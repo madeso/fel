@@ -11,6 +11,7 @@ struct FelState
   int first_column = 0;
   int last_column = 0;
   std::string file;
+  std::vector<char> str;
 
   StatementList program;
 
