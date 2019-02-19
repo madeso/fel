@@ -22,6 +22,8 @@ namespace fel
   struct Log
   {
     std::vector<LogEntry> entries;
+
+    void AddLog(const std::string& file, int line, int col, const std::string& message);
   };
 
   struct Entry

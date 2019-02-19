@@ -9,19 +9,9 @@
 #include "ast.h"
 #include "felparser.h"
 
-void AddLog(fel::Log* log, const std::string& file, int line, int col, const std::string& message)
-{
-  fel::LogEntry entry;
-  entry.file = file;
-  entry.message = message;
-  entry.line = line;
-  entry.column = col;
-  log->entries.push_back(entry);
-}
-
 void FelState::AddLog(const std::string& file, int line, int col, const std::string& message)
 {
-  ::AddLog(log, file, line, col, message);
+  log->AddLog(file, line, col, message);
 }
 
   
@@ -40,6 +30,18 @@ namespace fel
     o << entry.file << ":" << entry.line << ":" << entry.column << ": " << entry.message;
     return o;
   }
+
+
+  void Log::AddLog(const std::string& file, int line, int col, const std::string& message)
+  {
+    fel::LogEntry entry;
+    entry.file = file;
+    entry.message = message;
+    entry.line = line;
+    entry.column = col;
+    entries.push_back(entry);
+  }
+
 
   const Entry& State::from_index(int index) const
   {
@@ -83,7 +85,7 @@ namespace fel
       auto found = functions.find(fc->name);
       if(found == functions.end())
       {
-        AddLog(log, filename, -1, -1, "Unknown function");
+        log->AddLog(filename, -1, -1, "Unknown function");
       }
       else
       {
