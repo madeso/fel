@@ -20,6 +20,7 @@ add_library(fel STATIC
   ${FLEX_MyScanner_OUTPUTS}
   src/fel.cc
   src/ast.cc
+  src/felparserstate.cc
   )
 
 add_executable(felapp
