@@ -2,11 +2,11 @@
 #include <iostream>
 #include <string>
 
-#include "felparser.h"
+#include "felparserstate.h"
 #include "parser.hh"
 #include "lexer.hh"
 
-void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
+void yyerror(YYLTYPE* loc, yyscan_t scanner, FelParserState* fel, const char* err);
 %}
 
 %code requires {
@@ -19,7 +19,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* fel, const char* err);
 
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%parse-param { FelState* state }
+%parse-param { FelParserState* state }
 
 %union {
   std::string* string;
@@ -278,7 +278,7 @@ value
 */
 
 %%
-void yyerror(YYLTYPE* loc, yyscan_t scanner, FelState* state, const char* err)
+void yyerror(YYLTYPE* loc, yyscan_t scanner, FelParserState* state, const char* err)
 {
     state->AddLog(state->file, loc->first_line, loc->first_column, err);
 }

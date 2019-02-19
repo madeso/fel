@@ -1,6 +1,6 @@
 %{
 #include <string>
-#include "felparser.h"
+#include "felparserstate.h"
 #include "parser.hh"
 #include <iostream>
 #include <sstream>
@@ -16,7 +16,7 @@
 
 %}
 
-%option extra-type="FelState*"
+%option extra-type="FelParserState*"
 %option yylineno bison-locations
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge

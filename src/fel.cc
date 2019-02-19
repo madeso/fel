@@ -7,9 +7,9 @@
 #include <cassert>
 
 #include "ast.h"
-#include "felparser.h"
+#include "felparserstate.h"
 
-void FelState::AddLog(const std::string& file, int line, int col, const std::string& message)
+void FelParserState::AddLog(const std::string& file, int line, int col, const std::string& message)
 {
   log->AddLog(file, line, col, message);
 }

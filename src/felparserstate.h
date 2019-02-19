@@ -6,7 +6,7 @@
 #include "fel.h"
 #include "ast.h"
 
-struct FelState
+struct FelParserState
 {
   int first_column = 0;
   int last_column = 0;

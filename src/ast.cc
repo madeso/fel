@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "felparser.h"
+#include "felparserstate.h"
 
 #include "parser.hh"
 #include "lexer.hh"
@@ -14,7 +14,7 @@ void StringToAst(const std::string& str, const std::string& filename, fel::Log* 
       return;
   }
 
-  FelState fel;
+  FelParserState fel;
   fel.file = filename;
   fel.log = log;
   yyset_extra(&fel, scanner);
