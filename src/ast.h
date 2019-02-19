@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+namespace fel
+{
+  struct Log;
+}
+
 struct Statement
 {
   virtual ~Statement() {}
@@ -32,5 +37,7 @@ struct StringValue : public Value
   explicit StringValue(const std::string& v) : value(v) {}
   std::string value;
 };
+
+void StringToAst(const std::string& str, const std::string& filename, fel::Log* log, StatementList* program);
 
 #endif // FEL_AST_H

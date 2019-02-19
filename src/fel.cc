@@ -6,11 +6,10 @@
 #include <streambuf>
 #include <cassert>
 
+#include "ast.h"
 #include "felparser.h"
-#include "parser.hh"
-#include "lexer.hh"
 
-void FelState::AddLog(const std::string& file, int line, int col, const std::string& message)
+void AddLog(fel::Log* log, const std::string& file, int line, int col, const std::string& message)
 {
   fel::LogEntry entry;
   entry.file = file;
@@ -19,6 +18,12 @@ void FelState::AddLog(const std::string& file, int line, int col, const std::str
   entry.column = col;
   log->entries.push_back(entry);
 }
+
+void FelState::AddLog(const std::string& file, int line, int col, const std::string& message)
+{
+  ::AddLog(log, file, line, col, message);
+}
+
   
 namespace fel
 {
@@ -66,41 +71,19 @@ namespace fel
 
   void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
   {
-    yyscan_t scanner;
-    YY_BUFFER_STATE state;
+    StatementList program;
+    StringToAst(str, filename, log, &program);
 
-    if (yylex_init(&scanner)) {
-        /* could not initialize */
-        return;
-    }
-
-    FelState fel;
-    fel.file = filename;
-    fel.log = log;
-    yyset_extra(&fel, scanner);
-
-    state = yy_scan_string(str.c_str(), scanner);
-    yyset_lineno(1, scanner);
-
-    if (yyparse(scanner, &fel)) {
-        /* error parsing */
-        return;
-    }
-
-    yy_delete_buffer(state, scanner);
-    yylex_destroy(scanner);
-    
     // run ast
     // this is some ugly shit, it's highly temporary but it works for now...
     fel::State run_state;
-    const auto& program = fel.program;
     for(const auto& st : program.statements)
     {
       auto* fc = static_cast<FunctionCall*>(st.get());
       auto found = functions.find(fc->name);
       if(found == functions.end())
       {
-        fel.AddLog(filename, -1, -1, "Unknown function");
+        AddLog(log, filename, -1, -1, "Unknown function");
       }
       else
       {

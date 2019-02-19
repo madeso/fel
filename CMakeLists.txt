@@ -19,6 +19,7 @@ add_library(fel STATIC
   ${BISON_MyParser_OUTPUTS}
   ${FLEX_MyScanner_OUTPUTS}
   src/fel.cc
+  src/ast.cc
   )
 
 add_executable(felapp
