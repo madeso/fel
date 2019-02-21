@@ -4,6 +4,24 @@
 #include "parser.hh"
 #include "lexer.hh"
 
+void StatementList::VisitAll(StatementVisitor* vis)
+{
+  for(auto s : statements)
+  {
+    s->Visit(vis);
+  }
+}
+
+void FunctionCall::Visit(StatementVisitor* vis) const
+{
+  vis->OnFunctionCall(*this);
+}
+
+void StringValue::Visit(ValueVisitor* vis) const
+{
+  vis->OnString(*this);
+}
+
 void StringToAst(const std::string& str, const std::string& filename, fel::Log* log, StatementList* program)
 {
   yyscan_t scanner;

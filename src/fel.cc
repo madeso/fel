@@ -64,29 +64,59 @@ namespace fel
     functions[name] = callback;
   }
 
-  void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
+  struct StackPush : public ValueVisitor
   {
-    StatementList program;
-    StringToAst(str, filename, log, &program);
+    StackPush(fel::State* s) : run_state(s) {}
 
-    // run ast
-    // this is some ugly shit, it's highly temporary but it works for now...
-    fel::State run_state;
-    for(const auto& st : program.statements)
+    fel::State* run_state;
+    void OnString(const StringValue& str) override
     {
-      auto* fc = static_cast<FunctionCall*>(st.get());
-      auto found = functions.find(fc->name);
-      if(found == functions.end())
+      run_state->stack.push_back(Entry{str.value});
+    }
+  }; 
+
+  struct RunStatements : public StatementVisitor
+  {
+    RunStatements(fel::Fel* f, fel::State* r, fel::Log* l, const std::string& fn)
+      : fel(f)
+      , run_state(r)
+      , log(l)
+      , filename(fn)
+    {}
+    
+    fel::Fel* fel;
+    fel::State* run_state;
+    fel::Log* log;
+    std::string filename;
+
+    void OnFunctionCall(const FunctionCall& fc) override
+    {
+      auto found = fel->functions.find(fc.name);
+      if(found == fel->functions.end())
       {
         log->AddLog(filename, -1, -1, "Unknown function");
       }
       else
       {
-        run_state.stack.push_back(Entry{static_cast<StringValue*>(fc->arguments.get())->value});
-        found->second(1, &run_state);
-        run_state.stack.pop_back();
+        auto pusher = StackPush{run_state};
+        fc.arguments->Visit(&pusher);
+        found->second(1, run_state);
+        run_state->stack.pop_back();
       }
+
     }
+  };
+
+  void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
+  {
+    StatementList program;
+    StringToAst(str, filename, log, &program);
+
+    // run state
+    // todo: generate bytecode and run that instead
+    fel::State run_state;
+    auto runner = RunStatements{this, &run_state, log, filename};
+    program.VisitAll(&runner);
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
