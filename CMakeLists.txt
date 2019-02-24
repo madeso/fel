@@ -21,6 +21,7 @@ add_library(fel STATIC
   src/fel.cc
   src/ast.cc
   src/felparserstate.cc
+  src/bytecode.cc
   )
 
 add_executable(felapp
@@ -32,6 +33,7 @@ include_directories(SYSTEM external/catch/)
 
 add_executable(tests
   src/testmain.cc
+  src/testbytecode.cc
   src/test.cc
   )
 
