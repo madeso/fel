@@ -1,4 +1,5 @@
 #include "fel.h"
+#include "bytecode.h"
 
 #include <iostream>
 #include <string>
@@ -42,7 +43,7 @@ namespace fel
     assert(abs(index) < stack.size());
     const int i = (index >= 0)
       ? index
-      : static_cast<int>(stack.size())-index
+      : static_cast<int>(stack.size())+index
       ;
     assert(i >= 0 && i < stack.size());
     return stack[i];
@@ -58,6 +59,19 @@ namespace fel
     const auto& e = from_index(index);
     return e.str;
   }
+
+  void State::Push(const std::string& str)
+  {
+    stack.push_back(Entry{str});
+  }
+
+  void State::Pop(int count)
+  {
+    for(int i=0;i<count; i+=1)
+    {
+      stack.pop_back();
+    }
+  }
   
   void Fel::SetFunction(const std::string& name, Fel::Callback callback)
   {
@@ -66,18 +80,18 @@ namespace fel
 
   struct StackPush : public ValueVisitor
   {
-    StackPush(fel::State* s) : run_state(s) {}
+    StackPush(Compiler* s) : run_state(s) {}
 
-    fel::State* run_state;
+    Compiler* run_state;
     void OnString(const StringValue& str) override
     {
-      run_state->stack.push_back(Entry{str.value});
+      run_state->PushString(str.value);
     }
   }; 
 
-  struct RunStatements : public StatementVisitor
+  struct CompileStatements : public StatementVisitor
   {
-    RunStatements(fel::Fel* f, fel::State* r, fel::Log* l, const std::string& fn)
+    CompileStatements(fel::Fel* f, Compiler* r, fel::Log* l, const std::string& fn)
       : fel(f)
       , run_state(r)
       , log(l)
@@ -85,27 +99,51 @@ namespace fel
     {}
     
     fel::Fel* fel;
-    fel::State* run_state;
+    Compiler* run_state;
     fel::Log* log;
     std::string filename;
 
     void OnFunctionCall(const FunctionCall& fc) override
     {
-      auto found = fel->functions.find(fc.name);
-      if(found == fel->functions.end())
-      {
-        log->AddLog(filename, -1, -1, "Unknown function");
-      }
-      else
-      {
-        auto pusher = StackPush{run_state};
-        fc.arguments->Visit(&pusher);
-        found->second(1, run_state);
-        run_state->stack.pop_back();
-      }
-
+      auto pusher = StackPush{run_state};
+      fc.arguments->Visit(&pusher);
+      run_state->CallFunction(fc.name, 1);
+      run_state->Pop(1);
     }
   };
+
+  void Run(const CompiledCode& code, Fel* fel)
+  {
+    fel::State run_state;
+
+    for(const auto& c: code.codes)
+    {
+      switch(c.operation)
+      {
+        case Operation::PushConstantString:
+          run_state.Push(code.strings[c.argument]);
+          break;
+        case Operation::Pop:
+          run_state.Pop(c.argument);
+          break;
+        case Operation::CallFunction:
+          {
+            const auto function_name = run_state.as_string(-1);
+            run_state.Pop(1);
+            auto function = fel->functions.find(function_name);
+            if(function == fel->functions.end())
+            {
+              return;
+            }
+            else
+            {
+              function->second(c.argument, &run_state);
+            }
+          }
+          break;
+      }
+    }
+  }
 
   void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
   {
@@ -114,9 +152,13 @@ namespace fel
 
     // run state
     // todo: generate bytecode and run that instead
-    fel::State run_state;
-    auto runner = RunStatements{this, &run_state, log, filename};
-    program.VisitAll(&runner);
+    CompiledCode code;
+    {
+      auto compiler = Compiler(&code);
+      auto runner = CompileStatements{this, &compiler, log, filename};
+      program.VisitAll(&runner);
+    }
+    Run(code, this);
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
