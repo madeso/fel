@@ -40,7 +40,6 @@ namespace fel
   const Entry& State::from_index(int index) const
   {
     assert(!stack.empty());
-    assert(abs(index) < stack.size());
     const int i = (index >= 0)
       ? index
       : static_cast<int>(stack.size())+index
