@@ -78,16 +78,35 @@ namespace fel
     functions[name] = callback;
   }
 
+  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state);
+
   struct StackPush : public ValueVisitor
   {
     StackPush(Compiler* s) : run_state(s) {}
 
     Compiler* run_state;
+
+    void OnFunctionCall(const FunctionCall& fc) override
+    {
+      CompileFunctionCall(fc, run_state);
+    }
+
     void OnString(const StringValue& str) override
     {
       run_state->PushString(str.value);
     }
   }; 
+
+  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state)
+  {
+    auto pusher = StackPush{run_state};
+    for(auto a : fc.arguments->values)
+    {
+      a->Visit(&pusher);
+    }
+    run_state->CallFunction(fc.name, 1);
+    run_state->Pop(1);
+  }
 
   struct CompileStatements : public StatementVisitor
   {
@@ -105,14 +124,11 @@ namespace fel
 
     void OnFunctionCall(const FunctionCall& fc) override
     {
-      auto pusher = StackPush{run_state};
-      fc.arguments->Visit(&pusher);
-      run_state->CallFunction(fc.name, 1);
-      run_state->Pop(1);
+      CompileFunctionCall(fc, run_state);
     }
   };
 
-  void Run(const CompiledCode& code, Fel* fel)
+  void Run(const CompiledCode& code, Fel* fel, Log* log)
   {
     fel::State run_state;
 
@@ -133,6 +149,7 @@ namespace fel
             auto function = fel->functions.find(function_name);
             if(function == fel->functions.end())
             {
+              log->AddLog("file", -1, -1, "Unable to find function " + function_name);
               return;
             }
             else
@@ -158,7 +175,7 @@ namespace fel
       auto runner = CompileStatements{this, &compiler, log, filename};
       program.VisitAll(&runner);
     }
-    Run(code, this);
+    Run(code, this, log);
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)

@@ -17,6 +17,12 @@ void FunctionCall::Visit(StatementVisitor* vis) const
   vis->OnFunctionCall(*this);
 }
 
+void FunctionCall::Visit(ValueVisitor* vis) const
+{
+  vis->OnFunctionCall(*this);
+}
+
+
 void StringValue::Visit(ValueVisitor* vis) const
 {
   vis->OnString(*this);

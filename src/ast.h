@@ -31,12 +31,19 @@ struct StatementList
   void VisitAll(StatementVisitor* vis);
 };
 
-struct FunctionCall : public Statement
+struct ValueList
 {
-  FunctionCall(const std::string& n, std::shared_ptr<Value> v) : name(n), arguments(v) {}
+  std::vector<std::shared_ptr<Value>> values;
+};
+
+struct FunctionCall : public Statement, public Value
+{
+  FunctionCall(const std::string& n, std::shared_ptr<ValueList> v) : name(n), arguments(v) {}
+
   void Visit(StatementVisitor* vis) const override;
+  void Visit(ValueVisitor* vis) const override;
   std::string name;
-  std::shared_ptr<Value> arguments;
+  std::shared_ptr<ValueList> arguments;
 };
 
 struct StringValue : public Value
@@ -53,6 +60,7 @@ struct StatementVisitor
 
 struct ValueVisitor
 {
+  virtual void OnFunctionCall(const FunctionCall& fc) = 0;
   virtual void OnString(const StringValue& str) = 0;
 };
 

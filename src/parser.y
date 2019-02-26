@@ -29,6 +29,8 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelParserState* fel, const char* er
   Statement* statement;
   StatementList* statementlist;
   Value* value;
+  FunctionCall* functioncall;
+  ValueList* valuelist;
 }
 
 %token END 0 "end of file"
@@ -76,6 +78,8 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, FelParserState* fel, const char* er
 %type <statementlist> statementlist
 %type <statement> statement call_statement
 %type <value> value
+%type <functioncall> function_call
+%type <valuelist> function_call_arguments function_call_arguments_many
 
 %start program
 
@@ -95,8 +99,23 @@ statement
 ;
 
 call_statement
-  : IDENT[I] LPAREN value[V] RPAREN TERM { $$ = new FunctionCall{*$I, std::shared_ptr<Value>($V)}; delete $I; }
+  : function_call TERM { $$ = $1; }
 ;
+
+function_call
+  : IDENT[I] LPAREN function_call_arguments[V] RPAREN { $$ = new FunctionCall{*$I, std::shared_ptr<ValueList>($V)}; delete $I; }
+;
+
+function_call_arguments
+  : function_call_arguments_many { $$ = $1; }
+  | { $$ = new ValueList{}; }
+;
+
+function_call_arguments_many
+  : function_call_arguments_many COMMA value[V] { $$ = $1; $$->values.push_back(std::shared_ptr<Value>($V)); }
+  | value[V] { $$ = new ValueList{}; $$->values.push_back(std::shared_ptr<Value>($V)); }
+;
+
 
 /*
 statement
@@ -249,6 +268,7 @@ iterator_value
 
 value
   : STRING { $$ = new StringValue{*$1}; delete $1; }
+  | function_call {$$ = $1;}
 ;
 
 /*
