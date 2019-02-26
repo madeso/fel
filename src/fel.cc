@@ -78,7 +78,7 @@ namespace fel
     functions[name] = callback;
   }
 
-  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state);
+  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state, bool return_value);
 
   struct StackPush : public ValueVisitor
   {
@@ -88,7 +88,7 @@ namespace fel
 
     void OnFunctionCall(const FunctionCall& fc) override
     {
-      CompileFunctionCall(fc, run_state);
+      CompileFunctionCall(fc, run_state, true);
     }
 
     void OnString(const StringValue& str) override
@@ -97,14 +97,22 @@ namespace fel
     }
   }; 
 
-  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state)
+  void CompileFunctionCall(const FunctionCall& fc, Compiler* run_state, bool return_value)
   {
     auto pusher = StackPush{run_state};
     for(auto a : fc.arguments->values)
     {
       a->Visit(&pusher);
     }
-    run_state->CallFunction(fc.name, 1);
+    const auto arguments = fc.arguments->values.size();
+    if(return_value)
+    {
+      run_state->CallFunctionWithReturn(fc.name, arguments);
+    }
+    else
+    {
+      run_state->CallFunctionDiscardReturn(fc.name, arguments);
+    }
     run_state->Pop(1);
   }
 
@@ -124,7 +132,7 @@ namespace fel
 
     void OnFunctionCall(const FunctionCall& fc) override
     {
-      CompileFunctionCall(fc, run_state);
+      CompileFunctionCall(fc, run_state, false);
     }
   };
 
@@ -142,8 +150,10 @@ namespace fel
         case Operation::Pop:
           run_state.Pop(c.argument);
           break;
-        case Operation::CallFunction:
+        case Operation::CallFunctionDiscardReturn:
+        case Operation::CallFunctionWithReturn:
           {
+            const auto return_value = c.operation == Operation::CallFunctionWithReturn;
             const auto function_name = run_state.as_string(-1);
             run_state.Pop(1);
             auto function = fel->functions.find(function_name);
@@ -154,7 +164,27 @@ namespace fel
             }
             else
             {
-              function->second(c.argument, &run_state);
+              const auto number_of_returns = function->second(c.argument, &run_state);
+              if(return_value)
+              {
+                if(number_of_returns == 0)
+                {
+                  // function called and expected to return value, but no value was returned
+                  // report error, null or something else?
+                  run_state.Push("");
+                }
+                else
+                {
+                  assert(number_of_returns == 1);
+                }
+              }
+              else
+              {
+                if(number_of_returns > 0)
+                {
+                  run_state.Pop(number_of_returns);
+                }
+              }
             }
           }
           break;

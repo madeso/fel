@@ -45,7 +45,8 @@ namespace fel
 
   struct Fel
   {
-    using Callback = std::function<void(int arguments, State* state)>;
+    // return value: 0=no return values, 1=1 return value
+    using Callback = std::function<int(int arguments, State* state)>;
 
     std::map<std::string, Callback> functions;
 

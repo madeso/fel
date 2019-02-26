@@ -12,7 +12,9 @@ enum class Operation
   // arg=how many to pop
   Pop,
   // arg=how many arguments
-  CallFunction
+  CallFunctionDiscardReturn,
+  // arg=how many arguments
+  CallFunctionWithReturn
 };
 
 std::ostream& operator<<(std::ostream& s, const Operation o);
@@ -42,7 +44,8 @@ struct Compiler
 
   Compiler& PushString(const std::string& str);
   Compiler& Pop(int arg);
-  Compiler& CallFunction(const std::string& name, int arg);
+  Compiler& CallFunctionDiscardReturn(const std::string& name, int arg);
+  Compiler& CallFunctionWithReturn(const std::string& name, int arg);
 };
 
 #endif  // FEL_BYTECODE_H

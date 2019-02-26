@@ -6,7 +6,8 @@ std::ostream& operator<<(std::ostream& s, const Operation o)
   {
     case Operation::PushConstantString: s << "PushConstantString"; break;
     case Operation::Pop: s << "Pop"; break;
-    case Operation::CallFunction: s << "CallFunction"; break;
+    case Operation::CallFunctionDiscardReturn: s << "CallFunction_discard"; break;
+    case Operation::CallFunctionWithReturn: s << "CallFunction_ret"; break;
   }
 
   return s;
@@ -49,10 +50,17 @@ Compiler& Compiler::Pop(int arg)
   return *this;
 }
 
-Compiler& Compiler::CallFunction(const std::string& name, int arg)
+Compiler& Compiler::CallFunctionDiscardReturn(const std::string& name, int arg)
 {
   PushString(name);
-  code->codes.push_back(Bytecode{Operation::CallFunction, arg});
+  code->codes.push_back(Bytecode{Operation::CallFunctionDiscardReturn, arg});
+  return *this;
+}
+
+Compiler& Compiler::CallFunctionWithReturn(const std::string& name, int arg)
+{
+  PushString(name);
+  code->codes.push_back(Bytecode{Operation::CallFunctionWithReturn, arg});
   return *this;
 }
 
