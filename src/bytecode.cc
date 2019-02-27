@@ -10,6 +10,7 @@ std::ostream& operator<<(std::ostream& s, const Operation o)
     case Operation::Pop: s << "Pop"; break;
     case Operation::CallFunctionDiscardReturn: s << "CallFunction_discard"; break;
     case Operation::CallFunctionWithReturn: s << "CallFunction_ret"; break;
+    case Operation::Exchange: s << "Exch"; break;
   }
 
   return s;
@@ -67,6 +68,12 @@ Compiler& Compiler::PushString(const std::string& str)
 Compiler& Compiler::Pop(int arg)
 {
   code->codes.push_back(Bytecode{Operation::Pop, arg});
+  return *this;
+}
+
+Compiler& Compiler::Exch(int arg)
+{
+  code->codes.push_back(Bytecode{Operation::Exchange, arg});
   return *this;
 }
 

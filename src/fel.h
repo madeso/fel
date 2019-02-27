@@ -34,13 +34,17 @@ namespace fel
   struct State
   {
     std::vector<Entry> stack;
+
     const Entry& from_index(int index) const;
+    Entry& from_index(int index);
 
     bool is_string(int index) const;
     const std::string& as_string(int index) const;
 
     void Push(const std::string& str);
     void Pop(int count);
+
+    void Exchange(int index);
   };
 
   struct Fel

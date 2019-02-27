@@ -14,7 +14,9 @@ enum class Operation
   // arg=how many arguments
   CallFunctionDiscardReturn,
   // arg=how many arguments
-  CallFunctionWithReturn
+  CallFunctionWithReturn,
+  // arg=what index to exchange with
+  Exchange
 };
 
 std::ostream& operator<<(std::ostream& s, const Operation o);
@@ -46,6 +48,7 @@ struct Compiler
 
   Compiler& PushString(const std::string& str);
   Compiler& Pop(int arg);
+  Compiler& Exch(int index);
   Compiler& CallFunctionDiscardReturn(const std::string& name, int arg);
   Compiler& CallFunctionWithReturn(const std::string& name, int arg);
 };

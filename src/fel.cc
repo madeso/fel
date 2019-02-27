@@ -48,6 +48,11 @@ namespace fel
     return stack[i];
   }
 
+  Entry& State::from_index(int index)
+  {
+    return const_cast<Entry&>(const_cast<const State*>(this)->from_index(index));
+  }
+
   bool State::is_string(int index) const
   {
     return true;
@@ -70,6 +75,13 @@ namespace fel
     {
       stack.pop_back();
     }
+  }
+  
+  void State::Exchange(int index)
+  {
+    auto& src = from_index(index);
+    auto& top = from_index(-1);
+    std::swap(src, top);
   }
   
   void Fel::SetFunction(const std::string& name, Fel::Callback callback)
@@ -107,6 +119,7 @@ namespace fel
     if(return_value)
     {
       run_state->CallFunctionWithReturn(fc.name, arguments);
+      run_state->Exch(-2);
     }
     else
     {
@@ -186,6 +199,9 @@ namespace fel
               }
             }
           }
+          break;
+        case Operation::Exchange:
+          run_state.Exchange(c.argument);
           break;
       }
     }
