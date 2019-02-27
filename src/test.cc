@@ -48,8 +48,11 @@ TEST_CASE("basic", "[fel]")
   });
   f.SetFunction("join", [](int args, fel::State* state) -> int {
       std::stringstream ss;
+      bool first = true;
       for(int i=0; i<args; ++i)
       {
+        if(first) { first = false; }
+        else { ss << " "; }
         ss << state->as_string(argn(args, i));
       }
       state->Push(ss.str());
