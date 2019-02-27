@@ -34,6 +34,8 @@ struct CompiledCode
 {
   std::vector<Bytecode> codes;
   std::vector<std::string> strings;
+
+  void Dump() const;
 };
 
 struct Compiler

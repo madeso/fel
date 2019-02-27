@@ -1,5 +1,7 @@
 #include "bytecode.h"
 
+#include <iostream>
+
 std::ostream& operator<<(std::ostream& s, const Operation o)
 { 
   switch(o)
@@ -29,6 +31,24 @@ std::ostream& operator<<(std::ostream& s, const Bytecode& b)
 {
   s << "(" << b.operation << ", " << b.argument << ")";
   return s;
+}
+
+void CompiledCode::Dump() const
+{
+  auto& stream = std::cout;
+  stream << "Strings\n";
+  int index = 0;
+  for(const auto& s: strings)
+  {
+    stream << "  " << index << ": " << s << "\n";
+    index += 1;
+  }
+
+  stream << "\nCode:\n";
+  for(const auto& c: codes)
+  {
+    stream << "  " << c << "\n";
+  }
 }
 
 Compiler::Compiler(CompiledCode* cc)
