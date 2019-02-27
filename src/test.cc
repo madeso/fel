@@ -43,7 +43,7 @@ TEST_CASE("basic", "[fel]")
       return 0;
   });
   f.SetFunction("abc", [](int args, fel::State* state) -> int {
-      state->Push("abc");
+      state->Push("ABC");
       return 1;
   });
   f.SetFunction("join", [](int args, fel::State* state) -> int {
@@ -128,7 +128,7 @@ TEST_CASE("basic", "[fel]")
     f.LoadAndRunString("print(abc());", "abc.fel", &log);
     CHECK(log.entries == no_entries);
 
-    const auto expected = std::vector<std::string>{"abc"};
+    const auto expected = std::vector<std::string>{"ABC"};
     CHECK(output == expected);
   }
 
