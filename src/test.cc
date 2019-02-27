@@ -42,6 +42,19 @@ TEST_CASE("basic", "[fel]")
       output.push_back(ss.str());
       return 0;
   });
+  f.SetFunction("abc", [](int args, fel::State* state) -> int {
+      state->Push("abc");
+      return 1;
+  });
+  f.SetFunction("join", [](int args, fel::State* state) -> int {
+      std::stringstream ss;
+      for(int i=0; i<args; ++i)
+      {
+        ss << state->as_string(argn(args, i));
+      }
+      state->Push(ss.str());
+      return 1;
+  });
 
   // double quoted string
 
@@ -104,6 +117,15 @@ TEST_CASE("basic", "[fel]")
   SECTION("calling print with more than 1 argument")
   {
     f.LoadAndRunString("print('a', 'b', 'c');", "filename.fel", &log);
+    CHECK(log.entries == no_entries);
+
+    const auto expected = std::vector<std::string>{"abc"};
+    CHECK(output == expected);
+  }
+
+  SECTION("printing result of abc function")
+  {
+    f.LoadAndRunString("print(abc());", "abc.fel", &log);
     CHECK(log.entries == no_entries);
 
     const auto expected = std::vector<std::string>{"abc"};
