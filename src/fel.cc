@@ -220,6 +220,9 @@ namespace fel
       auto runner = CompileStatements{this, &compiler, log, filename};
       program.VisitAll(&runner);
     }
+    if(filename == "abc.fel") {
+      code.Dump();
+    }
     Run(code, this, log);
   }
 
