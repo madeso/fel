@@ -46,6 +46,7 @@ namespace fel
 
     void Exchange(int index);
   };
+  std::ostream& operator<<(std::ostream& o, const State& entry);
 
   struct Fel
   {

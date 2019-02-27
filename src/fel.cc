@@ -64,6 +64,17 @@ namespace fel
     return e.str;
   }
 
+  std::ostream& operator<<(std::ostream& o, const State& state)
+  {
+    int index = 0;
+    for(auto e: state.stack)
+    {
+      o << index << ": " << e.str << "\n";
+      index += 1;
+    }
+    return o;
+  }
+
   void State::Push(const std::string& str)
   {
     stack.push_back(Entry{str});
@@ -148,12 +159,16 @@ namespace fel
     }
   };
 
-  void Run(const CompiledCode& code, Fel* fel, Log* log)
+  void Run(const CompiledCode& code, Fel* fel, Log* log, bool debug)
   {
     fel::State run_state;
 
     for(const auto& c: code.codes)
     {
+      if(debug)
+      {
+        std::cout << run_state << "Run " << c << "\n\n";
+      }
       switch(c.operation)
       {
         case Operation::PushConstantString:
@@ -220,10 +235,12 @@ namespace fel
       auto runner = CompileStatements{this, &compiler, log, filename};
       program.VisitAll(&runner);
     }
+    bool debug = false;
     if(filename == "abc.fel") {
       code.Dump();
+      debug = true;
     }
-    Run(code, this, log);
+    Run(code, this, log, debug);
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
