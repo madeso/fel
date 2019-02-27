@@ -135,7 +135,15 @@ namespace fel
     {
       run_state->CallFunctionDiscardReturn(fc.name, arguments);
     }
-    run_state->Pop(fc.arguments->values.size());
+    const auto argc = fc.arguments->values.size();
+    if(argc > 0 )
+    {
+      if(return_value)
+      {
+        run_state->Exch(-(argc+1));
+      }
+      run_state->Pop(argc);
+    }
   }
 
   struct CompileStatements : public StatementVisitor
@@ -235,10 +243,6 @@ namespace fel
       program.VisitAll(&runner);
     }
     bool debug = false;
-    if(filename == "abc.fel") {
-      code.Dump();
-      debug = true;
-    }
     Run(code, this, log, debug);
   }
 

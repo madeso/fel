@@ -134,7 +134,7 @@ TEST_CASE("basic", "[fel]")
 
   SECTION("calling join with 2 arguments into print")
   {
-    f.LoadAndRunString("print(join('hello', 'world'));", "filename.fel", &log);
+    f.LoadAndRunString("print(join('hello', 'world'));", "join.fel", &log);
     CHECK(log.entries == no_entries);
 
     const auto expected = std::vector<std::string>{"hello world"};
