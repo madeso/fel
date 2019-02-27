@@ -130,13 +130,12 @@ namespace fel
     if(return_value)
     {
       run_state->CallFunctionWithReturn(fc.name, arguments);
-      run_state->Exch(-2);
     }
     else
     {
       run_state->CallFunctionDiscardReturn(fc.name, arguments);
     }
-    run_state->Pop(1);
+    run_state->Pop(fc.arguments->values.size());
   }
 
   struct CompileStatements : public StatementVisitor
