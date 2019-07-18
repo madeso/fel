@@ -230,6 +230,18 @@ namespace fel
             return parsed;
           }
           fc.arguments.push_back(RValue{int_parsed});
+          SkipSpaces(file);
+          if(file->Peek() == ',')
+          {
+            file->Read(); // read ,
+            SkipSpaces(file);
+
+            if(file->Peek() == ')')
+            {
+              Add(log, *file, "Unexpected ) found " + CharToString(file->Peek()));
+              return parsed;
+            }
+          }
         }
         EXPECT(')');
         SkipSpaces(file);
