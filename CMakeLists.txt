@@ -17,15 +17,15 @@ add_library(fel STATIC
   )
 
 add_executable(felapp
-  src/main.cc
+  cli/main.cc
   )
 target_link_libraries(felapp fel)
 
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
-  src/testmain.cc
-  src/test.cc
+  test/testmain.cc
+  test/test.cc
   )
 
 enable_testing()
