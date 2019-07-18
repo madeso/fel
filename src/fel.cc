@@ -3,6 +3,7 @@
 #include <string>
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 namespace fel
 {
@@ -101,6 +102,36 @@ namespace fel
     return ss.str();
   }
 
+  std::string ParseInt(File* file)
+  {
+    if(!IsNum(file->Peek()))
+    {
+      return "";
+    }
+    std::ostringstream ss;
+    const auto first = file->Read();
+    ss << first;
+    if(first == '0')
+    {
+      // todo: support octal numbers
+      return ss.str();
+    }
+
+    while(file->HasMore())
+    {
+      const auto p = file->Peek();
+      if(IsNum(p))
+      {
+        ss << file->Read();
+      }
+      else
+      {
+        break;
+      }
+    }
+    return ss.str();
+  }
+
   void SkipSpaces(File* file)
   {
     while(file->HasMore() && IsSpace(file->Peek()))
@@ -109,10 +140,17 @@ namespace fel
     }
   }
 
+  struct RValue
+  {
+    int value;
+  };
+
+
   struct FunctionCall
   {
     std::string function;
     Location location;
+    std::vector<RValue> arguments;
   };
 
   struct Parsed
@@ -174,11 +212,30 @@ namespace fel
         SkipSpaces(file);
         EXPECT('(');
         SkipSpaces(file);
+        auto fc = FunctionCall{ident, loc};
+        while(file->HasMore() && file->Peek() != ')')
+        {
+          auto int_string = ParseInt(file);
+          if(int_string == "" )
+          {
+            Add(log, *file, "Failed to parse int, found " + CharToString(file->Peek()));
+            return parsed;
+          }
+          std::istringstream ss (int_string);
+          int int_parsed;
+          ss >> int_parsed;
+          if(ss.fail())
+          {
+            Add(log, *file, "Internal error: Unable to get int from " + int_string);
+            return parsed;
+          }
+          fc.arguments.push_back(RValue{int_parsed});
+        }
         EXPECT(')');
         SkipSpaces(file);
         EXPECT(';');
         SkipSpaces(file);
-        parsed.statements.push_back(FunctionCall{ident, loc});
+        parsed.statements.push_back(fc);
       }
       else
       {
@@ -203,9 +260,27 @@ namespace fel
       else
       {
         State state;
+        for(const auto& a: s.arguments)
+        {
+          state.stack.push_back(a.value);
+          state.arguments += 1;
+        }
         found->second(&state);
       }
     }
+  }
+
+  int State::GetStack(int index) const
+  {
+    assert(index < 0);
+    return stack[stack.size()+index];
+  }
+
+  int State::GetArg(int index) const
+  {
+    assert(index >= 0);
+    assert(index < arguments);
+    return GetStack(index - arguments);
   }
 
   void Fel::SetFunction(const std::string& name, FunctionCallback callback)

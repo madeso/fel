@@ -29,6 +29,11 @@ TEST_CASE("call function", "[fel]" )
 
   f.SetFunction("a", [&] (fel::State*) {result += "a";});
   f.SetFunction("b", [&] (fel::State*) {result += "b";});
+  f.SetFunction("c", [&] (fel::State* s)
+      {
+        if(s->arguments>0) result += std::string(s->GetArg(0), 'c');
+      }
+    );
 
   SECTION("call missing()")
   {
@@ -56,5 +61,27 @@ TEST_CASE("call function", "[fel]" )
     CHECK(log);
     CHECK(result == "ab");
   }
+
+  SECTION("call c()")
+  {
+    f.LoadAndRunString("c();", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "");
+  }
+
+  SECTION("call c(5)")
+  {
+    f.LoadAndRunString("c(5);", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "ccccc");
+  }
+
+  SECTION("call c(3, 2)")
+  {
+    f.LoadAndRunString("c(3, 2);", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "ccc");
+  }
+
 }
 

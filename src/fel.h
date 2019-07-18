@@ -12,6 +12,11 @@ namespace fel
 {
   struct State
   {
+    int arguments = 0;
+    std::vector<int> stack;
+
+    int GetStack(int index) const;
+    int GetArg(int index) const;
   };
 
   struct Fel
