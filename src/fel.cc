@@ -110,8 +110,14 @@ namespace fel
     }
   }
 
+  struct FunctionCall
+  {
+    std::string function;
+  };
+
   struct Parsed
   {
+    std::vector<FunctionCall> statements;
   };
 
   void Add(Log* log, const File& file, const std::string& message)
@@ -169,6 +175,7 @@ namespace fel
         SkipSpaces(file);
         EXPECT(';');
         SkipSpaces(file);
+        parsed.statements.push_back(FunctionCall{ident});
       }
       else
       {
@@ -181,17 +188,34 @@ namespace fel
 #undef EXPECT
   }
 
-  void Run(const Parsed& parsed, Log* log)
+  void Run(const Fel& fel, const Parsed& parsed, Log* log)
   {
+    for(auto& s: parsed.statements)
+    {
+      auto found = fel.functions.find(s.function);
+      if(found == fel.functions.end())
+      {
+        Add(log, "", -1, -1, "Unable to find function " + s.function);
+      }
+      else
+      {
+        found->second();
+      }
+    }
+  }
+
+  void Fel::SetFunction(const std::string& name, FunctionCallback callback)
+  {
+    functions[name] = callback;
   }
 
   void Fel::LoadAndRunString(const std::string& str, const std::string& filename, Log* log)
   {
     auto file = File{filename, str};
     auto parsed = Parse(&file, log);
-    if(IsEmpty(*log)) { return; }
+    if(!IsEmpty(*log)) { return; }
 
-    Run(parsed, log);
+    Run(*this, parsed, log);
   }
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
