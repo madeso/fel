@@ -34,6 +34,16 @@ TEST_CASE("call function", "[fel]" )
         if(s->arguments>0) result += std::string(s->GetArg(0), 'c');
       }
     );
+  f.SetFunction("d", [&] (fel::State* s)
+      {
+        for(int i=0; i<s->arguments; i+=1)
+        {
+          std::ostringstream ss;
+          ss << s->GetArg(i);
+          result += ss.str();
+        }
+      }
+    );
 
   SECTION("call missing()")
   {
@@ -81,6 +91,13 @@ TEST_CASE("call function", "[fel]" )
     f.LoadAndRunString("c(3, 2);", "filename.fel", &log);
     CHECK(log);
     CHECK(result == "ccc");
+  }
+
+  SECTION("call d(3, 2)")
+  {
+    f.LoadAndRunString("d(3, 2, 42);", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "3242");
   }
 
 }
