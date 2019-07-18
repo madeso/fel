@@ -13,8 +13,26 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * Editor/intellisense support(mainly having a [LSP](https://github.com/Microsoft/language-server-protocol)-enabled server).
   * Operator overloading support. (like lua, unlike js)
 
-# Todo
+# Workplan
   * Make sure the basic features work.
+  * Make fast and lean
   * Switch from c++ to c
   * Customaizable syntax. Don't like {}, switch them out in a header before building
+
+# Todo
+  * call functions with ints
+  * call functions with strings
+  * call functions with basic arithmetics (+)
+  * scopes
+  * variables
+  * if statements
+  * double type
+  * more arithmetics
+  * objects
+  * functions as variables
+  * custom functions
+  * captures
+  * arrays
+  * meta objects/tables
+  * optional types
 
