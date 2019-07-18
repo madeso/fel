@@ -27,6 +27,7 @@ TEST_CASE("call function", "[fel]" )
   fel::Log log;
   std::string result;
 
+  f.SetFunction("junk", [&] (fel::State*) {result += "!";});
   f.SetFunction("a", [&] (fel::State*) {result += "a";});
   f.SetFunction("b", [&] (fel::State*) {result += "b";});
   f.SetFunction("c", [&] (fel::State* s)
@@ -93,11 +94,37 @@ TEST_CASE("call function", "[fel]" )
     CHECK(result == "ccc");
   }
 
-  SECTION("call d(3, 2)")
+  SECTION("call junk()")
   {
-    f.LoadAndRunString("d(3, 2, 42);", "filename.fel", &log);
+    f.LoadAndRunString("junk();", "filename.fel", &log);
     CHECK(log);
-    CHECK(result == "3242");
+    CHECK(result == "!");
+  }
+
+  SECTION("call junk(1 2)")
+  {
+    f.LoadAndRunString("junk(1 2);", "filename.fel", &log);
+    CHECK_FALSE(log);
+    CHECK(result == "");
+    REQUIRE(log.entries.size() == 1);
+    const auto& e = log.entries[0];
+    CHECK(e.file == "filename.fel");
+    CHECK(e.location.line == 1);
+    CHECK(e.location.column == 8);
+    CHECK(e.message == "Error: Expected ',' but found 2");
+  }
+
+  SECTION("call junk(42,)")
+  {
+    f.LoadAndRunString("junk(42,);", "filename.fel", &log);
+    CHECK_FALSE(log);
+    CHECK(result == "");
+    REQUIRE(log.entries.size() == 1);
+    const auto& e = log.entries[0];
+    CHECK(e.file == "filename.fel");
+    CHECK(e.location.line == 1);
+    CHECK(e.location.column == 8);
+    CHECK(e.message == "Found ) while looking for rvalue");
   }
 
 }

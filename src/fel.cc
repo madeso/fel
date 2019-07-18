@@ -213,8 +213,20 @@ namespace fel
         EXPECT('(');
         SkipSpaces(file);
         auto fc = FunctionCall{ident, loc};
+        bool first = true;
         while(file->HasMore() && file->Peek() != ')')
         {
+          if(!first)
+          {
+            EXPECT(',');
+            SkipSpaces(file);
+          }
+          first = false;
+          if(file->Peek() == ')')
+          {
+            Add(log, *file, "Found ) while looking for rvalue");
+            return parsed;
+          }
           auto int_string = ParseInt(file);
           if(int_string == "" )
           {
@@ -231,17 +243,6 @@ namespace fel
           }
           fc.arguments.push_back(RValue{int_parsed});
           SkipSpaces(file);
-          if(file->Peek() == ',')
-          {
-            file->Read(); // read ,
-            SkipSpaces(file);
-
-            if(file->Peek() == ')')
-            {
-              Add(log, *file, "Unexpected ) found " + CharToString(file->Peek()));
-              return parsed;
-            }
-          }
         }
         EXPECT(')');
         SkipSpaces(file);
