@@ -8,12 +8,19 @@
 
 namespace fel
 {
+  struct Location
+  {
+    int line = 0;
+    int column = 0;
+
+    bool operator==(const Location& rhs) const;
+  };
+
   struct LogEntry
   {
     std::string file;
     std::string message;
-    int line = 0;
-    int column = 0;
+    Location location;
 
     bool operator==(const LogEntry& rhs) const;
   };
@@ -27,7 +34,7 @@ namespace fel
   };
   std::ostream& operator<<(std::ostream& o, const Log& log);
 
-  void Add(Log* log, const std::string& file, int line, int col, const std::string& message);
+  void Add(Log* log, const std::string& file, const Location& location, const std::string& message);
   bool IsEmpty(const Log& log);
 }
 

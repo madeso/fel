@@ -8,17 +8,21 @@
 
 namespace fel
 {
+  bool Location::operator==(const Location& rhs) const
+  {
+    return line == rhs.line && column == rhs.column;
+  }
+
   bool LogEntry::operator==(const LogEntry& rhs) const
   {
     return file == rhs.file
       && message == rhs.message
-      && line == rhs.line
-      && column == rhs.column;
+      && location == rhs.location;
   }
 
   std::ostream& operator<<(std::ostream& o, const LogEntry& entry)
   {
-    o << entry.file << ":" << entry.line << ":" << entry.column << ": " << entry.message;
+    o << entry.file << ":" << entry.location.line << ":" << entry.location.column << ": " << entry.message;
     return o;
   }
 
@@ -31,17 +35,16 @@ namespace fel
   {
     for(const auto& e: log.entries)
     {
-      o << e.file << ":" << e.line << ":" << e.column << ": " << e.message << "\n";
+      o << e.file << ":" << e.location.line << ":" << e.location.column << ": " << e.message << "\n";
     }
   }
 
-  void Add(Log* log, const std::string& file, int line, int col, const std::string& message)
+  void Add(Log* log, const std::string& file, const Location& location, const std::string& message)
   {
     fel::LogEntry entry;
     entry.file = file;
     entry.message = message;
-    entry.line = line;
-    entry.column = col;
+    entry.location = location;
     log->entries.push_back(entry);
   }
 

@@ -11,8 +11,7 @@ namespace fel
     std::string filename;
     std::string data;
     int next_index = 0;
-    int col = 0;
-    int line = 1;
+    Location location = Location{1,0};
     
     File(const std::string& f, const std::string& d) : filename(f), data(d) {}
 
@@ -26,12 +25,12 @@ namespace fel
         next_index += 1;
         if(read == '\n')
         {
-          line += 1;
-          col = 0;
+          location.line += 1;
+          location.column = 0;
         }
         else
         {
-          col += 1;
+          location.column += 1;
         }
         return read;
       }
@@ -113,16 +112,18 @@ namespace fel
   struct FunctionCall
   {
     std::string function;
+    Location location;
   };
 
   struct Parsed
   {
+    std::string filename;
     std::vector<FunctionCall> statements;
   };
 
   void Add(Log* log, const File& file, const std::string& message)
   {
-    Add(log, file.filename, file.line, file.col, message);
+    Add(log, file.filename, file.location, message);
   }
 
   std::string CharToString(char c)
@@ -144,6 +145,7 @@ namespace fel
   Parsed Parse(File* file, Log* log)
   {
     Parsed parsed;
+    parsed.filename = file->filename;
 
 #define EXPECT(cc) \
     do\
@@ -162,6 +164,7 @@ namespace fel
       const auto first = file->Peek();
       if(IsFirstIdent(first))
       {
+        const auto loc = file->location;
         const auto ident = ParseIdent(file);
         if(ident == "")
         {
@@ -175,7 +178,7 @@ namespace fel
         SkipSpaces(file);
         EXPECT(';');
         SkipSpaces(file);
-        parsed.statements.push_back(FunctionCall{ident});
+        parsed.statements.push_back(FunctionCall{ident, loc});
       }
       else
       {
@@ -195,7 +198,7 @@ namespace fel
       auto found = fel.functions.find(s.function);
       if(found == fel.functions.end())
       {
-        Add(log, "", -1, -1, "Unable to find function " + s.function);
+        Add(log, parsed.filename, s.location, s.function + " is not a function");
       }
       else
       {

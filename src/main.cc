@@ -6,10 +6,7 @@ using namespace fel;
 
 void Print(const Log& log)
 {
-  for(const auto& e: log.entries)
-  {
-    std::cerr << e.file << ":" << e.line << ":" << e.column << ": " << e.message << "\n";
-  }
+  std::cerr << log;
   std::cout << log.entries.size() << " fel error(s) detected\n";
 }
 
