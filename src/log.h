@@ -22,7 +22,10 @@ namespace fel
   struct Log
   {
     std::vector<LogEntry> entries;
+
+    operator bool() const;
   };
+  std::ostream& operator<<(std::ostream& o, const Log& log);
 
   void Add(Log* log, const std::string& file, int line, int col, const std::string& message);
   bool IsEmpty(const Log& log);

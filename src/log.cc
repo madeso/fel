@@ -22,6 +22,18 @@ namespace fel
     return o;
   }
 
+  Log::operator bool() const
+  {
+    return IsEmpty(*this);
+  }
+
+  std::ostream& operator<<(std::ostream& o, const Log& log)
+  {
+    for(const auto& e: log.entries)
+    {
+      o << e.file << ":" << e.line << ":" << e.column << ": " << e.message << "\n";
+    }
+  }
 
   void Add(Log* log, const std::string& file, int line, int col, const std::string& message)
   {

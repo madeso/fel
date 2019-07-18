@@ -9,6 +9,15 @@ TEST_CASE("empty", "[fel]" )
   fel::Log log;
   f.LoadAndRunString("", "filename.fel", &log);
 
-  CHECK(log.entries.empty());
+  CHECK(log);
+}
+
+TEST_CASE("unable to fun", "[fel]" )
+{
+  fel::Fel f;
+  fel::Log log;
+  f.LoadAndRunString("dog", "filename.fel", &log);
+
+  CHECK_FALSE(log);
 }
 
