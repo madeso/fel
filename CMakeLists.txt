@@ -12,6 +12,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)
 
 add_library(fel STATIC
+  src/log.cc
   src/fel.cc
   )
 
