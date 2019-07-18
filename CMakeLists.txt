@@ -20,6 +20,7 @@ add_executable(felapp
   cli/main.cc
   )
 target_link_libraries(felapp fel)
+set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 
 include_directories(SYSTEM external/catch/)
 
