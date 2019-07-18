@@ -10,9 +10,10 @@ namespace fel
 {
   struct Location
   {
-    int line = 0;
-    int column = 0;
+    int line;
+    int column;
 
+    Location(int l=-1, int c=-1);
     bool operator==(const Location& rhs) const;
   };
 
