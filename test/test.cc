@@ -27,8 +27,8 @@ TEST_CASE("call function", "[fel]" )
   fel::Log log;
   std::string result;
 
-  f.SetFunction("a", [&] {result += "a";});
-  f.SetFunction("b", [&] {result += "b";});
+  f.SetFunction("a", [&] (fel::State*) {result += "a";});
+  f.SetFunction("b", [&] (fel::State*) {result += "b";});
 
   SECTION("call missing()")
   {

@@ -10,9 +10,13 @@
 
 namespace fel
 {
+  struct State
+  {
+  };
+
   struct Fel
   {
-    using FunctionCallback = std::function<void ()>;
+    using FunctionCallback = std::function<void (State*)>;
 
     void SetFunction(const std::string& name, FunctionCallback callback);
     void LoadAndRunString(const std::string& str, const std::string& filename, Log* log);

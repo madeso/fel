@@ -202,7 +202,8 @@ namespace fel
       }
       else
       {
-        found->second();
+        State state;
+        found->second(&state);
       }
     }
   }
