@@ -35,6 +35,12 @@ TEST_CASE("call function", "[fel]" )
     f.LoadAndRunString("missing();", "filename.fel", &log);
     CHECK_FALSE(log);
     CHECK(result == "");
+    REQUIRE(log.entries.size() == 1);
+    const auto& e = log.entries[0];
+    CHECK(e.file == "filename.fel");
+    CHECK(e.line == 1);
+    CHECK(e.column == 0);
+    CHECK(e.message == "missing is not a function");
   }
 
   SECTION("call a()")
