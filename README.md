@@ -20,7 +20,6 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * Customaizable syntax. Don't like {}, switch them out in a header before building
 
 # Todo
-  * call functions with ints
   * call functions with strings
   * call functions with basic arithmetics (+)
   * scopes
