@@ -21,22 +21,34 @@ TEST_CASE("syntax error", "[fel]" )
   CHECK_FALSE(log);
 }
 
-
-TEST_CASE("call missing function", "[fel]" )
-{
-  fel::Fel f;
-  fel::Log log;
-  f.LoadAndRunString("func();", "filename.fel", &log);
-
-  CHECK_FALSE(log);
-}
-
 TEST_CASE("call function", "[fel]" )
 {
   fel::Fel f;
   fel::Log log;
-  f.LoadAndRunString("func();", "filename.fel", &log);
+  std::string result;
 
-  CHECK(log);
+  f.SetFunction("a", [&] {result += "a";});
+  f.SetFunction("b", [&] {result += "b";});
+
+  SECTION("call missing()")
+  {
+    f.LoadAndRunString("missing();", "filename.fel", &log);
+    CHECK_FALSE(log);
+    CHECK(result == "");
+  }
+
+  SECTION("call a()")
+  {
+    f.LoadAndRunString("a();", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "a");
+  }
+
+  SECTION("call a() and b()")
+  {
+    f.LoadAndRunString("a(); b();", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "ab");
+  }
 }
 
