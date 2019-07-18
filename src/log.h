@@ -22,9 +22,10 @@ namespace fel
   struct Log
   {
     std::vector<LogEntry> entries;
-
-    void AddLog(const std::string& file, int line, int col, const std::string& message);
   };
+
+  void Add(Log* log, const std::string& file, int line, int col, const std::string& message);
+  bool IsEmpty(const Log& log);
 }
 
 #endif // LOG_H

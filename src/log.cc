@@ -23,14 +23,19 @@ namespace fel
   }
 
 
-  void Log::AddLog(const std::string& file, int line, int col, const std::string& message)
+  void Add(Log* log, const std::string& file, int line, int col, const std::string& message)
   {
     fel::LogEntry entry;
     entry.file = file;
     entry.message = message;
     entry.line = line;
     entry.column = col;
-    entries.push_back(entry);
+    log->entries.push_back(entry);
+  }
+
+  bool IsEmpty(const Log& log)
+  {
+    return log.entries.empty();
   }
 }
 
