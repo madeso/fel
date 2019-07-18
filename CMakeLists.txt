@@ -25,7 +25,7 @@ set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
-  test/testmain.cc
+  test/main.cc
   test/test.cc
   )
 
