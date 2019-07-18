@@ -4,6 +4,7 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 namespace fel
 {
@@ -312,6 +313,15 @@ namespace fel
 
   void Fel::LoadAndRunFile(const std::string& file, Log* log)
   {
+    std::ifstream t(file.c_str());
+    if(!t.good())
+    {
+      Add(log, file, Location{-1,-1}, "Unable to open file!");
+      return;
+    }
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+    LoadAndRunString(str, file, log);
   }
 }
 
