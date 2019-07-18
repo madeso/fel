@@ -26,36 +26,8 @@ namespace fel
     void AddLog(const std::string& file, int line, int col, const std::string& message);
   };
 
-  struct Entry
-  {
-    std::string str;
-  };
-  
-  struct State
-  {
-    std::vector<Entry> stack;
-
-    const Entry& from_index(int index) const;
-    Entry& from_index(int index);
-
-    bool is_string(int index) const;
-    const std::string& as_string(int index) const;
-
-    void Push(const std::string& str);
-    void Pop(int count);
-
-    void Exchange(int index);
-  };
-  std::ostream& operator<<(std::ostream& o, const State& entry);
-
   struct Fel
   {
-    // return value: 0=no return values, 1=1 return value
-    using Callback = std::function<int(int arguments, State* state)>;
-
-    std::map<std::string, Callback> functions;
-
-    void SetFunction(const std::string& name, Callback callback);
     void LoadAndRunString(const std::string& str, const std::string& filename, Log* log);
     void LoadAndRunFile(const std::string& file, Log* log);
   };
