@@ -5,7 +5,7 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
 
 [![Build Status](https://travis-ci.org/madeso/fel.svg?branch=master)](https://travis-ci.org/madeso/fel)
 
-# Main features
+# Planned features
   * 0 based arrays (as opposed to luas 1)
   * optional/gradual typesafety
   * JIT as a feature, not as a external library
