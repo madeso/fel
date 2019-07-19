@@ -22,7 +22,6 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * Customaizable syntax. Don't like {}, switch them out in a header before building
 
 # Todo
-  * call functions with basic arithmetics (+)
   * interactive (-i) and run-string (-x) arguments to cli app
   * functions can error and have return values
   * parse scopes
