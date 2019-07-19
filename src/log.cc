@@ -39,6 +39,7 @@ namespace fel
     {
       o << e.file << ":" << e.location.line << ":" << e.location.column << ": " << e.message << "\n";
     }
+    o << log.entries.size() << " error(s) detected\n";
   }
 
   void Add(Log* log, const std::string& file, const Location& location, const std::string& message)
