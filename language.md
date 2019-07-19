@@ -2,7 +2,7 @@
 Fel is greatly inspired by a mix of javascript and lua.
 
 # Comments
-Fel uses c-style comments with the distinction that multi line comments can be nested.
+Fel uses c-style comments with the distinction that multi line comments can be nested (though there are problems rendering it).
 
 ```javascript
 // single line comment
