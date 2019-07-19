@@ -32,16 +32,22 @@ TEST_CASE("call function", "[fel]" )
   f.SetFunction("b", [&] (fel::State*) {result += "b";});
   f.SetFunction("c", [&] (fel::State* s)
       {
-        if(s->arguments>0) result += std::string(s->GetArg(0), 'c');
+        if(s->arguments>0)
+        {
+        auto arg = s->GetArg(0);
+        auto* argi = arg->AsInt();
+          if(argi)
+          {
+            result += std::string(argi->value, 'c');
+          }
+        }
       }
     );
   f.SetFunction("d", [&] (fel::State* s)
       {
         for(int i=0; i<s->arguments; i+=1)
         {
-          std::ostringstream ss;
-          ss << s->GetArg(i);
-          result += ss.str();
+          result += s->GetArg(i)->GetStringRepresentation();
         }
       }
     );

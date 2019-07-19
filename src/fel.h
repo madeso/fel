@@ -4,19 +4,20 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <functional>
+#include <memory>
 
 #include "log.h"
+#include "value.h"
 
 namespace fel
 {
   struct State
   {
     int arguments = 0;
-    std::vector<int> stack;
+    std::vector<std::shared_ptr<Value>> stack;
 
-    int GetStack(int index) const;
-    int GetArg(int index) const;
+    std::shared_ptr<Value> GetStack(int index) const;
+    std::shared_ptr<Value> GetArg(int index) const;
   };
 
   struct Fel

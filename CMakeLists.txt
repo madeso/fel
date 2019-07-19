@@ -14,6 +14,7 @@ include_directories(src)
 add_library(fel STATIC
   src/log.cc
   src/fel.cc
+  src/value.cc
   )
 
 add_executable(felapp

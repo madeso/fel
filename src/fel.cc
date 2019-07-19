@@ -276,7 +276,7 @@ namespace fel
         State state;
         for(const auto& a: s.arguments)
         {
-          state.stack.push_back(a.value);
+          state.stack.push_back(std::make_shared<IntValue>(a.value));
           state.arguments += 1;
         }
         found->second(&state);
@@ -284,13 +284,13 @@ namespace fel
     }
   }
 
-  int State::GetStack(int index) const
+  std::shared_ptr<Value> State::GetStack(int index) const
   {
     assert(index < 0);
     return stack[stack.size()+index];
   }
 
-  int State::GetArg(int index) const
+  std::shared_ptr<Value> State::GetArg(int index) const
   {
     assert(index >= 0);
     assert(index < arguments);
