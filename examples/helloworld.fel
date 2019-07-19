@@ -1,2 +1,6 @@
+// this is the classic hello world program
+// unless the registered print function does something different
+// that is entirly up to the binding code
+
 print("hello world");
 

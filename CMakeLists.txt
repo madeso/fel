@@ -29,6 +29,7 @@ add_executable(tests
   test/main.cc
   test/test.cc
   test/strings.cc
+  test/comments.cc
   )
 
 enable_testing()

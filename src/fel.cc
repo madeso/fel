@@ -182,12 +182,96 @@ namespace fel
     return ss.str();
   }
 
-  void SkipSpaces(File* file)
+  bool SkipMultilineComment(File* file, Log* log)
   {
-    while(file->HasMore() && IsSpace(file->Peek()))
+    const auto first = file->Read();
+    const auto second = file->Read();
+    if(first != '/' || second != '*')
+    {
+      // todo: add error here
+      return false;
+    }
+    while(file->HasMore())
+    {
+      const auto next = file->Peek();
+      const auto after = file->Peek(2);
+      if(next == '/' && after == '*')
+      {
+        if(false == SkipMultilineComment(file, log))
+        {
+          return false;
+        }
+      }
+      else if(next == '*' && after == '/')
+      {
+        file->Read(); // skip
+        file->Read(); // skip
+        return true;
+      }
+      else
+      {
+        file->Read(); // skip
+      }
+    }
+    
+    // todo: add error here
+    return false;
+  }
+
+  bool SkipSinglelineComment(File* file, Log* log)
+  {
+    const auto first = file->Read();
+    const auto second = file->Read();
+    if(first != '/' || second != '/')
+    {
+      // todo: add error here
+      return false;
+    }
+    while(file->HasMore() && file->Peek() != '\n')
     {
       file->Read(); // skip
     }
+    return true;
+  }
+
+
+  bool SkipSpaces(File* file, Log* log)
+  {
+    while(file->HasMore())
+    {
+      const auto c = file->Peek();
+      if(IsSpace(c))
+      {
+        file->Read(); // skip
+      }
+      else if(c == '/')
+      {
+        const auto next = file->Peek(2);
+        if(next == '*')
+        {
+          if(false == SkipMultilineComment(file, log))
+          {
+            return false;
+          }
+        }
+        else if(next == '/')
+        {
+          if(false == SkipSinglelineComment(file, log))
+          {
+            return false;
+          }
+        }
+        else
+        {
+          return true;
+        }
+      }
+      else
+      {
+        return true;
+      }
+    }
+    return true;
   }
 
   struct RValue
@@ -287,7 +371,10 @@ namespace fel
       }\
     } while(false)
 
-    SkipSpaces(file);
+    if(false == SkipSpaces(file, log))
+    {
+      return parsed;
+    }
     while(file->HasMore())
     {
       const auto first = file->Peek();
@@ -300,9 +387,15 @@ namespace fel
           Add(log, *file, "internal parser error: expeced ident but got none");
           return parsed;
         }
-        SkipSpaces(file);
+        if(false == SkipSpaces(file, log))
+        {
+          return parsed;
+        }
         EXPECT('(');
-        SkipSpaces(file);
+        if(false == SkipSpaces(file, log))
+        {
+          return parsed;
+        }
         auto fc = FunctionCall{ident, loc};
         bool first = true;
         while(file->HasMore() && file->Peek() != ')')
@@ -310,7 +403,10 @@ namespace fel
           if(!first)
           {
             EXPECT(',');
-            SkipSpaces(file);
+            if(false == SkipSpaces(file, log))
+            {
+              return parsed;
+            }
           }
           first = false;
           if(file->Peek() == ')')
@@ -324,12 +420,21 @@ namespace fel
             return parsed;
           }
           fc.arguments.push_back(RValue{val});
-          SkipSpaces(file);
+          if(false == SkipSpaces(file, log))
+          {
+            return parsed;
+          }
         }
         EXPECT(')');
-        SkipSpaces(file);
+        if(false == SkipSpaces(file, log))
+        {
+          return parsed;
+        }
         EXPECT(';');
-        SkipSpaces(file);
+        if(false == SkipSpaces(file, log))
+        {
+          return parsed;
+        }
         parsed.statements.push_back(fc);
       }
       else
