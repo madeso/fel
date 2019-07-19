@@ -50,6 +50,16 @@ namespace fel
     }
   };
 
+  void Add(Log* log, const File& file, const std::string& message)
+  {
+    Add(log, file.filename, file.location, message);
+  }
+
+  void Add(Log* log, const File& file, const Location& location, const std::string& message)
+  {
+    Add(log, file.filename, location, message);
+  }
+
   bool IsNum(char c)
   {
     return c >= '0' && c <= '9';
@@ -184,11 +194,12 @@ namespace fel
 
   bool SkipMultilineComment(File* file, Log* log)
   {
+    const auto start_location = file->location;
     const auto first = file->Read();
     const auto second = file->Read();
     if(first != '/' || second != '*')
     {
-      // todo: add error here
+      Add(log, *file, "Invalid start of multiline comment");
       return false;
     }
     while(file->HasMore())
@@ -214,7 +225,8 @@ namespace fel
       }
     }
     
-    // todo: add error here
+    Add(log, *file, "Multiline comment not ended before EOF");
+    Add(log, *file, start_location, "Comment started here");
     return false;
   }
 
@@ -224,7 +236,7 @@ namespace fel
     const auto second = file->Read();
     if(first != '/' || second != '/')
     {
-      // todo: add error here
+      Add(log, *file, "Invalid start of one line comment");
       return false;
     }
     while(file->HasMore() && file->Peek() != '\n')
@@ -292,11 +304,6 @@ namespace fel
     std::string filename;
     std::vector<FunctionCall> statements;
   };
-
-  void Add(Log* log, const File& file, const std::string& message)
-  {
-    Add(log, file.filename, file.location, message);
-  }
 
   std::string CharToString(char c)
   {
