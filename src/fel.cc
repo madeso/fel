@@ -181,7 +181,7 @@ namespace fel
     }
   }
 
-  std::shared_ptr<Value> ParseConstant(File* file, Log* log)
+  std::shared_ptr<Value> ParseIntConstant(File* file, Log* log)
   {
     auto int_string = ParseInt(file);
     if(int_string == "" )
@@ -198,6 +198,18 @@ namespace fel
       return nullptr;
     }
     return std::make_shared<IntValue>(int_parsed);
+  }
+
+  std::shared_ptr<Value> ParseConstant(File* file, Log* log)
+  {
+    const auto p = file->Peek();
+    if(IsNum(p))
+    {
+      return ParseIntConstant(file, log);
+    }
+
+    Add(log, *file, "Unknown constant value, found " + CharToString(p));
+    return nullptr;
   }
 
   Parsed Parse(File* file, Log* log)
