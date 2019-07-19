@@ -135,3 +135,32 @@ TEST_CASE("call function", "[fel]" )
 
 }
 
+TEST_CASE("operator +", "[fel]" )
+{
+  fel::Fel f;
+  fel::Log log;
+  std::string result;
+  f.SetFunction("p", [&] (fel::State* s)
+      {
+        for(int i=0; i<s->arguments; i+=1)
+        {
+          result += s->GetArg(i)->GetStringRepresentation();
+        }
+      }
+    );
+  
+  SECTION("print(1+2+3)")
+  {
+    f.LoadAndRunString("p(1+2+3);", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "6");
+  }
+
+  SECTION("print(a+b)")
+  {
+    f.LoadAndRunString("p('a'+'b');", "filename.fel", &log);
+    CHECK(log);
+    CHECK(result == "ab");
+  }
+}
+
