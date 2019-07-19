@@ -289,7 +289,7 @@ namespace fel
   struct Rvalue
   {
     virtual ~Rvalue() {}
-    virtual std::shared_ptr<Value> CalculateValue() = 0;
+    virtual std::shared_ptr<Value> CalculateValue(Log* log) = 0;
   };
 
   struct ConstantRvalue : public Rvalue
@@ -299,7 +299,7 @@ namespace fel
     explicit ConstantRvalue(std::shared_ptr<Value> v) : value(v) {}
     ~ConstantRvalue() {}
 
-    std::shared_ptr<Value> CalculateValue() override
+    std::shared_ptr<Value> CalculateValue(Log* log) override
     {
       return value;
     }
@@ -476,13 +476,19 @@ namespace fel
       if(found == fel.functions.end())
       {
         Add(log, parsed.filename, s.location, s.function + " is not a function");
+        return;
       }
       else
       {
         State state;
         for(const auto& a: s.arguments)
         {
-          state.stack.push_back(a->CalculateValue());
+          auto arg = a->CalculateValue(log);
+          if(arg == nullptr)
+          {
+            return;
+          }
+          state.stack.push_back(arg);
           state.arguments += 1;
         }
         found->second(&state);
