@@ -28,6 +28,7 @@ include_directories(SYSTEM external/catch/)
 add_executable(tests
   test/main.cc
   test/test.cc
+  test/strings.cc
   )
 
 enable_testing()
