@@ -286,17 +286,30 @@ namespace fel
     return true;
   }
 
-  struct RValue
+  struct Rvalue
   {
-    std::shared_ptr<Value> value;
+    virtual ~Rvalue() {}
+    virtual std::shared_ptr<Value> CalculateValue() = 0;
   };
 
+  struct ConstantRvalue : public Rvalue
+  {
+    std::shared_ptr<Value> value;
+
+    explicit ConstantRvalue(std::shared_ptr<Value> v) : value(v) {}
+    ~ConstantRvalue() {}
+
+    std::shared_ptr<Value> CalculateValue() override
+    {
+      return value;
+    }
+  };
 
   struct FunctionCall
   {
     std::string function;
     Location location;
-    std::vector<RValue> arguments;
+    std::vector<std::shared_ptr<Rvalue>> arguments;
   };
 
   struct Parsed
@@ -426,7 +439,7 @@ namespace fel
           {
             return parsed;
           }
-          fc.arguments.push_back(RValue{val});
+          fc.arguments.push_back(std::make_shared<ConstantRvalue>(val));
           if(false == SkipSpaces(file, log))
           {
             return parsed;
@@ -469,7 +482,7 @@ namespace fel
         State state;
         for(const auto& a: s.arguments)
         {
-          state.stack.push_back(a.value);
+          state.stack.push_back(a->CalculateValue());
           state.arguments += 1;
         }
         found->second(&state);
