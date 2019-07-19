@@ -181,6 +181,25 @@ namespace fel
     }
   }
 
+  std::shared_ptr<Value> ParseConstant(File* file, Log* log)
+  {
+    auto int_string = ParseInt(file);
+    if(int_string == "" )
+    {
+      Add(log, *file, "Failed to parse int, found " + CharToString(file->Peek()));
+      return nullptr;
+    }
+    std::istringstream ss (int_string);
+    int int_parsed;
+    ss >> int_parsed;
+    if(ss.fail())
+    {
+      Add(log, *file, "Internal error: Unable to get int from " + int_string);
+      return nullptr;
+    }
+    return std::make_shared<IntValue>(int_parsed);
+  }
+
   Parsed Parse(File* file, Log* log)
   {
     Parsed parsed;
@@ -228,21 +247,12 @@ namespace fel
             Add(log, *file, "Found ) while looking for rvalue");
             return parsed;
           }
-          auto int_string = ParseInt(file);
-          if(int_string == "" )
+          auto val = ParseConstant(file, log);
+          if(val == nullptr)
           {
-            Add(log, *file, "Failed to parse int, found " + CharToString(file->Peek()));
             return parsed;
           }
-          std::istringstream ss (int_string);
-          int int_parsed;
-          ss >> int_parsed;
-          if(ss.fail())
-          {
-            Add(log, *file, "Internal error: Unable to get int from " + int_string);
-            return parsed;
-          }
-          fc.arguments.push_back(RValue{std::make_shared<IntValue>(int_parsed)});
+          fc.arguments.push_back(RValue{val});
           SkipSpaces(file);
         }
         EXPECT(')');
