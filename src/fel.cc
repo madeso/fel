@@ -143,7 +143,7 @@ namespace fel
 
   struct RValue
   {
-    int value;
+    std::shared_ptr<Value> value;
   };
 
 
@@ -242,7 +242,7 @@ namespace fel
             Add(log, *file, "Internal error: Unable to get int from " + int_string);
             return parsed;
           }
-          fc.arguments.push_back(RValue{int_parsed});
+          fc.arguments.push_back(RValue{std::make_shared<IntValue>(int_parsed)});
           SkipSpaces(file);
         }
         EXPECT(')');
@@ -276,7 +276,7 @@ namespace fel
         State state;
         for(const auto& a: s.arguments)
         {
-          state.stack.push_back(std::make_shared<IntValue>(a.value));
+          state.stack.push_back(a.value);
           state.arguments += 1;
         }
         found->second(&state);
