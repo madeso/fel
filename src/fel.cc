@@ -103,6 +103,55 @@ namespace fel
     return ss.str();
   }
 
+  std::shared_ptr<std::string> ParseString(File* file, char quote)
+  {
+    if(file->Peek() != quote)
+    {
+      return nullptr;
+    }
+    file->Read(); // quote
+    std::ostringstream ss;
+    while(file->HasMore())
+    {
+      char c = file->Read();
+      if(c == quote)
+      {
+        return std::make_shared<std::string>(ss.str());
+      }
+      if(c != '\\')
+      {
+        switch(c)
+        {
+          case '\r': case '\n': case '\t':
+            return nullptr;
+          default:
+            ss << c;
+        }
+      }
+      else
+      {
+        if(!file->HasMore())
+        {
+          return nullptr;
+        }
+        const auto next = file->Read();
+        switch(next)
+        {
+          case '\n': break;
+          case '\'': case '\"': case '\\':
+            ss << next;
+            break;
+          case 'n': ss << '\n'; break;
+          case 'r': ss << '\r'; break;
+          case 't': ss << '\t'; break;
+          default:
+            return nullptr;
+        }
+      }
+    }
+    return nullptr;
+  }
+
   std::string ParseInt(File* file)
   {
     if(!IsNum(file->Peek()))
@@ -206,6 +255,16 @@ namespace fel
     if(IsNum(p))
     {
       return ParseIntConstant(file, log);
+    }
+    if(p == '\'' || p=='\"')
+    {
+      auto s = ParseString(file, p);
+      if(s == nullptr)
+      {
+        Add(log, *file, "Unable to parse string, found " + CharToString(file->Peek()));
+        return nullptr;
+      }
+      return std::make_shared<StringValue>(*s);
     }
 
     Add(log, *file, "Unknown constant value, found " + CharToString(p));
