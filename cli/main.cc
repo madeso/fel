@@ -6,8 +6,10 @@ using namespace fel;
 
 void Print(const Log& log)
 {
-  std::cerr << log;
-  std::cout << log.entries.size() << " fel error(s) detected\n";
+  if(false == IsEmpty(log))
+  {
+    std::cerr << log;
+  }
 }
 
 int main(int argc, char* argv[])
