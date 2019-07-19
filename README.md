@@ -23,12 +23,13 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
 
 # Todo
   * call functions with basic arithmetics (+)
+  * interactive (-i) and run-string (-x) arguments to cli app
   * functions can error and have return values
   * parse scopes
   * variables
   * if statements
   * double type
-  * more arithmetics
+  * more (and valid) arithmetics (-/*% operators) and ()
   * objects
   * functions as variables
   * custom functions
