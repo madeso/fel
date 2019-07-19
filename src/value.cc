@@ -38,6 +38,11 @@ namespace fel
     return ss.str();
   }
 
+  const char* const IntValue::TypeToString() const
+  {
+    return "int";
+  }
+
 
   // struct StringValue : public Value
   StringValue::StringValue(const std::string& v) : value(v) {}
@@ -53,6 +58,11 @@ namespace fel
   std::string StringValue::GetStringRepresentation() const
   {
     return value;
+  }
+
+  const char* const StringValue::TypeToString() const
+  {
+    return "string";
   }
 }
 

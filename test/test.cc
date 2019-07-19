@@ -156,6 +156,20 @@ TEST_CASE("operator +", "[fel]" )
     CHECK(result == "6");
   }
 
+  SECTION("print(1+b)")
+  {
+    f.LoadAndRunString("p(1+'b');", "filename.fel", &log);
+    CHECK_FALSE(log);
+    CHECK(result == "");
+  }
+
+  SECTION("print(a+2)")
+  {
+    f.LoadAndRunString("p('a'+2);", "filename.fel", &log);
+    CHECK_FALSE(log);
+    CHECK(result == "");
+  }
+
   SECTION("print(a+b)")
   {
     f.LoadAndRunString("p('a'+'b');", "filename.fel", &log);

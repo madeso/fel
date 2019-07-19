@@ -16,6 +16,7 @@ namespace fel
     virtual StringValue* AsString();
 
     virtual std::string GetStringRepresentation() const = 0;
+    virtual const char* const TypeToString() const = 0;
   };
 
   struct IntValue : public Value
@@ -27,6 +28,7 @@ namespace fel
 
     IntValue* AsInt() override;
     std::string GetStringRepresentation() const override;
+    const char* const TypeToString() const override;
   };
 
   struct StringValue : public Value
@@ -38,6 +40,7 @@ namespace fel
 
     StringValue* AsString() override;
     std::string GetStringRepresentation() const override;
+    const char* const TypeToString() const override;
   };
 
 }

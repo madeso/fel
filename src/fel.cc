@@ -8,6 +8,23 @@
 
 namespace fel
 {
+  struct Str
+  {
+    std::ostringstream ss;
+
+    template<typename T>
+    Str& operator<<(const T& t)
+    {
+      ss << t;
+      return *this;
+    }
+
+    operator const std::string() const
+    {
+      return ss.str();
+    }
+  };
+
   struct File
   {
     std::string filename;
@@ -288,23 +305,25 @@ namespace fel
 
   struct Rvalue
   {
+    Location location;
     virtual ~Rvalue() {}
-    virtual std::shared_ptr<Value> CalculateValue(Log* log) = 0;
+    virtual std::shared_ptr<Value> CalculateValue(const std::string& filename, Log* log) = 0;
   };
 
   struct AddRvalue : public Rvalue
   {
+    Location location;
     std::shared_ptr<Rvalue> lhs;
     std::shared_ptr<Rvalue> rhs;
 
-    AddRvalue(std::shared_ptr<Rvalue> l, std::shared_ptr<Rvalue> r) : lhs(l), rhs(r) {}
+    AddRvalue(const Location& lo, std::shared_ptr<Rvalue> l, std::shared_ptr<Rvalue> r) : location(lo), lhs(l), rhs(r) {}
     virtual ~AddRvalue() {}
 
-    std::shared_ptr<Value> CalculateValue(Log* log)
+    std::shared_ptr<Value> CalculateValue(const std::string& filename, Log* log)
     {
-      auto lhs_value = lhs->CalculateValue(log);
+      auto lhs_value = lhs->CalculateValue(filename, log);
       if(lhs_value == nullptr) { return nullptr; }
-      auto rhs_value = rhs->CalculateValue(log);
+      auto rhs_value = rhs->CalculateValue(filename, log);
       if(rhs_value == nullptr) { return nullptr; }
 
       auto* lhs_value_int = lhs_value->AsInt();
@@ -313,7 +332,7 @@ namespace fel
         auto* rhs_value_int = rhs_value->AsInt();
         if(rhs_value_int == nullptr)
         {
-          // todo: fix this
+          Add(log, filename, location, Str() << "invalid operation for +: lhs is int but rhs is " << rhs_value->TypeToString());
           return nullptr;
         }
         return std::make_shared<IntValue>(lhs_value_int->value + rhs_value_int->value);
@@ -325,13 +344,13 @@ namespace fel
         auto* rhs_value_string = rhs_value->AsString();
         if(rhs_value_string == nullptr)
         {
-          // todo: fix this
+          Add(log, filename, location, Str() << "invalid operation for +: lhs is string but rhs is " << rhs_value->TypeToString());
           return nullptr;
         }
         return std::make_shared<StringValue>(lhs_value_string->value + rhs_value_string->value);
       }
 
-      // todo: fix this
+      Add(log, filename, location, Str() << "unknown operation for +: lhs is " << lhs_value->TypeToString() << " but rhs is " << rhs_value->TypeToString());
       return nullptr;
     }
   };
@@ -344,7 +363,7 @@ namespace fel
     explicit ConstantRvalue(std::shared_ptr<Value> v) : value(v) {}
     ~ConstantRvalue() {}
 
-    std::shared_ptr<Value> CalculateValue(Log* log) override
+    std::shared_ptr<Value> CalculateValue(const std::string& filename, Log* log) override
     {
       return value;
     }
@@ -434,6 +453,7 @@ namespace fel
     }
     if(file->Peek() == '+')
     {
+      const auto l = file->location;
       file->Read(); // skip
       if(false == SkipSpaces(file, log))
       {
@@ -444,7 +464,7 @@ namespace fel
       {
         return nullptr;
       }
-      return std::make_shared<AddRvalue>(rv, right);
+      return std::make_shared<AddRvalue>(l, rv, right);
     }
     return rv;
   }
@@ -553,7 +573,7 @@ namespace fel
         State state;
         for(const auto& a: s.arguments)
         {
-          auto arg = a->CalculateValue(log);
+          auto arg = a->CalculateValue(parsed.filename, log);
           if(arg == nullptr)
           {
             return;
