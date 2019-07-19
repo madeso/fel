@@ -292,6 +292,51 @@ namespace fel
     virtual std::shared_ptr<Value> CalculateValue(Log* log) = 0;
   };
 
+  struct AddRvalue : public Rvalue
+  {
+    std::shared_ptr<Rvalue> lhs;
+    std::shared_ptr<Rvalue> rhs;
+
+    AddRvalue(std::shared_ptr<Rvalue> l, std::shared_ptr<Rvalue> r) : lhs(l), rhs(r) {}
+    virtual ~AddRvalue() {}
+
+    std::shared_ptr<Value> CalculateValue(Log* log)
+    {
+      auto lhs_value = lhs->CalculateValue(log);
+      if(lhs_value == nullptr) { return nullptr; }
+      auto rhs_value = rhs->CalculateValue(log);
+      if(rhs_value == nullptr) { return nullptr; }
+
+      auto* lhs_value_int = lhs_value->AsInt();
+      if(lhs_value_int != nullptr)
+      {
+        auto* rhs_value_int = rhs_value->AsInt();
+        if(rhs_value_int == nullptr)
+        {
+          // todo: fix this
+          return nullptr;
+        }
+        return std::make_shared<IntValue>(lhs_value_int->value + rhs_value_int->value);
+      }
+
+      auto* lhs_value_string = lhs_value->AsString();
+      if(lhs_value_string != nullptr)
+      {
+        auto* rhs_value_string = rhs_value->AsString();
+        if(rhs_value_string == nullptr)
+        {
+          // todo: fix this
+          return nullptr;
+        }
+        return std::make_shared<StringValue>(lhs_value_string->value + rhs_value_string->value);
+      }
+
+      // todo: fix this
+      return nullptr;
+    }
+  };
+
+
   struct ConstantRvalue : public Rvalue
   {
     std::shared_ptr<Value> value;
@@ -386,6 +431,20 @@ namespace fel
     if(false == SkipSpaces(file, log))
     {
       return nullptr;
+    }
+    if(file->Peek() == '+')
+    {
+      file->Read(); // skip
+      if(false == SkipSpaces(file, log))
+      {
+        return nullptr;
+      }
+      auto right = ParseRval(file, log);
+      if(right == nullptr)
+      {
+        return nullptr;
+      }
+      return std::make_shared<AddRvalue>(rv, right);
     }
     return rv;
   }
