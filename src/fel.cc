@@ -375,6 +375,21 @@ namespace fel
     return nullptr;
   }
 
+  std::shared_ptr<Rvalue> ParseRval(File* file, Log* log)
+  {
+    auto val = ParseConstant(file, log);
+    if(val == nullptr)
+    {
+      return nullptr;
+    }
+    auto rv = std::make_shared<ConstantRvalue>(val);
+    if(false == SkipSpaces(file, log))
+    {
+      return nullptr;
+    }
+    return rv;
+  }
+
   Parsed Parse(File* file, Log* log)
   {
     Parsed parsed;
@@ -434,16 +449,12 @@ namespace fel
             Add(log, *file, "Found ) while looking for rvalue");
             return parsed;
           }
-          auto val = ParseConstant(file, log);
-          if(val == nullptr)
+          auto rv = ParseRval(file, log);
+          if(rv == nullptr)
           {
             return parsed;
           }
-          fc.arguments.push_back(std::make_shared<ConstantRvalue>(val));
-          if(false == SkipSpaces(file, log))
-          {
-            return parsed;
-          }
+          fc.arguments.push_back(rv);
         }
         EXPECT(')');
         if(false == SkipSpaces(file, log))
