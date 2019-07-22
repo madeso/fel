@@ -29,6 +29,11 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * if statements
   * double type
   * more (and valid) arithmetics (-/*% operators) and ()
+    pratt parser?
+      https://dev.to/jrop/pratt-parsing
+      https://news.ycombinator.com/item?id=2344837
+        http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
+        https://eli.thegreenplace.net/2010/01/02/top-down-operator-precedence-parsing/
   * objects
   * functions as variables
   * custom functions
