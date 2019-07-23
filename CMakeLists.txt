@@ -15,6 +15,8 @@ add_library(fel STATIC
   src/log.cc
   src/fel.cc
   src/value.cc
+  src/location.cc
+  src/file.cc
   )
 
 add_executable(felapp

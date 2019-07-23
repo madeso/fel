@@ -6,17 +6,10 @@
 #include <map>
 #include <functional>
 
+#include "location.h"
+
 namespace fel
 {
-  struct Location
-  {
-    int line;
-    int column;
-
-    Location(int l=-1, int c=-1);
-    bool operator==(const Location& rhs) const;
-  };
-
   struct LogEntry
   {
     std::string file;
