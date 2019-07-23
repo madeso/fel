@@ -22,7 +22,7 @@ namespace fel
 
   struct Fel
   {
-    using FunctionCallback = std::function<void (State*)>;
+    using FunctionCallback = std::function<int (State*)>;
 
     void SetFunction(const std::string& name, FunctionCallback callback);
     void LoadAndRunString(const std::string& str, const std::string& filename, Log* log);

@@ -27,9 +27,9 @@ TEST_CASE("call function", "[fel]" )
   fel::Log log;
   std::string result;
 
-  f.SetFunction("junk", [&] (fel::State*) {result += "!";});
-  f.SetFunction("a", [&] (fel::State*) {result += "a";});
-  f.SetFunction("b", [&] (fel::State*) {result += "b";});
+  f.SetFunction("junk", [&] (fel::State*) {result += "!"; return 0;});
+  f.SetFunction("a", [&] (fel::State*) {result += "a"; return 0;});
+  f.SetFunction("b", [&] (fel::State*) {result += "b"; return 0;});
   f.SetFunction("c", [&] (fel::State* s)
       {
         if(s->arguments>0)
@@ -41,6 +41,7 @@ TEST_CASE("call function", "[fel]" )
             result += std::string(argi->value, 'c');
           }
         }
+        return 0;
       }
     );
   f.SetFunction("d", [&] (fel::State* s)
@@ -49,6 +50,7 @@ TEST_CASE("call function", "[fel]" )
         {
           result += s->GetArg(i)->GetStringRepresentation();
         }
+        return 0;
       }
     );
 
@@ -146,6 +148,7 @@ TEST_CASE("operator +", "[fel]" )
         {
           result += s->GetArg(i)->GetStringRepresentation();
         }
+        return 0;
       }
     );
   

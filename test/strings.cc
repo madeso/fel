@@ -15,6 +15,7 @@ TEST_CASE("string", "[string]" )
         {
           result += s->GetArg(i)->GetStringRepresentation();
         }
+        return 0;
       }
     );
 

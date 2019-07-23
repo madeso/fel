@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
           std::cout << s->GetArg(i)->GetStringRepresentation();
         }
         std::cout << "\n";
+        return 0;
       }
     );
   Log log;
