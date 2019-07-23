@@ -17,9 +17,9 @@ void Print(const Log& log)
 void PrintUsage(const std::string& app)
 {
   std::cout << "Usage: \n"\
-    << "   " << app << " FILE\n"
-    << "   " << app << " -x CODE\n"
-    << "   " << app << " -i\n"
+    << "  run file:      " << app << " FILE\n"
+    << "  run code:      " << app << " -x CODE\n"
+    << "  interactive:   " << app << " -i\n"
     ;
 }
 
