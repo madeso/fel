@@ -59,4 +59,5 @@ build/
 
 *.un~
 .vscode/*
+generated-docs/*
 
