@@ -5,22 +5,23 @@
 
 namespace fel
 {
-  struct Str
-  {
-    std::ostringstream ss;
-
-    template<typename T>
-    Str& operator<<(const T& t)
+    struct Str
     {
-      ss << t;
-      return *this;
-    }
+        std::ostringstream ss;
 
-    operator const std::string() const
-    {
-      return ss.str();
-    }
-  };
-}
+        template <typename T>
+        Str&
+        operator<<(const T& t)
+        {
+            ss << t;
+            return *this;
+        }
+
+        operator const std::string() const
+        {
+            return ss.str();
+        }
+    };
+}  // namespace fel
 
 #endif  // STR_H

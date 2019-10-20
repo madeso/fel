@@ -4,65 +4,66 @@
 
 namespace fel
 {
-  // struct Value
-  Value::~Value()
-  {
-  }
+    // struct Value
+    Value::~Value() {}
 
-  IntValue* Value::AsInt()
-  {
-    return nullptr;
-  }
+    IntValue*
+    Value::AsInt()
+    {
+        return nullptr;
+    }
 
-  StringValue* Value::AsString()
-  {
-    return nullptr;
-  }
-
-
-  // struct IntValue : public Value
-  IntValue::IntValue(int v) : value (v) {}
-  IntValue::~IntValue()
-  {
-  }
-
-  IntValue* IntValue::AsInt()
-  {
-    return this;
-  }
-
-  std::string IntValue::GetStringRepresentation() const
-  {
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-  }
-
-  const char* IntValue::TypeToString() const
-  {
-    return "int";
-  }
+    StringValue*
+    Value::AsString()
+    {
+        return nullptr;
+    }
 
 
-  // struct StringValue : public Value
-  StringValue::StringValue(const std::string& v) : value(v) {}
-  StringValue::~StringValue()
-  {
-  }
+    // struct IntValue : public Value
+    IntValue::IntValue(int v) : value(v) {}
+    IntValue::~IntValue() {}
 
-  StringValue* StringValue::AsString()
-  {
-    return this;
-  }
+    IntValue*
+    IntValue::AsInt()
+    {
+        return this;
+    }
 
-  std::string StringValue::GetStringRepresentation() const
-  {
-    return value;
-  }
+    std::string
+    IntValue::GetStringRepresentation() const
+    {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
 
-  const char* StringValue::TypeToString() const
-  {
-    return "string";
-  }
-}
+    const char*
+    IntValue::TypeToString() const
+    {
+        return "int";
+    }
 
+
+    // struct StringValue : public Value
+    StringValue::StringValue(const std::string& v) : value(v) {}
+    StringValue::~StringValue() {}
+
+    StringValue*
+    StringValue::AsString()
+    {
+        return this;
+    }
+
+    std::string
+    StringValue::GetStringRepresentation() const
+    {
+        return value;
+    }
+
+    const char*
+    StringValue::TypeToString() const
+    {
+        return "string";
+    }
+}  // namespace fel

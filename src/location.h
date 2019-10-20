@@ -3,16 +3,16 @@
 
 namespace fel
 {
-  struct Location
-  {
-    int line;
-    int column;
+    struct Location
+    {
+        int line;
+        int column;
 
-    Location(int l=-1, int c=-1);
-    bool operator==(const Location& rhs) const;
-  };
-}
+        Location(int l = -1, int c = -1);
+        bool
+        operator==(const Location& rhs) const;
+    };
+}  // namespace fel
 
 
 #endif  // LOCATION_H
-

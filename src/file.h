@@ -7,22 +7,24 @@
 
 namespace fel
 {
-  struct File
-  {
-    std::string filename;
-    std::string data;
-    std::string::size_type next_index = 0;
-    Location location = Location{1,0};
-    
-    File(const std::string& f, const std::string& d); 
+    struct File
+    {
+        std::string            filename;
+        std::string            data;
+        std::string::size_type next_index = 0;
+        Location               location   = Location {1, 0};
 
-    bool HasMore() const;
+        File(const std::string& f, const std::string& d);
 
-    char Read();
+        bool
+        HasMore() const;
 
-    char Peek(int advance=1) const;
-  };
-}
+        char
+        Read();
+
+        char
+        Peek(int advance = 1) const;
+    };
+}  // namespace fel
 
 #endif  // FILE_H
-

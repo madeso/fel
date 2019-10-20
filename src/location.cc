@@ -2,11 +2,11 @@
 
 namespace fel
 {
-  Location::Location(int l, int c) : line(l), column(c) {}
+    Location::Location(int l, int c) : line(l), column(c) {}
 
-  bool Location::operator==(const Location& rhs) const
-  {
-    return line == rhs.line && column == rhs.column;
-  }
-}
-
+    bool
+    Location::operator==(const Location& rhs) const
+    {
+        return line == rhs.line && column == rhs.column;
+    }
+}  // namespace fel
