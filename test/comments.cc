@@ -7,7 +7,7 @@ TEST_CASE("comments", "[comments]" )
 {
   fel::Fel f;
   fel::Log log;
-  f.SetFunction("f", [&] (fel::State* s) {return 0;});
+  f.SetFunction("f", [&] (fel::State*) {return 0;});
 
   SECTION("empty call")
   {

@@ -307,7 +307,7 @@ namespace fel
     explicit ConstantRvalue(std::shared_ptr<Value> v) : value(v) {}
     ~ConstantRvalue() {}
 
-    std::shared_ptr<Value> CalculateValue(const std::string& filename, Log* log) override
+    std::shared_ptr<Value> CalculateValue(const std::string&, Log*) override
     {
       return value;
     }
@@ -315,6 +315,10 @@ namespace fel
 
   struct FunctionCall
   {
+    FunctionCall(const std::string& f, const Location& loc)
+    : function(f), location(loc)
+    {
+    }
     std::string function;
     Location location;
     std::vector<std::shared_ptr<Rvalue>> arguments;
@@ -435,8 +439,8 @@ namespace fel
     }
     while(file->HasMore())
     {
-      const auto first = file->Peek();
-      if(IsFirstIdent(first))
+      const auto first_char = file->Peek();
+      if(IsFirstIdent(first_char))
       {
         const auto loc = file->location;
         const auto ident = ParseIdent(file);
@@ -455,10 +459,10 @@ namespace fel
           return parsed;
         }
         auto fc = FunctionCall{ident, loc};
-        bool first = true;
+        bool is_first = true;
         while(file->HasMore() && file->Peek() != ')')
         {
-          if(!first)
+          if(!is_first)
           {
             EXPECT(',');
             if(false == SkipSpaces(file, log))
@@ -466,7 +470,7 @@ namespace fel
               return parsed;
             }
           }
-          first = false;
+          is_first = false;
           if(file->Peek() == ')')
           {
             Add(log, *file, "Found ) while looking for rvalue");
@@ -493,7 +497,7 @@ namespace fel
       }
       else
       {
-        Add(log, *file, "unknown char found: " + CharToString(first));
+        Add(log, *file, "unknown char found: " + CharToString(first_char));
         return parsed;
       }
     }

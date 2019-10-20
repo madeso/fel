@@ -11,7 +11,7 @@ namespace fel
   {
     std::string filename;
     std::string data;
-    int next_index = 0;
+    std::string::size_type next_index = 0;
     Location location = Location{1,0};
     
     File(const std::string& f, const std::string& d); 

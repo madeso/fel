@@ -38,7 +38,7 @@ namespace fel
     return ss.str();
   }
 
-  const char* const IntValue::TypeToString() const
+  const char* IntValue::TypeToString() const
   {
     return "int";
   }
@@ -60,7 +60,7 @@ namespace fel
     return value;
   }
 
-  const char* const StringValue::TypeToString() const
+  const char* StringValue::TypeToString() const
   {
     return "string";
   }
