@@ -1,23 +1,46 @@
 #include "file.h"
 
+#include <sstream>
+#include <iostream>
+#include <fstream>
+
+#include <cassert>
+
 namespace fel
 {
     File::File(const std::string& a_filename, const std::string& a_content)
         : filename(a_filename), data(a_content)
     {}
 
-    bool
-    File::HasMore() const
+    std::optional<File> File::Open(const std::string& a_filename)
     {
-        return next_index < data.size();
+        std::ifstream t(a_filename.c_str());
+        if(!t.good())
+        {
+            return std::nullopt;
+        }
+        const std::string content(
+                (std::istreambuf_iterator<char>(t)),
+                std::istreambuf_iterator<char>());
+        return File{a_filename, content};
+    }
+
+    FilePointer::FilePointer(const File& a_file) : file(a_file)
+    {
+    }
+
+    bool
+    FilePointer::HasMore() const
+    {
+        return next_index < file.data.size();
     }
 
     char
-    File::Read()
+    FilePointer::Read()
     {
-        if(next_index < data.size())
+        if(next_index < file.data.size())
         {
-            const auto read = data[next_index];
+            const auto read = file.data[next_index];
             next_index += 1;
             if(read == '\n')
             {
@@ -37,11 +60,13 @@ namespace fel
     }
 
     char
-    File::Peek(int advance) const
+    FilePointer::Peek(int advance) const
     {
-        const auto index = (next_index - 1) + advance;
-        if(index < data.size())
-            return data[index];
+        assert(advance > 0);
+        // assert(next_index > 0);
+        const auto index = next_index + advance - 1;
+        if(index < file.data.size())
+            return file.data[index];
         else
             return 0;
     }

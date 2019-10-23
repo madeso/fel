@@ -22,19 +22,26 @@ namespace fel
         GetArg(int index) const;
     };
 
+    struct File;
+
     struct Fel
     {
         using FunctionCallback = std::function<int(State*)>;
 
         void
         SetFunction(const std::string& name, FunctionCallback callback);
+
         void
         LoadAndRunString(
                 const std::string& str,
                 const std::string& filename,
                 Log*               log);
+
         void
         LoadAndRunFile(const std::string& file, Log* log);
+
+        void
+        LoadAndRunFile(const File& file, Log* log);
 
         std::map<std::string, FunctionCallback> functions;
     };

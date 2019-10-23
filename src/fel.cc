@@ -3,8 +3,6 @@
 #include <string>
 #include <cassert>
 #include <sstream>
-#include <iostream>
-#include <fstream>
 
 #include "str.h"
 #include "file.h"
@@ -12,18 +10,18 @@
 namespace fel
 {
     void
-    Add(Log* log, const File& file, const std::string& message)
+    Add(Log* log, const FilePointer& file, const std::string& message)
     {
-        Add(log, file.filename, file.location, message);
+        Add(log, file.file.filename, file.location, message);
     }
 
     void
     Add(Log*               log,
-        const File&        file,
+        const FilePointer&        file,
         const Location&    location,
         const std::string& message)
     {
-        Add(log, file.filename, location, message);
+        Add(log, file.file.filename, location, message);
     }
 
     bool
@@ -60,7 +58,7 @@ namespace fel
     }
 
     std::string
-    ParseIdent(File* file)
+    ParseIdent(FilePointer* file)
     {
         if(!IsFirstIdent(file->Peek()))
         {
@@ -84,7 +82,7 @@ namespace fel
     }
 
     std::shared_ptr<std::string>
-    ParseString(File* file, char quote)
+    ParseString(FilePointer* file, char quote)
     {
         if(file->Peek() != quote)
         {
@@ -133,7 +131,7 @@ namespace fel
     }
 
     std::string
-    ParseInt(File* file)
+    ParseInt(FilePointer* file)
     {
         if(!IsNum(file->Peek()))
         {
@@ -164,7 +162,7 @@ namespace fel
     }
 
     bool
-    SkipMultilineComment(File* file, Log* log)
+    SkipMultilineComment(FilePointer* file, Log* log)
     {
         const auto start_location = file->location;
         const auto first          = file->Read();
@@ -203,7 +201,7 @@ namespace fel
     }
 
     bool
-    SkipSinglelineComment(File* file, Log* log)
+    SkipSinglelineComment(FilePointer* file, Log* log)
     {
         const auto first  = file->Read();
         const auto second = file->Read();
@@ -221,7 +219,7 @@ namespace fel
 
 
     bool
-    SkipSpaces(File* file, Log* log)
+    SkipSpaces(FilePointer* file, Log* log)
     {
         while(file->HasMore())
         {
@@ -389,7 +387,7 @@ namespace fel
     }
 
     std::shared_ptr<Value>
-    ParseIntConstant(File* file, Log* log)
+    ParseIntConstant(FilePointer* file, Log* log)
     {
         auto int_string = ParseInt(file);
         if(int_string == "")
@@ -413,7 +411,7 @@ namespace fel
     }
 
     std::shared_ptr<Value>
-    ParseConstant(File* file, Log* log)
+    ParseConstant(FilePointer* file, Log* log)
     {
         const auto p = file->Peek();
         if(IsNum(p))
@@ -439,7 +437,7 @@ namespace fel
     }
 
     std::shared_ptr<Rvalue>
-    ParseRval(File* file, Log* log)
+    ParseRval(FilePointer* file, Log* log)
     {
         auto val = ParseConstant(file, log);
         if(val == nullptr)
@@ -470,10 +468,10 @@ namespace fel
     }
 
     Parsed
-    Parse(File* file, Log* log)
+    Parse(FilePointer* file, Log* log)
     {
         Parsed parsed;
-        parsed.filename = file->filename;
+        parsed.filename = file->file.filename;
 
 #define EXPECT(cc)                                                             \
     do                                                                         \
@@ -625,7 +623,14 @@ namespace fel
             Log*               log)
     {
         auto file   = File {filename, str};
-        auto parsed = Parse(&file, log);
+        LoadAndRunFile(file, log);
+    }
+
+    void
+    Fel::LoadAndRunFile(const File& file, Log* log)
+    {
+        auto fp = FilePointer{file};
+        auto parsed = Parse(&fp, log);
         if(!IsEmpty(*log))
         {
             return;
@@ -637,15 +642,13 @@ namespace fel
     void
     Fel::LoadAndRunFile(const std::string& file, Log* log)
     {
-        std::ifstream t(file.c_str());
-        if(!t.good())
+        if(auto f = File::Open(file))
+        {
+            LoadAndRunFile(*f, log);
+        }
+        else
         {
             Add(log, file, Location {-1, -1}, "Unable to open file!");
-            return;
-        }
-        std::string str(
-                (std::istreambuf_iterator<char>(t)),
-                std::istreambuf_iterator<char>());
-        LoadAndRunString(str, file, log);
+        }        
     }
 }  // namespace fel
