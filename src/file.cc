@@ -12,7 +12,8 @@ namespace fel
         : filename(a_filename), data(a_content)
     {}
 
-    std::optional<File> File::Open(const std::string& a_filename)
+    std::optional<File>
+    File::Open(const std::string& a_filename)
     {
         std::ifstream t(a_filename.c_str());
         if(!t.good())
@@ -22,12 +23,10 @@ namespace fel
         const std::string content(
                 (std::istreambuf_iterator<char>(t)),
                 std::istreambuf_iterator<char>());
-        return File{a_filename, content};
+        return File {a_filename, content};
     }
 
-    FilePointer::FilePointer(const File& a_file) : file(a_file)
-    {
-    }
+    FilePointer::FilePointer(const File& a_file) : file(a_file) {}
 
     bool
     FilePointer::HasMore() const

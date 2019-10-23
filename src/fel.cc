@@ -17,7 +17,7 @@ namespace fel
 
     void
     Add(Log*               log,
-        const FilePointer&        file,
+        const FilePointer& file,
         const Location&    location,
         const std::string& message)
     {
@@ -622,14 +622,14 @@ namespace fel
             const std::string& filename,
             Log*               log)
     {
-        auto file   = File {filename, str};
+        auto file = File {filename, str};
         LoadAndRunFile(file, log);
     }
 
     void
     Fel::LoadAndRunFile(const File& file, Log* log)
     {
-        auto fp = FilePointer{file};
+        auto fp     = FilePointer {file};
         auto parsed = Parse(&fp, log);
         if(!IsEmpty(*log))
         {
@@ -649,6 +649,6 @@ namespace fel
         else
         {
             Add(log, file, Location {-1, -1}, "Unable to open file!");
-        }        
+        }
     }
 }  // namespace fel
