@@ -14,7 +14,7 @@ namespace fel
         std::string::size_type next_index = 0;
         Location               location   = Location {1, 0};
 
-        File(const std::string& f, const std::string& d);
+        File(const std::string& a_filename, const std::string& a_content);
 
         bool
         HasMore() const;

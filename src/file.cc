@@ -2,8 +2,8 @@
 
 namespace fel
 {
-    File::File(const std::string& f, const std::string& d)
-        : filename(f), data(d)
+    File::File(const std::string& a_filename, const std::string& a_content)
+        : filename(a_filename), data(a_content)
     {}
 
     bool
