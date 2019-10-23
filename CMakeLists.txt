@@ -37,6 +37,7 @@ add_library(fel STATIC
   src/value.cc
   src/location.cc
   src/file.cc
+  src/lexer.cc
   )
 
 add_executable(felapp

@@ -3,6 +3,8 @@
 #include <string>
 
 #include "fel.h"
+#include "lexer.h"
+#include "file.h"
 
 using namespace fel;
 
@@ -65,6 +67,31 @@ main(int argc, char* argv[])
             }
             fel.LoadAndRunString(argv[2], cmdlineFile, &log);
             Print(log);
+            return 0;
+        case 'l':
+            if(argc < 3)
+            {
+                std::cerr << "-l missing expression\n";
+                return -3;
+            }
+            if(auto f = File::Open(argv[2]))
+            {
+                auto lexer = Lexer{*f};
+                auto parsing = true;
+                while(parsing)
+                {
+                    auto token = lexer.GetNextToken();
+                    switch(token.type)
+                    {
+                    case TokenType::EndOfStream:
+                        parsing = false;
+                        break;
+                    default:
+                        std::cout << static_cast<int>(token.type) << ": " << token.text << "\n";
+                        break;
+                    }
+                }
+            }
             return 0;
         default:
             std::cerr << "Command not recongnized " << argv[1] << "\n";
