@@ -2,6 +2,7 @@
 #define FEL_LEXER_H
 
 #include <string>
+#include <vector>
 
 #include "file.h"
 
@@ -33,11 +34,23 @@ namespace fel
         EndOfStream
     };
 
+    std::string ToString(const TokenType tt);
+
     struct Token
     {
         TokenType type;
         std::string text;
     };
+
+    bool operator==(const Token& lhs, const Token& rhs);
+    bool operator!=(const Token& lhs, const Token& rhs);
+
+    template<typename  Stream>
+    Stream& operator<<(Stream& stream, const Token& token)
+    {
+        stream << ToString(token.type) << ": " << token.text;
+        return stream;
+    }
 
     struct Lexer
     {
@@ -48,6 +61,8 @@ namespace fel
         Token
         GetNextToken();
     };
+
+    std::vector<Token> GetAllTokensInFile(const File& file);
 
 }
 

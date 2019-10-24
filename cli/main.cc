@@ -67,20 +67,10 @@ std::optional<File> ReadFile(const Options& options, const std::string& path)
 
 void RunLexer(const File& file)
 {
-    auto lexer = Lexer{file};
-    auto parsing = true;
-    while(parsing)
+    auto tokens = GetAllTokensInFile(file);
+    for(auto token : tokens)
     {
-        auto token = lexer.GetNextToken();
-        switch(token.type)
-        {
-        case TokenType::EndOfStream:
-            parsing = false;
-            break;
-        default:
-            std::cout << static_cast<int>(token.type) << ": " << token.text << "\n";
-            break;
-        }
+        std::cout << token << "\n";
     }
 }
 

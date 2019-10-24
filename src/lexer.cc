@@ -4,6 +4,70 @@
 
 namespace fel
 {
+    std::string ToString(const TokenType tt)
+    {
+        switch(tt)
+        {
+            #define X(x) case TokenType::x: return #x
+
+            X(Unknown);
+            X(BeginBrace);
+            X(EndBrace);
+            X(OpenParen);
+            X(CloseParen);
+            X(OpenBracket);
+            X(CloseBracket);
+            
+            X(Plus);
+            X(Minus);
+            X(Mult);
+            X(Div);
+            X(Comma);
+            X(Colon);
+            X(Term);
+
+            X(Dot);
+            X(DotDot);
+            X(Equal);
+            X(Assign);
+            X(Less);
+            X(LessEqual);
+            X(Greater);
+            X(GreaterEqual);
+
+            X(String);
+
+            X(Identifier);
+
+            X(KeywordIf);
+            X(KeywordElse);
+            X(KeywordFor);
+            X(KeywordFunction);
+            X(KeywordVar);
+            X(KeywordTrue);
+            X(KeywordFalse);
+            X(KeywordNull);
+
+            X(Int);
+            X(Number);
+            
+            X(EndOfStream);
+
+            #undef X
+        default:
+            return "<unknown>";
+        }
+    }
+
+    bool operator==(const Token& lhs, const Token& rhs)
+    {
+        return lhs.type == rhs.type && lhs.text == rhs.text;
+    }
+    bool operator!=(const Token& lhs, const Token& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
     Lexer::Lexer(const File& a_file) : file(a_file)
     {
     }
@@ -76,6 +140,8 @@ namespace fel
                     {
                         file->Read();
                     }
+                    file->Read();
+                    file->Read();
                 }
                 else
                 {
@@ -220,5 +286,24 @@ namespace fel
             }
         }
     }
+
+
+    std::vector<Token> GetAllTokensInFile(const File& file)
+    {
+        std::vector<Token> ret;
+        auto lexer = Lexer{file};
+        auto parsing = true;
+        while(parsing)
+        {
+            auto token = lexer.GetNextToken();
+            if(token.type == TokenType::EndOfStream)
+            {
+                break;
+            }
+            ret.emplace_back(token);
+        }
+        return ret;
+    }
+
 
 }
