@@ -51,7 +51,7 @@ set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
-  test/lexer.cc
+  test/test_lexer.cc
   test/main.cc
   )
 target_link_libraries(tests fel ${CMAKE_THREAD_LIBS_INIT})
