@@ -2,9 +2,9 @@
 #include <sstream>
 #include <string>
 
-#include "fel.h"
 #include "lexer.h"
 #include "file.h"
+#include "log.h"
 
 using namespace fel;
 
@@ -17,92 +17,139 @@ Print(const Log& log)
     }
 }
 
-void
-PrintUsage(const std::string& app)
+bool IsArgument(char* s)
 {
-    std::cout << "Usage: \n"
-              << "  run file:      " << app << " FILE\n"
-              << "  run code:      " << app << " -x CODE\n"
-              << "  interactive:   " << app << " -i\n";
+    switch(s[0])
+    {
+    case '-':
+    case '/':
+        return true;
+    default:
+        return false;
+    }
+}
+
+enum class FileMode
+{
+    Normal, Lexer
+};
+
+struct Options
+{
+    FileMode file_mode = FileMode::Normal;
+    bool file_as_commandline =false;
+};
+
+std::optional<File> ReadFile(const Options& options, const std::string& path)
+{
+    if(options.file_as_commandline)
+    {
+        return File{"commandline", path};
+    }
+    else
+    if(path == "stdin")
+    {
+        const std::string content(
+                (std::istreambuf_iterator<char>(std::cin)),
+                std::istreambuf_iterator<char>());
+        return File {"stdin", content};
+    }
+    else if(auto f = File::Open(path))
+    {
+        return *f;
+    }
+    else
+    {
+        std::cerr << "Failed to open " << path << "\n";
+        return std::nullopt;
+    }
+}
+
+void RunLexer(const File& file)
+{
+    auto lexer = Lexer{file};
+    auto parsing = true;
+    while(parsing)
+    {
+        auto token = lexer.GetNextToken();
+        switch(token.type)
+        {
+        case TokenType::EndOfStream:
+            parsing = false;
+            break;
+        default:
+            std::cout << static_cast<int>(token.type) << ": " << token.text << "\n";
+            break;
+        }
+    }
 }
 
 int
 main(int argc, char* argv[])
 {
-    if(argc < 2)
+    const auto app = std::string(argv[0]);
+    const auto PrintUsage = [app]()
     {
-        std::cerr << "No file specified\n";
-        PrintUsage(argv[0]);
-        return -2;
-    }
-    const std::string cmdlineFile = "cmdline";
-    Fel               fel;
-    fel.SetFunction("print", [](State* s) {
-        for(int i = 0; i < s->arguments; i += 1)
-        {
-            std::cout << s->GetArg(i)->GetStringRepresentation();
-        }
-        std::cout << "\n";
+        auto aaa = std::string(app.size(), ' ');
+        std::cout
+            << "Fast Embedded Lightweight terminal application.\n"
+            << "----------------------------------------------\n"
+            << "\n"
+            << app << " -h        print theese instructions.\n"
+            << app << " [options] FILE/CODE/stdin\n"
+            << aaa << "               run code\n"
+            << "\n"
+            << "options:\n"
+            << "  -lex, -x    print the lexer result instead of running the code\n"
+            << "  -code, -c   force code as the argument\n"
+            << "\n"
+            ;
+    };
+
+    Options options;
+    if(argc == 1)
+    {
+        PrintUsage();
         return 0;
-    });
-    Log log;
-    if(argv[1][0] == '-')
+    }
+    for(int i=1; i<argc; i+=1)
     {
-        switch(argv[1][1])
+        if(IsArgument(argv[i]))
         {
-        case 'i': {
-            std::cout << "Ctrl+Z/Ctrl+D to run> ";
-            std::ostringstream ss;
-            std::string        line;
-            ss << std::cin.rdbuf();
-            fel.LoadAndRunString(ss.str(), cmdlineFile, &log);
-            Print(log);
+            const auto a = std::string(argv[i]).substr(1);
+            if(a == "lex" || a == "x")
+            {
+                options.file_mode = FileMode::Lexer;
+            }
+            else if(a == "code" || a == "c")
+            {
+                options.file_as_commandline = true;
+            }
+            else
+            {
+                std::cerr << "Invalid option: " << argv[i] << "\n";
+                PrintUsage();
+                return -1;
+            }
         }
-            return 0;
-        case 'x':
-            if(argc < 3)
+        else
+        {
+            if(const auto file = ReadFile(options, argv[i]))
             {
-                std::cerr << "-x missing expression\n";
-                return -3;
-            }
-            fel.LoadAndRunString(argv[2], cmdlineFile, &log);
-            Print(log);
-            return 0;
-        case 'l':
-            if(argc < 3)
-            {
-                std::cerr << "-l missing expression\n";
-                return -3;
-            }
-            if(auto f = File::Open(argv[2]))
-            {
-                auto lexer = Lexer{*f};
-                auto parsing = true;
-                while(parsing)
+                switch(options.file_mode)
                 {
-                    auto token = lexer.GetNextToken();
-                    switch(token.type)
-                    {
-                    case TokenType::EndOfStream:
-                        parsing = false;
-                        break;
-                    default:
-                        std::cout << static_cast<int>(token.type) << ": " << token.text << "\n";
-                        break;
-                    }
+                case FileMode::Normal:
+                    std::cerr << "It's currently unsupported to run " << file->filename << "\n";
+                    return -1;
+                case FileMode::Lexer:
+                    RunLexer(*file);
+                    break;
                 }
+
+                options = Options{};
             }
-            return 0;
-        default:
-            std::cerr << "Command not recongnized " << argv[1] << "\n";
-            PrintUsage(argv[0]);
-            return -4;
         }
     }
-    else
-    {
-        fel.LoadAndRunFile(argv[1], &log);
-        Print(log);
-    }
+    
     return 0;
 }

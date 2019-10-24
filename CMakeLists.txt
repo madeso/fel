@@ -32,12 +32,14 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)
 
 add_library(fel STATIC
-  src/log.cc
-  src/fel.cc
-  src/value.cc
-  src/location.cc
   src/file.cc
+  src/file.h
   src/lexer.cc
+  src/lexer.h
+  src/location.cc
+  src/location.h
+  src/log.cc
+  src/log.h
   )
 
 add_executable(felapp
@@ -49,10 +51,8 @@ set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
+  test/lexer.cc
   test/main.cc
-  test/test.cc
-  test/strings.cc
-  test/comments.cc
   )
 target_link_libraries(tests fel ${CMAKE_THREAD_LIBS_INIT})
 
