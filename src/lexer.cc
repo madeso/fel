@@ -90,16 +90,15 @@ namespace fel
             return {tt, std::string(1, c)};
         }
 
-        Token CharAndEqual(FilePointer* file, TokenType one, TokenType two)
+        Token CharAndChar(FilePointer* file, TokenType one_char, char second_char, TokenType two_chars)
         {
-            auto c = file->Read();
-            auto s = std::string(1, c);
-            if(file->Peek() == '=')
+            auto first_char = std::string(1, file->Read());
+            if(file->Peek() == second_char)
             {
                 file->Read();
-                return {two, s + "="};
+                return {two_chars, first_char + std::string(1, second_char)};
             }
-            return {one, s};
+            return {one_char, first_char};
         }
 
         Token ParseString(FilePointer* file)
@@ -147,13 +146,13 @@ namespace fel
         case '*': return SingleChar(&file, TokenType::Mult);
         case '/': return SingleChar(&file, TokenType::Div);
         case ',': return SingleChar(&file, TokenType::Comma);
-        case '.': return SingleChar(&file, TokenType::Dot);
         case ':': return SingleChar(&file, TokenType::Colon);
         case ';': return SingleChar(&file, TokenType::Term);
 
-        case '=': return CharAndEqual(&file, TokenType::Assign, TokenType::Equal);
-        case '<': return CharAndEqual(&file, TokenType::Less, TokenType::LessEqual);
-        case '>': return CharAndEqual(&file, TokenType::Greater, TokenType::GreaterEqual);
+        case '.': return CharAndChar(&file, TokenType::Dot, '.', TokenType::DotDot);
+        case '=': return CharAndChar(&file, TokenType::Assign, '=', TokenType::Equal);
+        case '<': return CharAndChar(&file, TokenType::Less, '=', TokenType::LessEqual);
+        case '>': return CharAndChar(&file, TokenType::Greater, '=', TokenType::GreaterEqual);
             file.Read();
             if(file.Peek() == '=')
             {

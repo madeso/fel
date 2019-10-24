@@ -14,9 +14,12 @@ namespace fel
         OpenParen, CloseParen,
         OpenBracket, CloseBracket,
         
-        Plus, Minus, Mult, Div, Comma, Dot, Colon, Term,
+        Plus, Minus, Mult, Div, Comma, Colon, Term,
 
-        Equal, Assign, Less, Greater, LessEqual, GreaterEqual,
+        Dot, DotDot,
+        Equal, Assign,
+        Less, LessEqual,
+        Greater, GreaterEqual,
 
         String,
 
