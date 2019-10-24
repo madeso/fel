@@ -42,9 +42,6 @@ namespace fel
         std::string text;
     };
 
-    bool operator==(const Token& lhs, const Token& rhs);
-    bool operator!=(const Token& lhs, const Token& rhs);
-
     template<typename  Stream>
     Stream& operator<<(Stream& stream, const Token& token)
     {

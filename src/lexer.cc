@@ -59,15 +59,6 @@ namespace fel
         }
     }
 
-    bool operator==(const Token& lhs, const Token& rhs)
-    {
-        return lhs.type == rhs.type && lhs.text == rhs.text;
-    }
-    bool operator!=(const Token& lhs, const Token& rhs)
-    {
-        return !(lhs == rhs);
-    }
-
     Lexer::Lexer(const File& a_file) : file(a_file)
     {
     }
