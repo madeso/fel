@@ -83,37 +83,32 @@ namespace fel
                 }
             }
         }
-    }
 
-    Token Lexer::GetNextToken()
-    {
-        EatWhitespace(&file);
-
-        const auto SingleChar = [this](TokenType tt) -> Token
+        Token SingleChar(FilePointer* file, TokenType tt)
         {
-            const auto c = file.Read();
+            const auto c = file->Read();
             return {tt, std::string(1, c)};
-        };
+        }
 
-        const auto CharAndEqual = [this](TokenType one, TokenType two) -> Token
+        Token CharAndEqual(FilePointer* file, TokenType one, TokenType two)
         {
-            auto c = file.Read();
+            auto c = file->Read();
             auto s = std::string(1, c);
-            if(file.Peek() == '=')
+            if(file->Peek() == '=')
             {
-                file.Read();
+                file->Read();
                 return {two, s + "="};
             }
             return {one, s};
-        };
+        }
 
-        const auto ParseString = [this]() -> Token
+        Token ParseString(FilePointer* file)
         {
             std::ostringstream buffer;
-            auto end = file.Read();
-            while(file.Peek() != end)
+            auto end = file->Read();
+            while(file->Peek() != end)
             {
-                auto c = file.Read();
+                auto c = file->Read();
                 if( c == 0)
                 {
                     // todo(Gustav): add error
@@ -122,38 +117,43 @@ namespace fel
                 if(c == '\\')
                 {
                     // todo(Gustav): handle escape characters
-                    c = file.Read();
+                    c = file->Read();
                 }
 
                 buffer << c;
             }
-            file.Read();
+            file->Read();
             return {TokenType::String, buffer.str()};
-        };
+        }
+    }
+
+    Token Lexer::GetNextToken()
+    {
+        EatWhitespace(&file);
 
         switch(file.Peek())
         {
         case 0:
             return {TokenType::EndOfStream, ""};
 
-        case '{': return SingleChar(TokenType::BeginBrace);
-        case '}': return SingleChar(TokenType::EndBrace);
-        case '(': return SingleChar(TokenType::OpenParen);
-        case ')': return SingleChar(TokenType::CloseParen);
-        case '[': return SingleChar(TokenType::OpenBracket);
-        case ']': return SingleChar(TokenType::CloseBracket);
-        case '+': return SingleChar(TokenType::Plus);
-        case '-': return SingleChar(TokenType::Minus);
-        case '*': return SingleChar(TokenType::Mult);
-        case '/': return SingleChar(TokenType::Div);
-        case ',': return SingleChar(TokenType::Comma);
-        case '.': return SingleChar(TokenType::Dot);
-        case ':': return SingleChar(TokenType::Colon);
-        case ';': return SingleChar(TokenType::Term);
+        case '{': return SingleChar(&file, TokenType::BeginBrace);
+        case '}': return SingleChar(&file, TokenType::EndBrace);
+        case '(': return SingleChar(&file, TokenType::OpenParen);
+        case ')': return SingleChar(&file, TokenType::CloseParen);
+        case '[': return SingleChar(&file, TokenType::OpenBracket);
+        case ']': return SingleChar(&file, TokenType::CloseBracket);
+        case '+': return SingleChar(&file, TokenType::Plus);
+        case '-': return SingleChar(&file, TokenType::Minus);
+        case '*': return SingleChar(&file, TokenType::Mult);
+        case '/': return SingleChar(&file, TokenType::Div);
+        case ',': return SingleChar(&file, TokenType::Comma);
+        case '.': return SingleChar(&file, TokenType::Dot);
+        case ':': return SingleChar(&file, TokenType::Colon);
+        case ';': return SingleChar(&file, TokenType::Term);
 
-        case '=': return CharAndEqual(TokenType::Assign, TokenType::Equal);
-        case '<': return CharAndEqual(TokenType::Less, TokenType::LessEqual);
-        case '>': return CharAndEqual(TokenType::Greater, TokenType::GreaterEqual);
+        case '=': return CharAndEqual(&file, TokenType::Assign, TokenType::Equal);
+        case '<': return CharAndEqual(&file, TokenType::Less, TokenType::LessEqual);
+        case '>': return CharAndEqual(&file, TokenType::Greater, TokenType::GreaterEqual);
             file.Read();
             if(file.Peek() == '=')
             {
@@ -164,7 +164,7 @@ namespace fel
         
         case '"':
         case '\'':
-            return ParseString();
+            return ParseString(&file);
         
 
         default:
