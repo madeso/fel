@@ -1,5 +1,5 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef FEL_FILE_H
+#define FEL_FILE_H
 
 #include <string>
 #include <optional>
@@ -38,4 +38,4 @@ namespace fel
     };
 }  // namespace fel
 
-#endif  // FILE_H
+#endif  // FEL_FILE_H

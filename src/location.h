@@ -1,5 +1,5 @@
-#ifndef LOCATION_H
-#define LOCATION_H
+#ifndef FEL_LOCATION_H
+#define FEL_LOCATION_H
 
 namespace fel
 {
@@ -15,4 +15,4 @@ namespace fel
 }  // namespace fel
 
 
-#endif  // LOCATION_H
+#endif  // FEL_LOCATION_H

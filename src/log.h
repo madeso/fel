@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef FEL_LOG_H
+#define FEL_LOG_H
 
 #include <string>
 #include <vector>
@@ -40,4 +40,4 @@ namespace fel
     IsEmpty(const Log& log);
 }  // namespace fel
 
-#endif  // LOG_H
+#endif  // FEL_LOG_H
