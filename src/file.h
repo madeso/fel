@@ -34,7 +34,7 @@ namespace fel
 
         // 1 is next character, 2 is the one after that...
         char
-        Peek(int advance = 1) const;
+        Peek(std::size_t = 1) const;
     };
 }  // namespace fel
 

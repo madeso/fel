@@ -59,9 +59,8 @@ namespace fel
     }
 
     char
-    FilePointer::Peek(int advance) const
+    FilePointer::Peek(std::size_t advance) const
     {
-        assert(advance > 0);
         // assert(next_index > 0);
         const auto index = next_index + advance - 1;
         if(index < file.data.size())
