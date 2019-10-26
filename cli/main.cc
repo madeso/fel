@@ -11,7 +11,7 @@ using namespace fel;
 void
 Print(const Log& log)
 {
-    if(false == IsEmpty(log))
+    if(!log.IsEmpty())
     {
         std::cerr << log;
     }

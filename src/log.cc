@@ -6,56 +6,46 @@
 #include <streambuf>
 #include <cassert>
 
-namespace fel
+#include "file.h"
+
+namespace fel::log
 {
     bool
-    LogEntry::operator==(const LogEntry& rhs) const
+    operator==(const Entry& lhs, const Entry& rhs)
     {
-        return file == rhs.file && message == rhs.message
-               && location == rhs.location;
+        return lhs.file == rhs.file
+            && lhs.location == rhs.location
+            && lhs.intensity == rhs.intensity
+            && lhs.type == rhs.type
+            && lhs.arguments == rhs.arguments;
     }
 
-    std::ostream&
-    operator<<(std::ostream& o, const LogEntry& entry)
-    {
-        o << entry.file << ":" << entry.location.line << ":"
-          << entry.location.column << ": " << entry.message;
-        return o;
-    }
+    Entry::Entry(const FilePointer& a_where, Intensity a_intensity, log::Type a_type, const std::vector<std::string>& a_args)
+    : file(a_where.file.filename)
+    , location(a_where.location)
+    , intensity(a_intensity)
+    , type(a_type)
+    , arguments(a_args)
+    {}
+}
 
-    Log::operator bool() const
-    {
-        return IsEmpty(*this);
-    }
-
+namespace fel
+{
     std::ostream&
     operator<<(std::ostream& o, const Log& log)
     {
-        for(const auto& e: log.entries)
-        {
-            o << e.file << ":" << e.location.line << ":" << e.location.column
-              << ": " << e.message << "\n";
-        }
-        o << log.entries.size() << " error(s) detected\n";
         return o;
     }
 
     void
-    Add(Log*               log,
-        const std::string& file,
-        const Location&    location,
-        const std::string& message)
+    Log::AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args)
     {
-        fel::LogEntry entry;
-        entry.file     = file;
-        entry.message  = message;
-        entry.location = location;
-        log->entries.push_back(entry);
+        entries.emplace_back(where, log::Intensity::Error, type, args);
     }
 
     bool
-    IsEmpty(const Log& log)
+    Log::IsEmpty() const 
     {
-        return log.entries.empty();
+        return entries.empty();
     }
 }  // namespace fel

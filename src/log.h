@@ -10,34 +10,49 @@
 
 namespace fel
 {
-    struct LogEntry
+    struct FilePointer;
+
+    namespace log
     {
-        std::string file;
-        std::string message;
-        Location    location;
+        enum class Intensity
+        {
+            Note, Warning, Error
+        };
+
+        enum class Type
+        {
+            Invalid
+        };
+
+        struct Entry
+        {
+            Entry(const FilePointer& where, Intensity intensity, log::Type type, const std::vector<std::string>& args);
+
+            std::string file;
+            Location    location;
+            Intensity intensity;
+            Type type;
+            std::vector<std::string> arguments;
+        };
 
         bool
-        operator==(const LogEntry& rhs) const;
-    };
-    std::ostream&
-    operator<<(std::ostream& o, const LogEntry& entry);
+        operator==(const Entry& lhs, const Entry& rhs);
+
+        // std::ostream&
+        // operator<<(std::ostream& o, const Entry& entry);
+    }
 
     struct Log
     {
-        std::vector<LogEntry> entries;
+        std::vector<log::Entry> entries;
 
-        operator bool() const;
+        void AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args);
+
+        bool IsEmpty() const;
     };
+
     std::ostream&
     operator<<(std::ostream& o, const Log& log);
-
-    void
-    Add(Log*               log,
-        const std::string& file,
-        const Location&    location,
-        const std::string& message);
-    bool
-    IsEmpty(const Log& log);
 }  // namespace fel
 
 #endif  // FEL_LOG_H
