@@ -70,9 +70,12 @@ void RunLexer(const File& file)
     Log log;
     auto tokens = GetAllTokensInFile(file, &log);
     Print(log);
-    for(auto token : tokens)
+    if(log.IsEmpty())
     {
-        std::cout << token << "\n";
+        for(auto token : tokens)
+        {
+            std::cout << token << "\n";
+        }
     }
 }
 
