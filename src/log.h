@@ -38,8 +38,8 @@ namespace fel
         bool
         operator==(const Entry& lhs, const Entry& rhs);
 
-        // std::ostream&
-        // operator<<(std::ostream& o, const Entry& entry);
+        std::ostream&
+        operator<<(std::ostream& o, const Entry& entry);
     }
 
     struct Log

@@ -27,6 +27,44 @@ namespace fel::log
     , type(a_type)
     , arguments(a_args)
     {}
+
+
+    std::ostream&
+    operator<<(std::ostream& o, const Intensity& i)
+    {
+        switch(i)
+        {
+        case Intensity::Note:
+            o << "Note";
+            return o;
+        case Intensity::Warning:
+            o << "Warning";
+            return o;
+        case Intensity::Error:
+            o << "Error";
+            return o;
+        default:
+            o << "<internal error: unhandled intensity>";
+            return o;
+        }
+    }
+
+
+    std::ostream&
+    operator<<(std::ostream& o, const Entry& entry)
+    {
+        o << entry.file << "(" << entry.location.line << ":" << entry.location.line << ") " << entry.intensity << ": ";
+        switch(entry.type)
+        {
+        case Type::EosInString:
+            o << "'End Of Stream' detected in string";
+            break;
+        default:
+            o << "Internal error: Unhandled error in switch.";
+            break;
+        }
+        return o;
+    }
 }
 
 namespace fel
@@ -34,6 +72,25 @@ namespace fel
     std::ostream&
     operator<<(std::ostream& o, const Log& log)
     {
+        int errors = 0;
+        int warnings = 0;
+        for(const auto& e: log.entries)
+        {
+            o << e << "\n";
+            switch(e.intensity)
+            {
+            case log::Intensity::Note:
+                break;
+            case log::Intensity::Error:
+                errors += 1;
+                break;
+            case log::Intensity::Warning:
+                warnings += 1;
+                break;
+            }
+        }
+
+        o << errors << " error(s) and " << warnings << " warning(s) detected.\n";
         return o;
     }
 
