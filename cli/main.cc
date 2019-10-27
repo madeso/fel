@@ -67,7 +67,9 @@ std::optional<File> ReadFile(const Options& options, const std::string& path)
 
 void RunLexer(const File& file)
 {
-    auto tokens = GetAllTokensInFile(file);
+    Log log;
+    auto tokens = GetAllTokensInFile(file, &log);
+    Print(log);
     for(auto token : tokens)
     {
         std::cout << token << "\n";

@@ -21,7 +21,7 @@ namespace fel
 
         enum class Type
         {
-            Invalid
+            EosInString
         };
 
         struct Entry

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "log.h"
+
 namespace fel
 {
     std::string ToString(const TokenType tt)
@@ -59,7 +61,7 @@ namespace fel
         }
     }
 
-    Lexer::Lexer(const File& a_file) : file(a_file)
+    Lexer::Lexer(const File& a_file, Log* a_log) : file(a_file), log(a_log)
     {
     }
 
@@ -158,7 +160,7 @@ namespace fel
             return {one_char, first_char};
         }
 
-        Token ParseString(FilePointer* file)
+        Token ParseString(Log* log, FilePointer* file)
         {
             std::ostringstream buffer;
             auto end = file->Read();
@@ -168,6 +170,7 @@ namespace fel
                 if( c == 0)
                 {
                     // todo(Gustav): add error
+                    log->AddError(*file, log::Type::EosInString, {});
                     return {TokenType::String, buffer.str()};
                 }
                 if(c == '\\')
@@ -220,7 +223,7 @@ namespace fel
         
         case '"':
         case '\'':
-            return ParseString(&file);
+            return ParseString(log, &file);
         
 
         default:
@@ -279,10 +282,10 @@ namespace fel
     }
 
 
-    std::vector<Token> GetAllTokensInFile(const File& file)
+    std::vector<Token> GetAllTokensInFile(const File& file, Log* log)
     {
         std::vector<Token> ret;
-        auto lexer = Lexer{file};
+        auto lexer = Lexer{file, log};
         auto parsing = true;
         while(parsing)
         {

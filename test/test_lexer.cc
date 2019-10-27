@@ -4,6 +4,7 @@
 #include <iostream>
 #include "lexer.h"
 #include "file.h"
+#include "log.h"
 
 using namespace fel;
 using Catch::Matchers::Equals;
@@ -87,20 +88,21 @@ using Eq = Catch::Vector::EqualsMatcher<TestToken>;
 
 TEST_CASE("lexer", "[lexer]")
 {
+    Log log;
     SECTION("empty")
     {
         const auto equal_empty = Equals(std::vector<TestToken>{});
-        CHECK_THAT(C(GetAllTokensInFile(S(""))), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S(" "))), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("\n\t\n"))), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("  /* all dogs are nice */  "))), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("  // cats are cool"))), equal_empty);
+        CHECK_THAT(C(GetAllTokensInFile(S(""), &log)), equal_empty);
+        CHECK_THAT(C(GetAllTokensInFile(S(" "), &log)), equal_empty);
+        CHECK_THAT(C(GetAllTokensInFile(S("\n\t\n"), &log)), equal_empty);
+        CHECK_THAT(C(GetAllTokensInFile(S("  /* all dogs are nice */  "), &log)), equal_empty);
+        CHECK_THAT(C(GetAllTokensInFile(S("  // cats are cool"), &log)), equal_empty);
     }
 
     SECTION("operators")
     {
-        CHECK_THAT(C(GetAllTokensInFile(S("(..)"))), Eq({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
-        CHECK_THAT(C(GetAllTokensInFile(S("[if]"))), Eq({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
-        CHECK_THAT(C(GetAllTokensInFile(S("{.}"))), Eq({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
+        CHECK_THAT(C(GetAllTokensInFile(S("(..)"), &log)), Eq({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
+        CHECK_THAT(C(GetAllTokensInFile(S("[if]"), &log)), Eq({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
+        CHECK_THAT(C(GetAllTokensInFile(S("{.}"), &log)), Eq({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
     }
 }

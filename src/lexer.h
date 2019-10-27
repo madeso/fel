@@ -8,6 +8,8 @@
 
 namespace fel
 {
+    struct Log;
+
     enum class TokenType
     {
         Unknown,
@@ -52,14 +54,15 @@ namespace fel
     struct Lexer
     {
         FilePointer file;
+        Log* log;
 
-        explicit Lexer(const File& a_file);
+        Lexer(const File& a_file, Log* a_log);
 
         Token
         GetNextToken();
     };
 
-    std::vector<Token> GetAllTokensInFile(const File& file);
+    std::vector<Token> GetAllTokensInFile(const File& file, Log* log);
 
 }
 
