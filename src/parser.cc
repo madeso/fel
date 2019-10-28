@@ -57,10 +57,15 @@ namespace fel
             }
         }
 
+        bool ParseValue(Parser* parser)
+        {
+            if( false == Expect(parser, TokenType::Identifier) ) { return false; }
+            return true;
+        }
+
         bool ParseStatement(Parser* parser)
         {
-            // lvalue
-            if( false == Expect(parser, TokenType::Identifier) ) { return false; }
+            if( false == ParseValue(parser) ) { return false; }
 
             // function call
             if(Accept(parser, TokenType::OpenParen))
@@ -71,8 +76,7 @@ namespace fel
             // assignment
             else if(Accept(parser, TokenType::Assign))
             {
-                // rvalue
-                if(false == Expect(parser, TokenType::Identifier)) {return false;}
+                if( false == ParseValue(parser) ) { return false; }
                 if(false == Expect(parser, TokenType::Term)) {return false;}
             }
             else
