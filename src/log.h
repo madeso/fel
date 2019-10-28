@@ -21,7 +21,13 @@ namespace fel
 
         enum class Type
         {
-            EosInString
+            EosInString,
+
+            // expected symbol, found token
+            UnexpectedSymbol,
+
+            // found token
+            InvalidSymbol
         };
 
         struct Entry

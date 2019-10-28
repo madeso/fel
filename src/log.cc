@@ -49,6 +49,19 @@ namespace fel::log
         }
     }
 
+    namespace
+    {
+        std::string Arg(const Entry& entry, size_t i)
+        {
+            if(i >= entry.arguments.size())
+            {
+                assert(false);
+                return "<invalid index>";
+            }
+
+            return entry.arguments[i];
+        }
+    }
 
     std::ostream&
     operator<<(std::ostream& o, const Entry& entry)
@@ -58,6 +71,12 @@ namespace fel::log
         {
         case Type::EosInString:
             o << "'End Of Stream' detected in string";
+            break;
+        case Type::UnexpectedSymbol:
+            o << "Unexpected symbol " << Arg(entry, 1) << ", expected " << Arg(entry, 0);
+            break;
+        case Type::InvalidSymbol:
+            o << "Invalid symbol " << Arg(entry, 0);
             break;
         default:
             o << "Internal error: Unhandled error in switch.";

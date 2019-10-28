@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "file.h"
 #include "log.h"
+#include "parser.h"
 
 using namespace fel;
 
@@ -34,7 +35,7 @@ bool IsArgument(char* s)
 
 enum class FileMode
 {
-    Normal, Lexer
+    Normal, Lexer, Parser
 };
 
 
@@ -87,6 +88,18 @@ void RunLexer(const File& file)
 }
 
 
+void RunParser(const File& file)
+{
+    Log log;
+    auto reader = LexerReader{file, &log};
+    auto parse_ok = Parse(&reader, &log);
+    Print(log);
+
+    std::cout << (parse_ok ? "parse ok" : "parse failed")
+              << "\n";
+}
+
+
 int
 main(int argc, char* argv[])
 {
@@ -104,6 +117,7 @@ main(int argc, char* argv[])
             << "\n"
             << "options:\n"
             << "  -lex, -x    print the lexer result instead of running the code\n"
+            << "  -parse, -p  parse input instead of running it\n"
             << "  -code, -c   force code as the argument\n"
             << "\n"
             ;
@@ -123,6 +137,10 @@ main(int argc, char* argv[])
             if(a == "lex" || a == "x")
             {
                 options.file_mode = FileMode::Lexer;
+            }
+            else if(a == "parse" || a == "p")
+            {
+                options.file_mode = FileMode::Parser;
             }
             else if(a == "code" || a == "c")
             {
@@ -146,6 +164,9 @@ main(int argc, char* argv[])
                     return -1;
                 case FileMode::Lexer:
                     RunLexer(*file);
+                    break;
+                case FileMode::Parser:
+                    RunParser(*file);
                     break;
                 }
 
