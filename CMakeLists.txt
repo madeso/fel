@@ -40,6 +40,8 @@ add_library(fel STATIC
   src/location.h
   src/log.cc
   src/log.h
+  src/parser.cc
+  src/parser.h
   )
 
 add_executable(felapp
@@ -51,8 +53,9 @@ set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 include_directories(SYSTEM external/catch/)
 
 add_executable(tests
-  test/test_lexer.cc
   test/main.cc
+  test/test_lexer.cc
+  test/test_parser.cc
   )
 target_link_libraries(tests fel ${CMAKE_THREAD_LIBS_INIT})
 
