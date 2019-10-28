@@ -281,20 +281,44 @@ namespace fel
         }
     }
 
+    LexerReader::LexerReader(const File& a_file, Log* a_log)
+        : lexer(a_file, a_log)
+    {
+    }
 
-    std::vector<Token> GetAllTokensInFile(const File& file, Log* log)
+    Token LexerReader::Peek()
+    {
+        if(token)
+        {
+            return *token;
+        }
+        else
+        {
+            token = lexer.GetNextToken();
+            return *token;
+        }
+    }
+
+    Token LexerReader::Read()
+    {
+        if(token)
+        {
+            const auto r = *token;
+            token.reset();
+            return r;
+        }
+        else
+        {
+            return lexer.GetNextToken();
+        }
+    }
+
+    std::vector<Token> GetAllTokensInFile(LexerReader* reader)
     {
         std::vector<Token> ret;
-        auto lexer = Lexer{file, log};
-        auto parsing = true;
-        while(parsing)
+        while( reader->Peek().type != TokenType::EndOfStream)
         {
-            auto token = lexer.GetNextToken();
-            if(token.type == TokenType::EndOfStream)
-            {
-                break;
-            }
-            ret.emplace_back(token);
+            ret.emplace_back(reader->Read());
         }
         return ret;
     }

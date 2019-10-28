@@ -8,6 +8,7 @@
 
 using namespace fel;
 
+
 void
 Print(const Log& log)
 {
@@ -16,6 +17,7 @@ Print(const Log& log)
         std::cerr << log;
     }
 }
+
 
 bool IsArgument(char* s)
 {
@@ -29,16 +31,19 @@ bool IsArgument(char* s)
     }
 }
 
+
 enum class FileMode
 {
     Normal, Lexer
 };
+
 
 struct Options
 {
     FileMode file_mode = FileMode::Normal;
     bool file_as_commandline =false;
 };
+
 
 std::optional<File> ReadFile(const Options& options, const std::string& path)
 {
@@ -65,10 +70,12 @@ std::optional<File> ReadFile(const Options& options, const std::string& path)
     }
 }
 
+
 void RunLexer(const File& file)
 {
     Log log;
-    auto tokens = GetAllTokensInFile(file, &log);
+    auto reader = LexerReader{file, &log};
+    auto tokens = GetAllTokensInFile(&reader);
     Print(log);
     if(log.IsEmpty())
     {
@@ -78,6 +85,7 @@ void RunLexer(const File& file)
         }
     }
 }
+
 
 int
 main(int argc, char* argv[])

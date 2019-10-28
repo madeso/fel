@@ -82,6 +82,12 @@ namespace
         }
         return r;
     }
+
+    std::vector<TestToken> Tokenize(const File& a_file, Log* a_log)
+    {
+        auto lexer = LexerReader{a_file, a_log};
+        return C(GetAllTokensInFile(&lexer));
+    }
 }
 
 using Eq = Catch::Vector::EqualsMatcher<TestToken>;
@@ -92,17 +98,17 @@ TEST_CASE("lexer", "[lexer]")
     SECTION("empty")
     {
         const auto equal_empty = Equals(std::vector<TestToken>{});
-        CHECK_THAT(C(GetAllTokensInFile(S(""), &log)), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S(" "), &log)), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("\n\t\n"), &log)), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("  /* all dogs are nice */  "), &log)), equal_empty);
-        CHECK_THAT(C(GetAllTokensInFile(S("  // cats are cool"), &log)), equal_empty);
+        CHECK_THAT(Tokenize(S(""), &log), equal_empty);
+        CHECK_THAT(Tokenize(S(" "), &log), equal_empty);
+        CHECK_THAT(Tokenize(S("\n\t\n"), &log), equal_empty);
+        CHECK_THAT(Tokenize(S("  /* all dogs are nice */  "), &log), equal_empty);
+        CHECK_THAT(Tokenize(S("  // cats are cool"), &log), equal_empty);
     }
 
     SECTION("operators")
     {
-        CHECK_THAT(C(GetAllTokensInFile(S("(..)"), &log)), Eq({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
-        CHECK_THAT(C(GetAllTokensInFile(S("[if]"), &log)), Eq({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
-        CHECK_THAT(C(GetAllTokensInFile(S("{.}"), &log)), Eq({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
+        CHECK_THAT(Tokenize(S("(..)"), &log), Eq({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
+        CHECK_THAT(Tokenize(S("[if]"), &log), Eq({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
+        CHECK_THAT(Tokenize(S("{.}"), &log), Eq({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
     }
 }

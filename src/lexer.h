@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 
 #include "file.h"
 
@@ -62,8 +63,18 @@ namespace fel
         GetNextToken();
     };
 
-    std::vector<Token> GetAllTokensInFile(const File& file, Log* log);
+    struct LexerReader
+    {
+        Lexer lexer;
+        std::optional<Token> token;
 
+        LexerReader(const File& a_file, Log* a_log);
+
+        Token Peek();
+        Token Read();
+    };
+
+    std::vector<Token> GetAllTokensInFile(LexerReader* reader);
 }
 
 #endif  // FEL_LEXER_H
