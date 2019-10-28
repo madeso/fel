@@ -44,7 +44,7 @@ namespace fel
             }
         }
 
-        bool Expect(Parser* parser, TokenType token)
+        bool Require(Parser* parser, TokenType token)
         {
             if(Accept(parser, token))
             {
@@ -59,7 +59,39 @@ namespace fel
 
         bool ParseValue(Parser* parser)
         {
-            if( false == Expect(parser, TokenType::Identifier) ) { return false; }
+            if(Accept(parser, TokenType::Identifier))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::String))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::Int))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::Number))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::KeywordNull))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::KeywordTrue))
+            {
+                return true;
+            }
+            else if(Accept(parser, TokenType::KeywordFalse))
+            {
+                return true;
+            }
+            else
+            {
+                Error(parser, log::Type::InvalidSymbol, { ToString(parser->lexer->Peek()) });
+                return false;
+            }
             return true;
         }
 
@@ -70,14 +102,29 @@ namespace fel
             // function call
             if(Accept(parser, TokenType::OpenParen))
             {
-                if(false == Expect(parser, TokenType::CloseParen)) {return false;}
-                if(false == Expect(parser, TokenType::Term)) {return false;}
+                if(Accept(parser, TokenType::CloseParen))
+                {
+                    // no arguments
+                }
+                else
+                {
+                    // first argument
+                    if(false == ParseValue(parser)) {return false;}
+
+                    // the rest of the arguments
+                    while(Accept(parser, TokenType::CloseParen) == false)
+                    {
+                        if(false == Require(parser, TokenType::Comma)) {return false;}
+                        if(false == ParseValue(parser)) {return false;}
+                    }
+                }
+                if(false == Require(parser, TokenType::Term)) {return false;}
             }
             // assignment
             else if(Accept(parser, TokenType::Assign))
             {
                 if( false == ParseValue(parser) ) { return false; }
-                if(false == Expect(parser, TokenType::Term)) {return false;}
+                if(false == Require(parser, TokenType::Term)) {return false;}
             }
             else
             {
