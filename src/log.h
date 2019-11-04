@@ -55,6 +55,9 @@ namespace fel
         void AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args);
 
         bool IsEmpty() const;
+
+        // return true if it is empty
+        operator bool() const;
     };
 
     std::ostream&

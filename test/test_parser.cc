@@ -19,6 +19,8 @@ namespace
     }
 }
 
+#define RUN_INFO(x) Parse(x, &log); INFO("code: " x);
+
 TEST_CASE("parser", "[parser]")
 {
     Log log;
@@ -26,38 +28,62 @@ TEST_CASE("parser", "[parser]")
     {
         SECTION("empty")
         {
-            INFO(log);
-            CHECK(Parse("", &log));
+            RUN_INFO("");
+            CHECK(log);
         }
 
         SECTION("function call 0")
         {
-            INFO(log);
-            CHECK(Parse("dog();", &log));
+            RUN_INFO("dog();");
+            CHECK(log);
         }
 
         SECTION("function call 1")
         {
-            INFO(log);
-            CHECK(Parse("dog(42);", &log));
+            RUN_INFO("dog(42);");
+            CHECK(log);
         }
 
         SECTION("function call 2")
         {
-            INFO(log);
-            CHECK(Parse("dog('dog', 42);", &log));
+            RUN_INFO("dog('dog', 42);");
+            CHECK(log);
         }
 
         SECTION("function call 3")
         {
-            INFO(log);
-            CHECK(Parse("doggy(dog, doogy, dog);", &log));
+            RUN_INFO("doggy(dog, doogy, dog);");
+            CHECK(log);
         }
 
         SECTION("assignment")
         {
-            INFO(log);
-            CHECK(Parse("cat = awesome;", &log));
+            RUN_INFO("cat = awesome;");
+            CHECK(log);
+        }
+
+        SECTION("if no block")
+        {
+            RUN_INFO("if(dog) dog();");
+            CHECK(log);
+        }
+
+        SECTION("if block")
+        {
+            RUN_INFO("if(cat) { cat(); }");
+            CHECK(log);
+        }
+
+        SECTION("if semi")
+        {
+            RUN_INFO("if(why);");
+            CHECK(log);
+        }
+
+        SECTION("if empty block")
+        {
+            RUN_INFO("if(function()) {}");
+            CHECK(log);
         }
     }
 
@@ -65,44 +91,44 @@ TEST_CASE("parser", "[parser]")
     {
         SECTION("bad assignment")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("a =", &log));
+            RUN_INFO("a =");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 1")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(", &log));
+            RUN_INFO("b(");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 2")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(c,", &log));
+            RUN_INFO("b(c,");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 3")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(3,);", &log));
+            RUN_INFO("b(3,);");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 4")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(,);", &log));
+            RUN_INFO("b(,);");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 5")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(3,,)", &log));
+            RUN_INFO("b(3,,)");
+            CHECK_FALSE(log);
         }
 
         SECTION("bad function call 6")
         {
-            INFO(log);
-            CHECK_FALSE(Parse("b(3;4);", &log));
+            RUN_INFO("b(3;4);");
+            CHECK_FALSE(log);
         }
     }
 }

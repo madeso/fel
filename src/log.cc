@@ -124,4 +124,9 @@ namespace fel
     {
         return entries.empty();
     }
+
+    Log::operator bool() const
+    {
+        return IsEmpty();
+    }
 }  // namespace fel
