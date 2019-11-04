@@ -97,7 +97,49 @@ namespace fel
 
         bool ParseStatement(Parser* parser)
         {
-            if( false == ParseValue(parser) ) { return false; }
+            // block statement
+            if(Accept(parser, TokenType::BeginBrace))
+            {
+                while(Accept(parser, TokenType::EndBrace) == false)
+                {
+                    if(false == ParseStatement(parser)) {return false;}
+                }
+                if(false == Require(parser, TokenType::EndBrace)) {return false;}
+                return true;
+            }
+
+            // if statement
+            else if(Accept(parser, TokenType::KeywordIf))
+            {
+                if(false == Require(parser, TokenType::OpenParen)) {return false;}
+                if(false == ParseValue(parser)) {return false;}
+                if(false == Require(parser, TokenType::CloseParen)) {return false;}
+                if(false == ParseStatement(parser)) {return false;}
+                return true;
+            }
+
+            // emtpy statement
+            else if(Accept(parser, TokenType::Term))
+            {
+                return true;
+            }
+
+            else
+            {
+                // value
+                if(false == ParseValue(parser)) {return false;}
+
+                if(Accept(parser, TokenType::Assign))
+                {
+                    // rhs
+                    if(false == ParseValue(parser)) {return false;}
+                }
+
+                if(false == Require(parser, TokenType::Term)) {return false;}
+
+                return true;
+            }
+            
 
             // function call
             if(Accept(parser, TokenType::OpenParen))
