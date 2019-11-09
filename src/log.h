@@ -27,7 +27,10 @@ namespace fel
             UnexpectedSymbol,
 
             // found token
-            InvalidSymbol
+            InvalidSymbol,
+
+            // Invalid parser state (statename) but found (token)
+            InvalidParserState
         };
 
         struct Entry

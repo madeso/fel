@@ -82,7 +82,24 @@ TEST_CASE("parser", "[parser]")
 
         SECTION("if empty block")
         {
-            RUN_INFO("if(function()) {}");
+            RUN_INFO("if(foo()) {}");
+            CHECK(log);
+        }
+
+        SECTION("complex 1")
+        {
+            RUN_INFO("a.b.c[d,e].f(g,h) = i;");
+            CHECK(log);
+        }
+
+        SECTION("complex 2a")
+        {
+            RUN_INFO("fn() { return cat; } ().name = 'mittens';");
+            CHECK(log);
+        }
+        SECTION("complex 2b")
+        {
+            RUN_INFO("fn() return dog;().name = 'sparky';");
             CHECK(log);
         }
     }

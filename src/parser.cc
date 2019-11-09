@@ -3,193 +3,192 @@
 #include "lexer.h"
 #include "log.h"
 
-namespace fel
+namespace
 {
-    namespace
+    using namespace fel;
+
+    std::string ToString(Token token)
     {
-        struct Parser
+        switch(token.type)
         {
-            LexerReader* lexer;
-            Log* log;
-        };
-
-        std::string ToString(Token token)
-        {
-            switch(token.type)
-            {
-            case TokenType::String:
-                return "string";
-            case TokenType::Identifier:
-                return "ident: " + token.text;
-            default:
-                return token.text;
-            }
-        }
-
-        void Error(Parser* parser, log::Type error, std::vector<std::string> args)
-        {
-            parser->log->AddError(parser->lexer->lexer.file, error, args);
-        }
-
-        bool Accept(Parser* parser, TokenType token)
-        {
-            if(parser->lexer->Peek().type == token)
-            {
-                parser->lexer->Read();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        bool Require(Parser* parser, TokenType token)
-        {
-            if(Accept(parser, token))
-            {
-                return true;
-            }
-            else
-            {
-                Error(parser, log::Type::UnexpectedSymbol, { fel::ToString(token), ToString(parser->lexer->Peek()) });
-                return false;
-            }
-        }
-
-        bool ParseValue(Parser* parser)
-        {
-            if(Accept(parser, TokenType::Identifier))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::String))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::Int))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::Number))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::KeywordNull))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::KeywordTrue))
-            {
-                return true;
-            }
-            else if(Accept(parser, TokenType::KeywordFalse))
-            {
-                return true;
-            }
-            else
-            {
-                Error(parser, log::Type::InvalidSymbol, { ToString(parser->lexer->Peek()) });
-                return false;
-            }
-            return true;
-        }
-
-        bool ParseStatement(Parser* parser)
-        {
-            // block statement
-            if(Accept(parser, TokenType::BeginBrace))
-            {
-                while(Accept(parser, TokenType::EndBrace) == false)
-                {
-                    if(false == ParseStatement(parser)) {return false;}
-                }
-                if(false == Require(parser, TokenType::EndBrace)) {return false;}
-                return true;
-            }
-
-            // if statement
-            else if(Accept(parser, TokenType::KeywordIf))
-            {
-                if(false == Require(parser, TokenType::OpenParen)) {return false;}
-                if(false == ParseValue(parser)) {return false;}
-                if(false == Require(parser, TokenType::CloseParen)) {return false;}
-                if(false == ParseStatement(parser)) {return false;}
-                return true;
-            }
-
-            // emtpy statement
-            else if(Accept(parser, TokenType::Term))
-            {
-                return true;
-            }
-
-            else
-            {
-                // value
-                if(false == ParseValue(parser)) {return false;}
-
-                if(Accept(parser, TokenType::Assign))
-                {
-                    // rhs
-                    if(false == ParseValue(parser)) {return false;}
-                }
-
-                if(false == Require(parser, TokenType::Term)) {return false;}
-
-                return true;
-            }
-            
-
-            // function call
-            if(Accept(parser, TokenType::OpenParen))
-            {
-                if(Accept(parser, TokenType::CloseParen))
-                {
-                    // no arguments
-                }
-                else
-                {
-                    // first argument
-                    if(false == ParseValue(parser)) {return false;}
-
-                    // the rest of the arguments
-                    while(Accept(parser, TokenType::CloseParen) == false)
-                    {
-                        if(false == Require(parser, TokenType::Comma)) {return false;}
-                        if(false == ParseValue(parser)) {return false;}
-                    }
-                }
-                if(false == Require(parser, TokenType::Term)) {return false;}
-            }
-            // assignment
-            else if(Accept(parser, TokenType::Assign))
-            {
-                if( false == ParseValue(parser) ) { return false; }
-                if(false == Require(parser, TokenType::Term)) {return false;}
-            }
-            else
-            {
-                Error(parser, log::Type::InvalidSymbol, { ToString(parser->lexer->Peek()) });
-                return false;
-            }
-
-            return true;
-        }
-
-        bool ParseProgram(Parser* parser)
-        {
-            if( parser->lexer->Peek().type != TokenType::EndOfStream )
-            {
-                if( ParseStatement(parser) == false)
-                {
-                    return false;
-                }
-            }
-            return true;
+        case TokenType::String:
+            return "string";
+        case TokenType::Identifier:
+            return "ident: " + token.text;
+        default:
+            return token.text;
         }
     }
 
+    struct Parser
+    {
+        LexerReader* lexer;
+        Log* log;
+
+        bool Error(log::Type error, const std::vector<std::string>& args)
+        {
+            log->AddError(lexer->lexer.file, error, args);
+            return false;
+        }
+
+        Token Peek() const
+        {
+            return lexer->Peek();
+        }
+
+        bool Accept(TokenType token)
+        {
+            if(Peek().type == token)
+            {
+                lexer->Read();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        bool Require(TokenType token)
+        {
+            if(Accept(token))
+            {
+                return true;
+            }
+            else
+            {
+                Error(log::Type::UnexpectedSymbol, { fel::ToString(token), ToString(lexer->Peek()) });
+                return false;
+            }
+        }
+    };
+
+    bool ParseValue(Parser* parser);
+
+    bool ParseValueArguments(Parser* parser)
+    {
+        if(!ParseValue(parser)) {return false;}
+        while(parser->Accept(TokenType::Comma))
+        {
+            if(!ParseValue(parser)) {return false;}
+        }
+
+        return true;
+    }
+
+    bool ParseSimpleValue(Parser* parser)
+    {
+        if(parser->Accept(TokenType::KeywordTrue)) { return true; }
+        if(parser->Accept(TokenType::KeywordFalse)) { return true; }
+        if(parser->Accept(TokenType::KeywordNull)) { return true; }
+        if(parser->Accept(TokenType::Int)) { return true; }
+        if(parser->Accept(TokenType::Number)) { return true;}
+        if(parser->Accept(TokenType::String)) { return true;}
+        if(parser->Accept(TokenType::Identifier))
+        {
+            while(true)
+            {
+                if(parser->Accept(TokenType::OpenParen))
+                {
+                    // function call
+                    if(parser->Peek().type != TokenType::CloseParen)
+                    {
+                        if(!ParseValueArguments(parser)) { return false;}
+                    }
+                    if(!parser->Require(TokenType::CloseParen)) {return false;}
+                }
+                else if (parser->Accept(TokenType::OpenBracket))
+                {
+                    // array index
+                    if(!ParseValueArguments(parser)) { return false;}
+                    if(!parser->Require(TokenType::CloseBracket)) {return false;}
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+        return parser->Error(log::Type::InvalidParserState, {"value", ToString(parser->Peek())});
+    }
+
+    bool ParseValue(Parser* parser)
+    {
+        if(parser->Accept(TokenType::OpenParen))
+        {
+            if(!ParseValue(parser)) {return false;}
+            if(parser->Require(TokenType::CloseParen)) {return false;}
+            return true;
+        }
+        if(parser->Accept(TokenType::KeywordFunction))
+        {
+            // todo(Gustav): implement this
+            return parser->Error(log::Type::InvalidParserState, {"function parsing not implemented", ToString(parser->Peek())});
+        }
+
+        return ParseSimpleValue(parser);
+    }
+
+    bool ParseManyStatements(Parser* parser);
+
+    bool ParseStatement(Parser* parser)
+    {
+        #define term() do { if(!parser->Require(TokenType::Term)) {return false;} } while(false)
+        if(parser->Accept(TokenType::Term)) {return true;}
+        if(parser->Accept(TokenType::BeginBrace))
+        {
+            if(!ParseManyStatements(parser)) { return false;}
+            if(!parser->Require(TokenType::EndBrace)) {return false;}
+            return true;
+        }
+        if( parser->Accept(TokenType::KeywordVar) )
+        {
+            if(!parser->Require(TokenType::Identifier)) {return false;}
+            if(!parser->Require(TokenType::Assign)) {return false;}
+            if(!ParseValue(parser)) {return false;}
+            term();
+            return true;
+        }
+        if( parser->Accept(TokenType::KeywordIf) )
+        {
+            if(!parser->Require(TokenType::OpenParen)) {return false;}
+            if(!ParseValue(parser)) {return false;}
+            if(!parser->Require(TokenType::CloseParen)) {return false;}
+            if(!ParseStatement(parser)) {return false;}
+            return true;
+        }
+        // else it's just a value like a function call, or a assign statement
+        if(!ParseValue(parser)) return false;
+        if(parser->Accept(TokenType::Assign))
+        {
+            if(!ParseValue(parser)) { return false; }
+        }
+        term();
+        return true;
+    }
+
+    bool ParseManyStatements(Parser* parser)
+    {
+        while(parser->Peek().type != TokenType::EndOfStream && parser->Peek().type != TokenType::EndBrace)
+        {
+            if(ParseStatement(parser) == false) return false;
+        }
+        return true;
+    }
+
+    bool ParseProgram(Parser* parser)
+    {
+        const auto statements = ParseManyStatements(parser);
+        if( parser->Peek().type == TokenType::EndOfStream )
+        {
+            return statements;
+        }
+        return parser->Error(log::Type::InvalidParserState, {"program", ToString(parser->Peek())});
+    }
+}
+
+namespace fel
+{
     bool Parse(LexerReader* reader, Log* log)
     {
         auto parser = Parser{reader, log};
