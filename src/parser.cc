@@ -109,8 +109,10 @@ namespace
                 }
             }
         }
-        return parser->Error(log::Type::InvalidParserState, {"value", ToString(parser->Peek())});
+        return parser->Error(log::Type::InvalidParserState, {"simple value", ToString(parser->Peek())});
     }
+
+    bool ParseStatement(Parser* parser);
 
     bool ParseValue(Parser* parser)
     {
@@ -122,8 +124,10 @@ namespace
         }
         if(parser->Accept(TokenType::KeywordFunction))
         {
-            // todo(Gustav): implement this
-            return parser->Error(log::Type::InvalidParserState, {"function parsing not implemented", ToString(parser->Peek())});
+            if(!parser->Require(TokenType::OpenParen)){ return false; }
+            if(!parser->Require(TokenType::CloseParen)){ return false; }
+            if(!ParseStatement(parser)) { return false;}
+            return true;
         }
 
         if(!ParseSimpleValue(parser)) { return false; }
@@ -155,6 +159,18 @@ namespace
             if(!ParseValue(parser)) {return false;}
             term();
             return true;
+        }
+        if(parser->Accept(TokenType::KeywordReturn))
+        {
+            if(parser->Accept(TokenType::Term))
+            {
+                // single return statement
+                return true;
+            }
+
+            if(!ParseValue(parser)) {return false;}
+
+            term();
         }
         if( parser->Accept(TokenType::KeywordIf) )
         {

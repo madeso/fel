@@ -30,7 +30,7 @@ namespace fel
         Identifier,
 
         KeywordIf, KeywordElse, KeywordFor, KeywordFunction, KeywordVar,
-        KeywordTrue, KeywordFalse, KeywordNull,
+        KeywordTrue, KeywordFalse, KeywordNull, KeywordReturn,
 
         Int, Number,
         

@@ -86,6 +86,12 @@ TEST_CASE("parser", "[parser]")
             CHECK(log);
         }
 
+        SECTION("if empty block and func")
+        {
+            RUN_INFO("if(foo()) {} bar();");
+            CHECK(log);
+        }
+
         SECTION("complex 1")
         {
             RUN_INFO("a.b.c[d,e].f(g,h) = i;");

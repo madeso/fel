@@ -49,6 +49,7 @@ namespace fel
             X(KeywordTrue);
             X(KeywordFalse);
             X(KeywordNull);
+            X(KeywordReturn);
 
             X(Int);
             X(Number);
@@ -234,6 +235,7 @@ namespace fel
                 else if(s == "else") { return {TokenType::KeywordElse, s}; }
                 else if(s == "for") { return {TokenType::KeywordFor, s}; }
                 else if(s == "fun") { return {TokenType::KeywordFunction, s}; }
+                else if(s == "return") { return {TokenType::KeywordReturn, s}; }
                 else if(s == "var") { return {TokenType::KeywordVar, s}; }
                 else if(s == "true") { return {TokenType::KeywordTrue, s}; }
                 else if(s == "false") { return {TokenType::KeywordFalse, s}; }
