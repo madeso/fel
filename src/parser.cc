@@ -126,7 +126,14 @@ namespace
             return parser->Error(log::Type::InvalidParserState, {"function parsing not implemented", ToString(parser->Peek())});
         }
 
-        return ParseSimpleValue(parser);
+        if(!ParseSimpleValue(parser)) { return false; }
+
+        while(parser->Accept(TokenType::Dot))
+        {
+            if(!ParseSimpleValue(parser)) { return false; }
+        }
+
+        return true;
     }
 
     bool ParseManyStatements(Parser* parser);
