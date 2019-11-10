@@ -94,12 +94,12 @@ TEST_CASE("parser", "[parser]")
 
         SECTION("complex 2a")
         {
-            RUN_INFO("fn() { return cat; } ().name = 'mittens';");
+            RUN_INFO("fun() { return cat; } ().name = 'mittens';");
             CHECK(log);
         }
         SECTION("complex 2b")
         {
-            RUN_INFO("fn() return dog;().name = 'sparky';");
+            RUN_INFO("fun() return dog;().name = 'sparky';");
             CHECK(log);
         }
     }

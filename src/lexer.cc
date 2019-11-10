@@ -213,13 +213,6 @@ namespace fel
         case '=': return CharAndChar(&file, TokenType::Assign, '=', TokenType::Equal);
         case '<': return CharAndChar(&file, TokenType::Less, '=', TokenType::LessEqual);
         case '>': return CharAndChar(&file, TokenType::Greater, '=', TokenType::GreaterEqual);
-            file.Read();
-            if(file.Peek() == '=')
-            {
-                file.Read();
-                return {TokenType::Equal, "=="};
-            }
-            return {TokenType::Assign, "="};
         
         case '"':
         case '\'':
@@ -240,7 +233,7 @@ namespace fel
                 else if(s == "if") { return {TokenType::KeywordIf, s}; }
                 else if(s == "else") { return {TokenType::KeywordElse, s}; }
                 else if(s == "for") { return {TokenType::KeywordFor, s}; }
-                else if(s == "function") { return {TokenType::KeywordFunction, s}; }
+                else if(s == "fun") { return {TokenType::KeywordFunction, s}; }
                 else if(s == "var") { return {TokenType::KeywordVar, s}; }
                 else if(s == "true") { return {TokenType::KeywordTrue, s}; }
                 else if(s == "false") { return {TokenType::KeywordFalse, s}; }
