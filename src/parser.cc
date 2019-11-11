@@ -15,6 +15,8 @@ namespace
             return "string";
         case TokenType::Identifier:
             return "ident: " + token.text;
+        case TokenType::EndOfStream:
+            return "<end of stream>";
         default:
             return token.text;
         }
@@ -171,6 +173,7 @@ namespace
             if(!ParseValue(parser)) {return false;}
 
             term();
+            return true;
         }
         if( parser->Accept(TokenType::KeywordIf) )
         {

@@ -56,6 +56,12 @@ TEST_CASE("parser", "[parser]")
             CHECK(log);
         }
 
+        SECTION("2 function calls")
+        {
+            RUN_INFO("cat(); dog();");
+            CHECK(log);
+        }
+
         SECTION("assignment")
         {
             RUN_INFO("cat = awesome;");
@@ -89,6 +95,24 @@ TEST_CASE("parser", "[parser]")
         SECTION("if empty block and func")
         {
             RUN_INFO("if(foo()) {} bar();");
+            CHECK(log);
+        }
+
+        SECTION("just return")
+        {
+            RUN_INFO("return;");
+            CHECK(log);
+        }
+
+        SECTION("return number")
+        {
+            RUN_INFO("return 42;");
+            CHECK(log);
+        }
+
+        SECTION("if return")
+        {
+            RUN_INFO("if(foo()) {return cat;} return dog;");
             CHECK(log);
         }
 
