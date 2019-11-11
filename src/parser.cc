@@ -78,6 +78,26 @@ namespace
         return true;
     }
 
+    bool ParseStatement(Parser* parser);
+
+    bool AcceptCallable(Parser* parser)
+    {
+        if(parser->Accept(TokenType::Identifier))
+        {
+            return true;
+        }
+
+        if(parser->Accept(TokenType::KeywordFunction))
+        {
+            if(!parser->Require(TokenType::OpenParen)){ return false; }
+            if(!parser->Require(TokenType::CloseParen)){ return false; }
+            if(!ParseStatement(parser)) { return false;}
+            return true;
+        }
+
+        return false;
+    }
+
     bool ParseSimpleValue(Parser* parser)
     {
         if(parser->Accept(TokenType::KeywordTrue)) { return true; }
@@ -86,7 +106,7 @@ namespace
         if(parser->Accept(TokenType::Int)) { return true; }
         if(parser->Accept(TokenType::Number)) { return true;}
         if(parser->Accept(TokenType::String)) { return true;}
-        if(parser->Accept(TokenType::Identifier))
+        if(AcceptCallable(parser))
         {
             while(true)
             {
@@ -114,8 +134,6 @@ namespace
         return parser->Error(log::Type::InvalidParserState, {"simple value", ToString(parser->Peek())});
     }
 
-    bool ParseStatement(Parser* parser);
-
     bool ParseValue(Parser* parser)
     {
         if(parser->Accept(TokenType::OpenParen))
@@ -124,13 +142,7 @@ namespace
             if(parser->Require(TokenType::CloseParen)) {return false;}
             return true;
         }
-        if(parser->Accept(TokenType::KeywordFunction))
-        {
-            if(!parser->Require(TokenType::OpenParen)){ return false; }
-            if(!parser->Require(TokenType::CloseParen)){ return false; }
-            if(!ParseStatement(parser)) { return false;}
-            return true;
-        }
+        
 
         if(!ParseSimpleValue(parser)) { return false; }
 
