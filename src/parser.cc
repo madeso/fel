@@ -1,7 +1,11 @@
 #include "parser.h"
 
+#include <optional>
+#include <sstream>
+
 #include "lexer.h"
 #include "log.h"
+#include "ast.h"
 
 namespace
 {
@@ -27,10 +31,10 @@ namespace
         LexerReader* lexer;
         Log* log;
 
-        bool Error(log::Type error, const std::vector<std::string>& args)
+        std::nullopt_t Error(log::Type error, const std::vector<std::string>& args)
         {
             log->AddError(lexer->lexer.file, error, args);
-            return false;
+            return std::nullopt;
         }
 
         Token Peek() const
@@ -38,76 +42,109 @@ namespace
             return lexer->Peek();
         }
 
-        bool Accept(TokenType token)
+        std::optional<Token> Accept(TokenType token)
         {
             if(Peek().type == token)
             {
-                lexer->Read();
-                return true;
+                return lexer->Read();
             }
             else
             {
-                return false;
+                return std::nullopt;
             }
         }
 
-        bool Require(TokenType token)
+        std::optional<Token> Require(TokenType token)
         {
-            if(Accept(token))
+            if(auto r = Accept(token))
             {
-                return true;
+                return r;
             }
             else
             {
                 Error(log::Type::UnexpectedSymbol, { fel::ToString(token), ToString(lexer->Peek()) });
-                return false;
+                return std::nullopt;
             }
         }
     };
 
-    bool ParseValue(Parser* parser);
+    ValuePtr ParseValue(Parser* parser);
 
-    bool ParseValueArguments(Parser* parser)
+    std::optional<ValueList> ParseValueArguments(Parser* parser)
     {
-        if(!ParseValue(parser)) {return false;}
-        while(parser->Accept(TokenType::Comma))
-        {
-            if(!ParseValue(parser)) {return false;}
-        }
+        ValueList values;
 
-        return true;
+        do
+        {
+            if(auto value = ParseValue(parser); value)
+            {
+                values.push_back(value);
+            }
+            else
+            {
+                return std::nullopt;
+            }
+        } while(parser->Accept(TokenType::Comma));
+
+        return values;
     }
 
-    bool ParseStatement(Parser* parser);
+    StatementPtr ParseStatement(Parser* parser);
 
-    bool AcceptCallable(Parser* parser)
+    // bool=true if callable was accepted, false if not
+    // Callable might be null if it was accepted but there was a syntax error
+    std::pair<bool, ValuePtr> AcceptCallable(Parser* parser)
     {
-        if(parser->Accept(TokenType::Identifier))
+        if(auto ident = parser->Accept(TokenType::Identifier); ident)
         {
-            return true;
+            return {true, std::make_shared<ValueIdent>(ident->text)};
         }
 
         if(parser->Accept(TokenType::KeywordFunction))
         {
-            if(!parser->Require(TokenType::OpenParen)){ return false; }
-            if(!parser->Require(TokenType::CloseParen)){ return false; }
-            if(!ParseStatement(parser)) { return false;}
-            return true;
+            if(!parser->Require(TokenType::OpenParen)){ return {true, nullptr}; }
+            // todo(Gustav): parse argumentes!
+            if(!parser->Require(TokenType::CloseParen)){ return {true, nullptr}; }
+            if(auto statement = ParseStatement(parser); statement)
+            {
+                return {true, std::make_shared<ValueFunctionDefinition>(statement)};
+            }
+            else
+            {
+                return {true, nullptr};
+            }
         }
 
-        return false;
+        return {false, nullptr};
     }
 
-    bool ParseSimpleValue(Parser* parser)
+    template<typename V>
+    ValuePtr ParseNumber(Parser* parser, const Token& token)
     {
-        if(parser->Accept(TokenType::KeywordTrue)) { return true; }
-        if(parser->Accept(TokenType::KeywordFalse)) { return true; }
-        if(parser->Accept(TokenType::KeywordNull)) { return true; }
-        if(parser->Accept(TokenType::Int)) { return true; }
-        if(parser->Accept(TokenType::Number)) { return true;}
-        if(parser->Accept(TokenType::String)) { return true;}
-        if(AcceptCallable(parser))
+        decltype(V::value) value;
+        std::istringstream iss(token.text.c_str());
+        iss >> value;
+        if(iss.good()) { return std::make_shared<V>(value);}
+        else
         {
+            parser->Error(log::Type::InvalidParserState, {"simple value", ToString(parser->Peek())});
+            return nullptr;
+        }
+    }
+
+    ValuePtr ParseSimpleValue(Parser* parser)
+    {
+        if(parser->Accept(TokenType::KeywordTrue)) { return std::make_shared<ValueBool>(true); }
+        if(parser->Accept(TokenType::KeywordFalse)) { return std::make_shared<ValueBool>(false); }
+        if(parser->Accept(TokenType::KeywordNull)) { return std::make_shared<ValueNull>(); }
+        if(auto value = parser->Accept(TokenType::Int); value) { return ParseNumber<ValueInt>(parser, *value); }
+        if(auto value = parser->Accept(TokenType::Number); value) { return ParseNumber<ValueNumber>(parser, *value);}
+        if(auto value = parser->Accept(TokenType::String); value) { return std::make_shared<ValueString>(value->text);}
+        if(auto [callable_accepted, callable] = AcceptCallable(parser); callable_accepted)
+        {
+            if(!callable) { return nullptr; }
+
+            auto ret = callable;
             while(true)
             {
                 if(parser->Accept(TokenType::OpenParen))
@@ -115,119 +152,161 @@ namespace
                     // function call
                     if(parser->Peek().type != TokenType::CloseParen)
                     {
-                        if(!ParseValueArguments(parser)) { return false;}
+                        if(auto arguments = ParseValueArguments(parser); arguments)
+                        {
+                            ret = std::make_shared<ValueCallFunction>(ret, *arguments);
+                        }
+                        else
+                        {
+                            return nullptr;
+                        }
                     }
-                    if(!parser->Require(TokenType::CloseParen)) {return false;}
+                    if(!parser->Require(TokenType::CloseParen)) {return nullptr;}
                 }
                 else if (parser->Accept(TokenType::OpenBracket))
                 {
                     // array index
-                    if(!ParseValueArguments(parser)) { return false;}
-                    if(!parser->Require(TokenType::CloseBracket)) {return false;}
+                    if(auto arguments = ParseValueArguments(parser); arguments)
+                    {
+                        ret = std::make_shared<ValueCallArray>(ret, *arguments);
+                    }
+                    else
+                    {
+                        return nullptr;
+                    }
+                    if(!parser->Require(TokenType::CloseBracket)) {return nullptr;}
                 }
                 else
                 {
-                    return true;
+                    return ret;
                 }
             }
         }
-        return parser->Error(log::Type::InvalidParserState, {"simple value", ToString(parser->Peek())});
+        parser->Error(log::Type::InvalidParserState, {"simple value", ToString(parser->Peek())});
+        return nullptr;
     }
 
-    bool ParseValue(Parser* parser)
+    ValuePtr ParseValue(Parser* parser)
     {
         if(parser->Accept(TokenType::OpenParen))
         {
-            if(!ParseValue(parser)) {return false;}
-            if(parser->Require(TokenType::CloseParen)) {return false;}
-            return true;
+            auto value = ParseValue(parser);
+            if(!value) {return nullptr;}
+            if(parser->Require(TokenType::CloseParen)) {return nullptr;}
+            return value;
         }
         
-
-        if(!ParseSimpleValue(parser)) { return false; }
+        auto value = ParseSimpleValue(parser);
+        if(!value) { return nullptr; }
 
         while(parser->Accept(TokenType::Dot))
         {
-            if(!ParseSimpleValue(parser)) { return false; }
+            if(auto sub = ParseSimpleValue(parser); sub)
+            {
+                value = std::make_shared<ValueDotAccess>(value, sub);
+            }
+            else{ return nullptr; }
         }
 
-        return true;
+        return value;
     }
 
-    bool ParseManyStatements(Parser* parser);
+    StatementPtr ParseManyStatements(Parser* parser);
 
-    bool ParseStatement(Parser* parser)
+    StatementPtr ParseStatement(Parser* parser)
     {
-        #define term() do { if(!parser->Require(TokenType::Term)) {return false;} } while(false)
-        if(parser->Accept(TokenType::Term)) {return true;}
+        #define term() do { if(!parser->Require(TokenType::Term)) {return nullptr;} } while(false)
+        if(parser->Accept(TokenType::Term)) {return std::make_shared<StatementNull>();}
         if(parser->Accept(TokenType::BeginBrace))
         {
-            if(!ParseManyStatements(parser)) { return false;}
-            if(!parser->Require(TokenType::EndBrace)) {return false;}
-            return true;
+            auto statements = ParseManyStatements(parser);
+            if(!statements) { return nullptr;}
+            if(!parser->Require(TokenType::EndBrace)) {return nullptr;}
+            return statements;
         }
         if( parser->Accept(TokenType::KeywordVar) )
         {
-            if(!parser->Require(TokenType::Identifier)) {return false;}
-            if(!parser->Require(TokenType::Assign)) {return false;}
-            if(!ParseValue(parser)) {return false;}
+            auto name = parser->Require(TokenType::Identifier);
+            if(!name) {return nullptr;}
+            if(!parser->Require(TokenType::Assign)) {return nullptr;}
+            auto value = ParseValue(parser);
+            if(!value) {return nullptr;}
             term();
-            return true;
+            return std::make_shared<StatementDeclaration>(name->text, value);
         }
         if(parser->Accept(TokenType::KeywordReturn))
         {
             if(parser->Accept(TokenType::Term))
             {
                 // single return statement
-                return true;
+                return std::make_shared<StatementReturn>();
             }
 
-            if(!ParseValue(parser)) {return false;}
+            auto value = ParseValue(parser);
+            if(!value) {return nullptr;}
 
             term();
-            return true;
+            return std::make_shared<StatementReturnValue>(value);
         }
         if( parser->Accept(TokenType::KeywordIf) )
         {
-            if(!parser->Require(TokenType::OpenParen)) {return false;}
-            if(!ParseValue(parser)) {return false;}
-            if(!parser->Require(TokenType::CloseParen)) {return false;}
-            if(!ParseStatement(parser)) {return false;}
-            return true;
+            if(!parser->Require(TokenType::OpenParen)) {return nullptr;}
+            auto value = ParseValue(parser);
+            if(!value) {return nullptr;}
+            if(!parser->Require(TokenType::CloseParen)) {return nullptr;}
+            auto statement = ParseStatement(parser);
+            if(!statement) {return nullptr;}
+            return std::make_shared<StatementConditionIf>(value, statement);
         }
         // else it's just a value like a function call, or a assign statement
-        if(!ParseValue(parser)) return false;
+        auto value = ParseValue(parser);
+        if(!value) return nullptr;
         if(parser->Accept(TokenType::Assign))
         {
-            if(!ParseValue(parser)) { return false; }
+            auto rhs = ParseValue(parser);
+            if(!rhs) { return nullptr; }
+            term();
+            return std::make_shared<StatementAssign>(value, rhs);
         }
-        term();
-        return true;
+        else
+        {
+            term();
+            return std::make_shared<StatementValue>(value);
+        }
     }
 
-    bool ParseManyStatements(Parser* parser)
+    StatementPtr ParseManyStatements(Parser* parser)
     {
+        auto list = std::make_shared<StatementList>();
         while(parser->Peek().type != TokenType::EndOfStream && parser->Peek().type != TokenType::EndBrace)
         {
-            if(ParseStatement(parser) == false) return false;
+            if(auto statement = ParseStatement(parser); statement)
+            {
+                list->statements.emplace_back(statement);
+            }
+            else
+            {
+                return nullptr;
+            }
         }
-        return true;
+        return list;
     }
 
-    bool ParseProgram(Parser* parser)
+    StatementPtr ParseProgram(Parser* parser)
     {
         const auto statements = ParseManyStatements(parser);
         if( parser->Peek().type == TokenType::EndOfStream )
         {
             return statements;
         }
-        return parser->Error(log::Type::InvalidParserState, {"program", ToString(parser->Peek())});
+        parser->Error(log::Type::InvalidParserState, {"program", ToString(parser->Peek())});
+        return nullptr;
     }
 }
 
 namespace fel
 {
-    bool Parse(LexerReader* reader, Log* log)
+    StatementPtr Parse(LexerReader* reader, Log* log)
     {
         auto parser = Parser{reader, log};
         return ParseProgram(&parser);

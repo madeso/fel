@@ -11,7 +11,7 @@ using namespace fel;
 
 namespace
 {
-    bool Parse(const std::string& source, Log* log)
+    fel::StatementPtr Parse(const std::string& source, Log* log)
     {
         auto file = File{"source", source};
         auto reader = LexerReader{file, log};

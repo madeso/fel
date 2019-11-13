@@ -32,6 +32,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)
 
 add_library(fel STATIC
+  src/ast.cc
+  src/ast.h
   src/file.cc
   src/file.h
   src/lexer.cc
