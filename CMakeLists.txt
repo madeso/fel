@@ -34,6 +34,8 @@ include_directories(src)
 add_library(fel STATIC
   src/ast.cc
   src/ast.h
+  src/context.cc
+  src/context.h
   src/file.cc
   src/file.h
   src/lexer.cc

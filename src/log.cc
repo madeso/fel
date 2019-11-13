@@ -6,6 +6,7 @@
 #include <streambuf>
 #include <cassert>
 
+#include "context.h"
 #include "file.h"
 
 namespace fel::log
@@ -20,12 +21,13 @@ namespace fel::log
             && lhs.arguments == rhs.arguments;
     }
 
-    Entry::Entry(const FilePointer& a_where, Intensity a_intensity, log::Type a_type, const std::vector<std::string>& a_args)
+    Entry::Entry(const FilePointer& a_where, Intensity a_intensity, log::Type a_type, const std::vector<std::string>& a_args, const std::vector<std::string>& a_debug_context)
     : file(a_where.file.filename)
     , location(a_where.location)
     , intensity(a_intensity)
     , type(a_type)
     , arguments(a_args)
+    , debug_context(a_debug_context)
     {}
 
 
@@ -85,6 +87,17 @@ namespace fel::log
             o << "Internal error: Unhandled error in switch.";
             break;
         }
+        if(!entry.debug_context.empty())
+        {
+            o << "\n";
+            bool first = true;
+            for(auto d: entry.debug_context)
+            {
+                if(first) first = false;
+                else o << "->";
+                o << d;
+            }
+        }
         return o;
     }
 }
@@ -117,9 +130,16 @@ namespace fel
     }
 
     void
+    Log::AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args, const Context& context)
+    {
+        entries.emplace_back(where, log::Intensity::Error, type, args, context.stack);
+    }
+
+    void
     Log::AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args)
     {
-        entries.emplace_back(where, log::Intensity::Error, type, args);
+        std::vector<std::string> dc;
+        entries.emplace_back(where, log::Intensity::Error, type, args, dc);
     }
 
     bool
