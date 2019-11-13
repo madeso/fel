@@ -129,10 +129,10 @@ namespace
         decltype(V::value) value;
         std::istringstream iss(token.text.c_str());
         iss >> value;
-        if(iss.good()) { return std::make_shared<V>(value);}
+        if(!iss.fail() && iss.eof()) { return std::make_shared<V>(value);}
         else
         {
-            parser->Error(log::Type::InvalidParserState, {"number", ToString(parser->Peek())});
+            parser->Error(log::Type::UnableToParseNumber, {token.text});
             return nullptr;
         }
     }

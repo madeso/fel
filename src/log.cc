@@ -80,6 +80,9 @@ namespace fel::log
         case Type::InvalidSymbol:
             o << "Invalid symbol " << Arg(entry, 0);
             break;
+        case Type::UnableToParseNumber:
+            o << "unable to parse number " << Arg(entry, 0);
+            break;
         case Type::InvalidParserState:
             o << "Unexpected token "<< Arg(entry, 1) << " in " << Arg(entry, 0);
             break;

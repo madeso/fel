@@ -30,6 +30,9 @@ namespace fel
             // found token
             InvalidSymbol,
 
+            // unable to parse (text) to number
+            UnableToParseNumber,
+
             // Invalid parser state (statename) but found (token)
             InvalidParserState
         };
