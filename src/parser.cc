@@ -8,6 +8,8 @@
 #include "ast.h"
 #include "context.h"
 
+#include "preproc.h"
+
 namespace
 {
     using namespace fel;
@@ -70,11 +72,13 @@ namespace
         }
     };
 
+    #define FEL_ADD_CONTEXT(parser, message) auto FEL_CONCAT(scope_, __LINE__) = Scope{&parser->context, message}
+
     ValuePtr ParseValue(Parser* parser);
 
     std::optional<ValueList> ParseValueArguments(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "value arguments");
+        FEL_ADD_CONTEXT(parser, "value arguments");
         ValueList values;
 
         do
@@ -98,7 +102,7 @@ namespace
     // Callable might be null if it was accepted but there was a syntax error
     std::pair<bool, ValuePtr> AcceptCallable(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "accept callable");
+        FEL_ADD_CONTEXT(parser, "accept callable");
         if(auto ident = parser->Accept(TokenType::Identifier); ident)
         {
             return {true, std::make_shared<ValueIdent>(ident->text)};
@@ -125,7 +129,7 @@ namespace
     template<typename V>
     ValuePtr ParseNumber(Parser* parser, const Token& token)
     {
-        FEL_SCOPE(&parser->context, "number");
+        FEL_ADD_CONTEXT(parser, "number");
         decltype(V::value) value;
         std::istringstream iss(token.text.c_str());
         iss >> value;
@@ -139,7 +143,7 @@ namespace
 
     ValuePtr ParseSimpleValue(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "simple value");
+        FEL_ADD_CONTEXT(parser, "simple value");
         if(parser->Accept(TokenType::KeywordTrue)) { return std::make_shared<ValueBool>(true); }
         if(parser->Accept(TokenType::KeywordFalse)) { return std::make_shared<ValueBool>(false); }
         if(parser->Accept(TokenType::KeywordNull)) { return std::make_shared<ValueNull>(); }
@@ -148,7 +152,7 @@ namespace
         if(auto value = parser->Accept(TokenType::String); value) { return std::make_shared<ValueString>(value->text);}
         if(auto [callable_accepted, callable] = AcceptCallable(parser); callable_accepted)
         {
-            FEL_SCOPE(&parser->context, "callable");
+            FEL_ADD_CONTEXT(parser, "callable");
             if(!callable) { return nullptr; }
 
             auto ret = callable;
@@ -156,7 +160,7 @@ namespace
             {
                 if(parser->Accept(TokenType::OpenParen))
                 {
-                    FEL_SCOPE(&parser->context, "function call");
+                    FEL_ADD_CONTEXT(parser, "function call");
                     // function call
                     if(parser->Peek().type != TokenType::CloseParen)
                     {
@@ -174,7 +178,7 @@ namespace
                 else if (parser->Accept(TokenType::OpenBracket))
                 {
                     // array index
-                    FEL_SCOPE(&parser->context, "array index");
+                    FEL_ADD_CONTEXT(parser, "array index");
                     if(auto arguments = ParseValueArguments(parser); arguments)
                     {
                         ret = std::make_shared<ValueCallArray>(ret, *arguments);
@@ -197,10 +201,10 @@ namespace
 
     ValuePtr ParseValue(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "value");
+        FEL_ADD_CONTEXT(parser, "value");
         if(parser->Accept(TokenType::OpenParen))
         {
-            FEL_SCOPE(&parser->context, "inside paren");
+            FEL_ADD_CONTEXT(parser, "inside paren");
             auto value = ParseValue(parser);
             if(!value) {return nullptr;}
             if(parser->Require(TokenType::CloseParen)) {return nullptr;}
@@ -212,7 +216,7 @@ namespace
 
         while(parser->Accept(TokenType::Dot))
         {
-            FEL_SCOPE(&parser->context, "dot");
+            FEL_ADD_CONTEXT(parser, "dot");
             if(auto sub = ParseSimpleValue(parser); sub)
             {
                 value = std::make_shared<ValueDotAccess>(value, sub);
@@ -227,13 +231,13 @@ namespace
 
     StatementPtr ParseStatement(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "statement");
+        FEL_ADD_CONTEXT(parser, "statement");
 
         #define term() do { if(!parser->Require(TokenType::Term)) {return nullptr;} } while(false)
         if(parser->Accept(TokenType::Term)) {return std::make_shared<StatementNull>();}
         if(parser->Accept(TokenType::BeginBrace))
         {
-            FEL_SCOPE(&parser->context, "inside braces");
+            FEL_ADD_CONTEXT(parser, "inside braces");
             auto statements = ParseManyStatements(parser);
             if(!statements) { return nullptr;}
             if(!parser->Require(TokenType::EndBrace)) {return nullptr;}
@@ -241,7 +245,7 @@ namespace
         }
         if( parser->Accept(TokenType::KeywordVar) )
         {
-            FEL_SCOPE(&parser->context, "var statement");
+            FEL_ADD_CONTEXT(parser, "var statement");
             auto name = parser->Require(TokenType::Identifier);
             if(!name) {return nullptr;}
             if(!parser->Require(TokenType::Assign)) {return nullptr;}
@@ -252,7 +256,7 @@ namespace
         }
         if(parser->Accept(TokenType::KeywordReturn))
         {
-            FEL_SCOPE(&parser->context, "return statement");
+            FEL_ADD_CONTEXT(parser, "return statement");
             if(parser->Accept(TokenType::Term))
             {
                 // single return statement
@@ -267,7 +271,7 @@ namespace
         }
         if( parser->Accept(TokenType::KeywordIf) )
         {
-            FEL_SCOPE(&parser->context, "if statement");
+            FEL_ADD_CONTEXT(parser, "if statement");
             if(!parser->Require(TokenType::OpenParen)) {return nullptr;}
             auto value = ParseValue(parser);
             if(!value) {return nullptr;}
@@ -281,7 +285,7 @@ namespace
         if(!value) return nullptr;
         if(parser->Accept(TokenType::Assign))
         {
-            FEL_SCOPE(&parser->context, "assign var");
+            FEL_ADD_CONTEXT(parser, "assign var");
             auto rhs = ParseValue(parser);
             if(!rhs) { return nullptr; }
             term();
@@ -296,7 +300,7 @@ namespace
 
     StatementPtr ParseManyStatements(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "many statements");
+        FEL_ADD_CONTEXT(parser, "many statements");
 
         auto list = std::make_shared<StatementList>();
         while(parser->Peek().type != TokenType::EndOfStream && parser->Peek().type != TokenType::EndBrace)
@@ -315,7 +319,7 @@ namespace
 
     StatementPtr ParseProgram(Parser* parser)
     {
-        FEL_SCOPE(&parser->context, "program");
+        FEL_ADD_CONTEXT(parser, "program");
 
         const auto statements = ParseManyStatements(parser);
         if( parser->Peek().type == TokenType::EndOfStream )

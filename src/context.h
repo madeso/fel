@@ -18,10 +18,6 @@ namespace fel
 
         Context* context;
     };
-
-    #define FEL_CONCAT_HELPER(X,Y) X ## Y
-    #define FEL_CONCAT(X, Y) FEL_CONCAT_HELPER(X, Y)
-    #define FEL_SCOPE(context, message) auto FEL_CONCAT(scope_, __LINE__) = Scope{context, message}
 }
 
 #endif  // FEL_CONTEXT_H
