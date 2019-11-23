@@ -1,8 +1,8 @@
 // same
-var foo1 = function() {};
-function foo2() {}
+var foo1 = fun() {};
+fun foo2() {}
 
-function test_variables()
+fun test_variables()
 {
     // declare and initialize variables, terminate with semicolon
     var a = 3;
@@ -75,40 +75,40 @@ function test_variables()
     var table3 = {name="Rex", ..table2}; // table3 is a shallow copy of table2, if name was in table2, it is now replaced
 }
 
-function test_functions()
+fun test_functions()
 {
     // this is a function
-    var f1 = function() {};
+    var f1 = fun() {};
 
     // it behaves like a variables, so we can assign a new function to a variable
-    f1 = function() {};
+    f1 = fun() {};
 
     // function can optionally return 1 value
-    var f2 = function() {return 3;};
+    var f2 = fun() {return 3;};
     var ret1 = f2();
     // functions with no explicit return statement or not specifying the return value returns null
 
     // function can take 0 or more arguments
-    var f3 = function(a, b, c) {};
+    var f3 = fun(a, b, c) {};
     f3(1, 2, 3);
     
     // arguments not specified are passed as null
     f3(1, 2); // c is null here
 
     // default values can be specified, and positional arguments can be used and are evaluated is specified order and then left to right
-    var f4 = function(a=1, b=2, c=3) {};
+    var f4 = fun(a=1, b=2, c=3) {};
     f4(c=1, a=3); // 3, 2, 1, eval order: c a b
 
     // functions called on tables are implicitly passed a argument called this
     var table1 = {
       what = "",
-      fun = function() {this.what = "Dog";}
+      fun = fun() {this.what = "Dog";}
     };
     table1.what = "Cat";
     table1.fun();
 }
 
-function test_conditionals()
+fun test_conditionals()
 {
     var a = 3;
 
@@ -179,7 +179,7 @@ function test_conditionals()
     }
 }
 
-function test_types()
+fun test_types()
 {
     // types are implicit and optional, so for we haven't specified the types on our variables but lets start
     
