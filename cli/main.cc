@@ -92,11 +92,17 @@ void RunParser(const File& file)
 {
     Log log;
     auto reader = LexerReader{file, &log};
-    auto parse_ok = Parse(&reader, &log);
+    auto statement = Parse(&reader, &log);
     Print(log);
 
-    std::cout << (parse_ok ? "parse ok" : "parse failed")
-              << "\n";
+    if(statement)
+    {
+        std::cout << PrintStatement(statement) << "\n\n";
+    }
+    else
+    {
+        Print(log);
+    }
 }
 
 
