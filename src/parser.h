@@ -8,7 +8,7 @@ namespace fel
     struct LexerReader;
     struct Log;
 
-    StatementPtr Parse(LexerReader* reader, Log* log);
+    StatementPtr Parse(LexerReader* reader, Log* log, bool debug);
 }
 
 #endif  // FEL_PARSER_H

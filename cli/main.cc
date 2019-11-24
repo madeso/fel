@@ -92,7 +92,7 @@ void RunParser(const File& file)
 {
     Log log;
     auto reader = LexerReader{file, &log};
-    auto statement = Parse(&reader, &log);
+    auto statement = Parse(&reader, &log, false);
     Print(log);
 
     if(statement)

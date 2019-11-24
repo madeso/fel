@@ -11,18 +11,19 @@ using namespace fel;
 
 namespace
 {
-    fel::StatementPtr Parse(const std::string& source, Log* log)
+    fel::StatementPtr Parse(const std::string& source, Log* log, bool debug_parser)
     {
         auto file = File{"source", source};
         auto reader = LexerReader{file, log};
-        return fel::Parse(&reader, log);
+        return fel::Parse(&reader, log, debug_parser);
     }
 }
 
-#define RUN_INFO(x) const std::string code = "code: " #x; auto r = Parse(x, &log); const auto printed = PrintStatement(r); INFO(code);
+#define RUN_INFO(x) const std::string code = "code: " #x; auto r = Parse(x, &log, debug_parser); const auto printed = PrintStatement(r); INFO(code);
 
 TEST_CASE("parser", "[parser]")
 {
+    bool debug_parser = false;
     Log log;
     SECTION("ok")
     {

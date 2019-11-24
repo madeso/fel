@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <sstream>
+#include <iostream>
 
 #include "lexer.h"
 #include "log.h"
@@ -33,6 +34,7 @@ namespace
     {
         LexerReader* lexer;
         Log* log;
+        bool debug;
         Context context = {};
 
         std::nullopt_t Error(log::Type error, const std::vector<std::string>& args)
@@ -76,8 +78,11 @@ namespace
 
     ValuePtr ParseValue(Parser* parser);
 
+    #define DEBUG(parser, message) do { if (parser->debug) { std::cout << message << "\n"; } } while(false)
+
     std::optional<ValueList> ParseValueArguments(Parser* parser)
     {
+        DEBUG(parser, "parse value arguments");
         FEL_ADD_CONTEXT(parser, "value arguments");
         ValueList values;
 
@@ -85,14 +90,17 @@ namespace
         {
             if(auto value = ParseValue(parser); value)
             {
+                DEBUG(parser, "got value");
                 values.push_back(value);
             }
             else
             {
+                DEBUG(parser, "failed to parse arguments");
                 return std::nullopt;
             }
         } while(parser->Accept(TokenType::Comma));
 
+        DEBUG(parser, "got value arguments");
         return values;
     }
 
@@ -102,40 +110,48 @@ namespace
     // Callable might be null if it was accepted but there was a syntax error
     std::pair<bool, ValuePtr> AcceptCallable(Parser* parser)
     {
+        DEBUG(parser, "accept callable");
         FEL_ADD_CONTEXT(parser, "accept callable");
         if(auto ident = parser->Accept(TokenType::Identifier); ident)
         {
+            DEBUG(parser, "callable ident");
             return {true, std::make_shared<ValueIdent>(ident->text)};
         }
 
         if(parser->Accept(TokenType::KeywordFunction))
         {
-            if(!parser->Require(TokenType::OpenParen)){ return {true, nullptr}; }
+            DEBUG(parser, "got function keyword");
+            if(!parser->Require(TokenType::OpenParen)){ DEBUG(parser, "syntax error, missing open paren after fun"); return {true, nullptr}; }
             // todo(Gustav): parse argumentes!
-            if(!parser->Require(TokenType::CloseParen)){ return {true, nullptr}; }
+            if(!parser->Require(TokenType::CloseParen)){ DEBUG(parser, "syntax error, missing close paren after fun"); return {true, nullptr}; }
             if(auto statement = ParseStatement(parser); statement)
             {
+                DEBUG(parser, "parsed callable");
                 return {true, std::make_shared<ValueFunctionDefinition>(statement)};
             }
             else
             {
+                DEBUG(parser, "syntax error, missing statement after fun");
                 return {true, nullptr};
             }
         }
 
+        DEBUG(parser, "no callable");
         return {false, nullptr};
     }
 
     template<typename V>
     ValuePtr ParseNumber(Parser* parser, const Token& token)
     {
+        DEBUG(parser, "parsing number");
         FEL_ADD_CONTEXT(parser, "number");
         decltype(V::value) value;
         std::istringstream iss(token.text.c_str());
         iss >> value;
-        if(!iss.fail() && iss.eof()) { return std::make_shared<V>(value);}
+        if(!iss.fail() && iss.eof()) { DEBUG(parser, "got number"); return std::make_shared<V>(value);}
         else
         {
+            DEBUG(parser, "unable to parse number");
             parser->Error(log::Type::UnableToParseNumber, {token.text});
             return nullptr;
         }
@@ -143,15 +159,17 @@ namespace
 
     ValuePtr ParseSimpleValue(Parser* parser)
     {
+        DEBUG(parser, "parsing simple value");
         FEL_ADD_CONTEXT(parser, "simple value");
-        if(parser->Accept(TokenType::KeywordTrue)) { return std::make_shared<ValueBool>(true); }
-        if(parser->Accept(TokenType::KeywordFalse)) { return std::make_shared<ValueBool>(false); }
-        if(parser->Accept(TokenType::KeywordNull)) { return std::make_shared<ValueNull>(); }
-        if(auto value = parser->Accept(TokenType::Int); value) { return ParseNumber<ValueInt>(parser, *value); }
-        if(auto value = parser->Accept(TokenType::Number); value) { return ParseNumber<ValueNumber>(parser, *value);}
-        if(auto value = parser->Accept(TokenType::String); value) { return std::make_shared<ValueString>(value->text);}
+        if(parser->Accept(TokenType::KeywordTrue)) { DEBUG(parser, "got true"); return std::make_shared<ValueBool>(true); }
+        if(parser->Accept(TokenType::KeywordFalse)) { DEBUG(parser, "got false"); return std::make_shared<ValueBool>(false); }
+        if(parser->Accept(TokenType::KeywordNull)) { DEBUG(parser, "got null"); return std::make_shared<ValueNull>(); }
+        if(auto value = parser->Accept(TokenType::Int); value) { DEBUG(parser, "got int"); return ParseNumber<ValueInt>(parser, *value); }
+        if(auto value = parser->Accept(TokenType::Number); value) { DEBUG(parser, "got number"); return ParseNumber<ValueNumber>(parser, *value);}
+        if(auto value = parser->Accept(TokenType::String); value) { DEBUG(parser, "got string"); return std::make_shared<ValueString>(value->text);}
         if(auto [callable_accepted, callable] = AcceptCallable(parser); callable_accepted)
         {
+            DEBUG(parser, "got callable");
             FEL_ADD_CONTEXT(parser, "callable");
             if(!callable) { return nullptr; }
 
@@ -160,33 +178,43 @@ namespace
             {
                 if(parser->Accept(TokenType::OpenParen))
                 {
+                    DEBUG(parser, "got open paren");
                     FEL_ADD_CONTEXT(parser, "function call");
                     // function call
+                    ValueList arguments;
                     if(parser->Peek().type != TokenType::CloseParen)
                     {
-                        if(auto arguments = ParseValueArguments(parser); arguments)
+                        if(auto optional_arguments = ParseValueArguments(parser); optional_arguments)
                         {
-                            ret = std::make_shared<ValueCallFunction>(ret, *arguments);
+                            DEBUG(parser, "got function argument");
+                            arguments = *optional_arguments;
                         }
                         else
                         {
+                            DEBUG(parser, "failed to parse function argument");
                             return nullptr;
                         }
                     }
-                    if(!parser->Require(TokenType::CloseParen)) {return nullptr;}
+                    ret = std::make_shared<ValueCallFunction>(ret, arguments);
+                    if(!parser->Require(TokenType::CloseParen)) {DEBUG(parser, "failed to get close parent"); return nullptr;}
+                    DEBUG(parser, "function call done");
                 }
                 else if (parser->Accept(TokenType::OpenBracket))
                 {
-                    // array index
+                    DEBUG(parser, "got open bracket");
                     FEL_ADD_CONTEXT(parser, "array index");
-                    if(auto arguments = ParseValueArguments(parser); arguments)
+                    // array index
+                    ValueList arguments;
+                    FEL_ADD_CONTEXT(parser, "array index");
+                    if(auto optional_arguments = ParseValueArguments(parser); optional_arguments)
                     {
-                        ret = std::make_shared<ValueCallArray>(ret, *arguments);
+                        arguments = *optional_arguments;
                     }
                     else
                     {
                         return nullptr;
                     }
+                    ret = std::make_shared<ValueCallArray>(ret, arguments);
                     if(!parser->Require(TokenType::CloseBracket)) {return nullptr;}
                 }
                 else
@@ -333,9 +361,9 @@ namespace
 
 namespace fel
 {
-    StatementPtr Parse(LexerReader* reader, Log* log)
+    StatementPtr Parse(LexerReader* reader, Log* log, bool debug)
     {
-        auto parser = Parser{reader, log};
+        auto parser = Parser{reader, log, debug};
         return ParseProgram(&parser);
     }
 }
