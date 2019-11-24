@@ -19,7 +19,7 @@ namespace
     }
 }
 
-#define RUN_INFO(x) Parse(x, &log); INFO("code: " x);
+#define RUN_INFO(x) const std::string code = "code: " #x; auto r = Parse(x, &log); const auto printed = PrintStatement(r); INFO(code);
 
 TEST_CASE("parser", "[parser]")
 {
@@ -30,24 +30,28 @@ TEST_CASE("parser", "[parser]")
         {
             RUN_INFO("");
             CHECK(log);
+            CHECK(printed == "");
         }
 
         SECTION("function call 0")
         {
             RUN_INFO("dog();");
             CHECK(log);
+            CHECK(printed == "dog();\n");
         }
 
         SECTION("function call 1")
         {
             RUN_INFO("dog(42);");
             CHECK(log);
+            CHECK(printed == "dog(42);\n");
         }
 
         SECTION("function call 2")
         {
             RUN_INFO("dog('dog', 42);");
             CHECK(log);
+            CHECK(printed == "dog(\"dog\", 42);\n");
         }
 
         SECTION("function call 3")

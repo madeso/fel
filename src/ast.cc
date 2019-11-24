@@ -167,8 +167,11 @@ namespace fel
     std::string PrintStatement(StatementPtr statement)
     {
         std::ostringstream ss;
-        auto printer = Printer{ss};
-        Print(&printer, statement.get(), true);
+        if(statement != nullptr)
+        {
+            auto printer = Printer{ss};
+            Print(&printer, statement.get(), true);
+        }
         return ss.str();
     }
 
