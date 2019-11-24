@@ -59,83 +59,97 @@ TEST_CASE("parser", "[parser]")
         {
             RUN_INFO("doggy(dog, doogy, dog);");
             CHECK(log);
+            CHECK(printed == "doggy(dog, doogy, dog);\n");
         }
 
         SECTION("2 function calls")
         {
             RUN_INFO("cat(); dog();");
             CHECK(log);
+            CHECK(printed == "cat();\ndog();\n");
         }
 
         SECTION("assignment")
         {
             RUN_INFO("cat = awesome;");
             CHECK(log);
+            CHECK(printed == "cat = awesome;\n");
         }
 
         SECTION("if no block")
         {
             RUN_INFO("if(dog) dog();");
             CHECK(log);
+            CHECK(printed == "if(dog) dog();\n");
         }
 
         SECTION("if block")
         {
             RUN_INFO("if(cat) { cat(); }");
             CHECK(log);
+            CHECK(printed == "if(cat) \n{\n    cat();\n}\n");
         }
 
         SECTION("if semi")
         {
             RUN_INFO("if(why);");
             CHECK(log);
+            CHECK(printed == "if(why) ;\n");
         }
 
         SECTION("if empty block")
         {
             RUN_INFO("if(foo()) {}");
             CHECK(log);
+            CHECK(printed == "if(foo()) \n{\n}\n");
         }
 
         SECTION("if empty block and func")
         {
             RUN_INFO("if(foo()) {} bar();");
             CHECK(log);
+            CHECK(printed == "if(foo()) \n{\n}\nbar();\n");            
         }
 
         SECTION("just return")
         {
             RUN_INFO("return;");
             CHECK(log);
+            CHECK(printed == "return;\n");
         }
 
         SECTION("return number")
         {
             RUN_INFO("return 42;");
             CHECK(log);
+            CHECK(printed == "return 42;\n");
         }
 
         SECTION("if return")
         {
             RUN_INFO("if(foo()) {return cat;} return dog;");
             CHECK(log);
+            CHECK(printed == "if(foo()) \n{\n    return cat;\n}\nreturn dog;\n");
         }
 
         SECTION("complex 1")
         {
             RUN_INFO("a.b.c[d,e].f(g,h) = i;");
             CHECK(log);
+            CHECK(printed == "a.b.c[d, e].f(g, h) = i;\n");
         }
 
         SECTION("complex 2a")
         {
             RUN_INFO("fun() { return cat; } ().name = 'mittens';");
             CHECK(log);
+            CHECK(printed == "fun() \n{\n    return cat;\n}().name = \"mittens\";\n");
         }
         SECTION("complex 2b")
         {
             RUN_INFO("fun() return dog;().name = 'sparky';");
             CHECK(log);
+            CHECK(printed == "fun() return dog;().name = \"sparky\";\n");
         }
     }
 
