@@ -97,11 +97,7 @@ void RunParser(const File& file)
 
     if(statement)
     {
-        std::cout << PrintStatement(statement) << "\n\n";
-    }
-    else
-    {
-        Print(log);
+        std::cout << PrintStatement(statement) << "\n";
     }
 }
 

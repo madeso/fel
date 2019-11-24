@@ -26,12 +26,12 @@ namespace fel
         void EndScope() { current_indent -= 1; }
     };
 
-    void Print(Printer* printer, Statement* statement);
+    void Print(Printer* printer, Statement* statement, bool root=false);
     void Print(Printer* printer, Value* statement);
 
     struct PrintValueVisitor : public ValueVisitor
     {
-        Printer* print;
+        Printer* print = nullptr;
 
         void Visit(ValueBool* value) override { print->stream << (value->value ? "true" : "false"); }
         void Visit(ValueInt* value) override { print->stream << value->value; }
@@ -82,82 +82,78 @@ namespace fel
 
     struct PrintStatementVisitor : public StatementVisitor
     {
-        Printer* print;
+        Printer* print = nullptr;
+        bool root = false;
 
         void Visit(StatementNull* ) override
         {
-            print->Indent();
             print->stream << ";";
-            print->Newline();
         }
         void Visit(StatementDeclaration* statement) override
         {
-            print->Indent();
             print->stream << "var " << statement->name << " = ";
             Print(print, statement->value.get());
             print->stream << ";";
-            print->Newline();
         }
         void Visit(StatementList* statement) override
         {
-            print->Indent();
-            print->stream << "{";
-            print->Newline();
-            print->BeginScope();
+            if(!root)
+            {
+                print->Newline();
+                print->Indent();
+                print->stream << "{";
+                print->Newline();
+                print->BeginScope();
+            }
             for(auto s: statement->statements)
             {
+                print->Indent();
                 Print(print, s.get());
+                print->Newline();
             }
-            print->EndScope();
-            print->Indent();
-            print->stream << "}";
-            print->Newline();
+            if(!root)
+            {
+                print->EndScope();
+                print->Indent();
+                print->stream << "}";
+            }
         }
         void Visit(StatementReturn* ) override
         {
-            print->Indent();
             print->stream << "return;";
-            print->Newline();
         }
         void Visit(StatementReturnValue* statement) override
         {
-            print->Indent();
             print->stream << "return ";
             Print(print, statement->value.get());
             print->stream << ";";
-            print->Newline();
         }
         void Visit(StatementConditionIf* statement) override
         {
-            print->Indent();
             print->stream << "if(";
             Print(print, statement->condition.get());
-            print->stream << ")";
-            print->Newline();
+            print->stream << ") ";
             Print(print, statement->if_true.get());
         }
         void Visit(StatementValue* statement) override
         {
-            print->Indent();
             Print(print, statement->value.get());
             print->stream << ";";
-            print->Newline();
         }
         void Visit(StatementAssign* statement) override
         {
-            print->Indent();
             Print(print, statement->lhs.get());
             print->stream << " = ";
             Print(print, statement->rhs.get());
             print->stream << ";";
-            print->Newline();
         }
     };
 
-    void Print(Printer* printer, Statement* statement)
+    void Print(Printer* printer, Statement* statement, bool root)
     {
         auto visitor = PrintStatementVisitor{};
         visitor.print = printer;
+        visitor.root = root;
         statement->Visit(&visitor);
     }
 
@@ -172,7 +168,7 @@ namespace fel
     {
         std::ostringstream ss;
         auto printer = Printer{ss};
-        Print(&printer, statement.get());
+        Print(&printer, statement.get(), true);
         return ss.str();
     }
 
