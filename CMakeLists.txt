@@ -34,6 +34,8 @@ include_directories(src)
 add_library(fel STATIC
   src/ast.cc
   src/ast.h
+  src/bytecode.h
+  src/bytecode.cc
   src/context.cc
   src/context.h
   src/file.cc
@@ -58,6 +60,7 @@ include_directories(SYSTEM external/catch/)
 
 add_executable(tests
   test/main.cc
+  test/test_bytecode.cc
   test/test_lexer.cc
   test/test_parser.cc
   )

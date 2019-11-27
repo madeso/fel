@@ -6,6 +6,7 @@
 #include "file.h"
 #include "log.h"
 #include "parser.h"
+#include "bytecode.h"
 
 using namespace fel;
 
@@ -35,7 +36,7 @@ bool IsArgument(char* s)
 
 enum class FileMode
 {
-    Normal, Lexer, Parser
+    Normal, Lexer, Parser, Bytecode
 };
 
 
@@ -101,6 +102,12 @@ void RunParser(const File& file)
     }
 }
 
+void RunBytecode(const File& file)
+{
+    // todo(Gustav): implement this
+    // parse text assembly and run in a vm
+}
+
 
 int
 main(int argc, char* argv[])
@@ -121,6 +128,7 @@ main(int argc, char* argv[])
             << "  -lex, -x    print the lexer result instead of running the code\n"
             << "  -parse, -p  parse input instead of running it\n"
             << "  -code, -c   force code as the argument\n"
+            << "  -byte, -b   load and run bytecode\n"
             << "\n"
             ;
     };
@@ -148,6 +156,10 @@ main(int argc, char* argv[])
             {
                 options.file_as_commandline = true;
             }
+            else if(a == "byte" || a == "b")
+            {
+                options.file_mode = FileMode::Bytecode;
+            }
             else
             {
                 std::cerr << "Invalid option: " << argv[i] << "\n";
@@ -169,6 +181,9 @@ main(int argc, char* argv[])
                     break;
                 case FileMode::Parser:
                     RunParser(*file);
+                    break;
+                case FileMode::Bytecode:
+                    RunBytecode(*file);
                     break;
                 }
 
