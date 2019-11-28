@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <cstdint>
 
 #include "location.h"
@@ -51,12 +52,16 @@ namespace fel
         IfTrueGoto
     };
 
+    std::string_view ToString(Instruction inst);
+
     // designed to fit in a 32 or 64 bit structure
     struct Command
     {
-        Instruction instruction = Instruction::Nop;
+        Command() = delete;
+        Command(Instruction inst, unsigned int a0);
 
-        unsigned int arg0 = 0;
+        Instruction instruction;
+        unsigned int arg0;
         // int arg1 = 0;
         // int arg2 = 0;
         
