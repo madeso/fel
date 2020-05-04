@@ -3,11 +3,12 @@ Fast Embedded Lightweight scripting engine. Despite it standing for something it
 
 [Language reference](https://github.com/madeso/fel/blob/master/language.md)
 
-Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thing to create your own language instead of using an existing language this not bad name for a language. Finally, one aim of the language is also to generate errors at "compile" time instead of at run time and we have yet another meaning behind the name. It is also probably a bad idea to allow modifications to the language syntax as a core feature.
+Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thing to create your own language instead of using an existing language this not bad name for a language. Finally, one aim of the language is also to generate errors at "compile" time instead of at run time and we have yet another meaning behind the name. It is also probably a bad idea to allow modifications to the language syntax as a core feature (that's another thing I want to add further down the line).
 
 [![Build Status](https://travis-ci.org/madeso/fel.svg?branch=master)](https://travis-ci.org/madeso/fel)
+[![Coverage Status](https://coveralls.io/repos/github/madeso/fel/badge.svg?branch=master)](https://coveralls.io/github/madeso/fel?branch=master)
 
-# Planned features
+# Key features
   * 0 based arrays (as opposed to luas 1)
   * optional/gradual typesafety
   * JIT as a feature, not as a external library
@@ -16,30 +17,8 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * Operator overloading support. (like lua, unlike js)
 
 # Workplan
-  * Make sure the basic features work.
-  * Make fast and lean
-  * Switch from c++ to c
-  * Customaizable syntax. Don't like {}, switch them out in a header before building
-
-# Todo
-  * functions can error and have return values
-  * parse scopes
-  * variables
-  * if statements
-  * double type
-  * more (and valid) arithmetics (-/*% operators) and ()
-    parse with https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing seems sensible?
-    bodmas/pemdas - solve precedence by not allowing different precedence in the same expression without () to clarify what you really mean?
-    pratt parser?
-      https://dev.to/jrop/pratt-parsing
-      https://news.ycombinator.com/item?id=2344837
-        http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
-        https://eli.thegreenplace.net/2010/01/02/top-down-operator-precedence-parsing/
-  * objects
-  * functions as variables
-  * custom functions
-  * captures
-  * arrays
-  * meta objects/tables
-  * optional types
+1. Make sure the basic barebones features work.
+2. Quality of life updates and API finalizations. Should be able to replace lua/js at this point.
+3. Add perfomance tests agains other scripting languages and become "fastish"
+4. Optional/gradual types.
 
