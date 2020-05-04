@@ -28,6 +28,7 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
   * if statements
   * double type
   * more (and valid) arithmetics (-/*% operators) and ()
+    parse with https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing seems sensible?
     bodmas/pemdas - solve precedence by not allowing different precedence in the same expression without () to clarify what you really mean?
     pratt parser?
       https://dev.to/jrop/pratt-parsing
