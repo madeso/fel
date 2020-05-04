@@ -4,8 +4,10 @@ project(fel)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(EXTRA_FLAGS "" CACHE STRING "extra flags to both compile and link")
 
 # enable all warnings
 if(MSVC)
@@ -27,6 +29,9 @@ else()
 
   add_compile_options(-Wno-error=deprecated)
 endif()
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_FLAGS}")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)

@@ -1,3 +1,57 @@
-language: c
-dist: bionic
-script: mkdir build && cd build && cmake .. && make
+language: cpp
+sudo: false
+
+compiler: clang
+
+matrix:
+    include:
+        - os: linux
+          dist: bionic
+          compiler: gcc
+          env:
+              - CONF=release
+        - os: linux
+          dist: bionic
+          compiler: gcc
+          env:
+              - CONF=debug
+              - GCOV_FLAGS='--coverage'
+          after_success:
+              - pip install --user cpp-coveralls
+              - $CXX --version
+              - /usr/bin/gcov-9 --v
+              - coveralls -h
+              - coveralls -r .. --gcov /usr/bin/gcov-9 --gcov-options '\-lp' -i src
+        - os: linux
+          dist: bionic
+          compiler: clang
+          env:
+              - CONF=release
+        - os: linux
+          dist: bionic
+          compiler: clang
+          env:
+              - CONF=debug
+
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-9" CC="gcc-9"; fi
+
+
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-9
+      - g++-9
+      - lcov
+
+script:
+  - $CXX --version
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=$CONF -DEXTRA_FLAGS="$GCOV_FLAGS" ..
+  - cmake --build .
+  - ./tests/tests
+
