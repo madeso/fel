@@ -95,12 +95,13 @@ TEST_CASE("lexer", "[lexer]")
     Log log;
     SECTION("empty")
     {
-        const auto equal_empty = Equals(std::vector<TestToken>{});
-        CHECK_THAT(Tokenize(S(""), &log), equal_empty);
-        CHECK_THAT(Tokenize(S(" "), &log), equal_empty);
-        CHECK_THAT(Tokenize(S("\n\t\n"), &log), equal_empty);
-        CHECK_THAT(Tokenize(S("  /* all dogs are nice */  "), &log), equal_empty);
-        CHECK_THAT(Tokenize(S("  // cats are cool"), &log), equal_empty);
+        const auto empty = std::vector<TestToken>{};
+
+        CHECK_THAT(Tokenize(S(""), &log), Equals(empty));
+        CHECK_THAT(Tokenize(S(" "), &log), Equals(empty));
+        CHECK_THAT(Tokenize(S("\n\t\n"), &log), Equals(empty));
+        CHECK_THAT(Tokenize(S("  /* all dogs are nice */  "), &log), Equals(empty));
+        CHECK_THAT(Tokenize(S("  // cats are cool"), &log), Equals(empty));
     }
 
     SECTION("operators")
