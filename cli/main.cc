@@ -102,7 +102,7 @@ void RunParser(const File& file)
     }
 }
 
-void RunBytecode(const File& file)
+void RunBytecode(const File&)
 {
     // todo(Gustav): implement this
     // parse text assembly and run in a vm
