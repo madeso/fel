@@ -90,8 +90,6 @@ namespace
     }
 }
 
-using Eq = Catch::Vector::EqualsMatcher<TestToken>;
-
 TEST_CASE("lexer", "[lexer]")
 {
     Log log;
@@ -107,8 +105,8 @@ TEST_CASE("lexer", "[lexer]")
 
     SECTION("operators")
     {
-        CHECK_THAT(Tokenize(S("(..)"), &log), Eq({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
-        CHECK_THAT(Tokenize(S("[if]"), &log), Eq({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
-        CHECK_THAT(Tokenize(S("{.}"), &log), Eq({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
+        CHECK_THAT(Tokenize(S("(..)"), &log), Catch::Equals<TestToken>({TokenType::OpenParen, TokenType::DotDot, TokenType::CloseParen}));
+        CHECK_THAT(Tokenize(S("[if]"), &log), Catch::Equals<TestToken>({TokenType::OpenBracket, TokenType::KeywordIf, TokenType::CloseBracket}));
+        CHECK_THAT(Tokenize(S("{.}"), &log), Catch::Equals<TestToken>({TokenType::BeginBrace, TokenType::Dot, TokenType::EndBrace}));
     }
 }
