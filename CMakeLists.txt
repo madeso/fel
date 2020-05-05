@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.12.4)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(fel CXX)
 
