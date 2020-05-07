@@ -1,0 +1,33 @@
+{
+    "name": "fel",
+    "displayName": "fel",
+    "description": "FEL languge",
+    "version": "0.0.1",
+    "engines":
+    {
+        "vscode": "^1.44.0"
+    },
+    "categories":
+    [
+        "Programming Languages"
+    ],
+    "contributes":
+    {
+        "languages":
+        [
+            {
+                "id": "fel",
+                "extensions": [".fel"],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars":
+        [
+            {
+                "language": "fel",
+                "scopeName": "source.fel",
+                "path": "./syntaxes/fel.tmLanguage.json"
+            }
+        ]
+    }
+}

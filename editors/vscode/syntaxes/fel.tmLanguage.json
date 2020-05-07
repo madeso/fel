@@ -1,0 +1,120 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    
+    "scopeName": "source.fel",
+    
+    "name": "fel",
+    "patterns":
+    [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#characters"
+        },
+        {
+            "include": "#single_line_comment"
+        },
+        {
+            "include": "#block_comment"
+        },
+        {
+            "include": "#number"
+        },
+        {
+            "include": "#lang_const"
+        },
+        {
+            "include": "#operators"
+        }
+    ],
+    "repository":
+    {
+        "keywords":
+        {
+            "patterns":
+            [
+                {
+                    "name": "keyword.control.fel",
+                    "match": "\\b(if|else|while|for|var|fun|in|break|return)\\b"
+                }
+            ]
+        },
+
+        "lang_const":
+        {
+            "patterns":
+            [
+                {
+                    "name": "constant.language.fel",
+                    "match": "\\b(true|false|null|this)\\b"
+                }
+            ]
+        },
+
+        "operators":
+        {
+            "patterns":
+            [
+                {
+                    "name": "keyword.operator.fel",
+                    "match": "[\\+-/\\*\\[\\]{}(),=\\.<>;]+"
+                }
+            ]
+        },
+
+        "single_line_comment":
+        {
+            "name": "comment.line.double-slash.fel",
+            "begin": "//",
+            "end": "$",
+            "patterns": []
+        },
+
+        "block_comment":
+        {
+            "name": "comment.block.fel",
+            "begin": "/\\*",
+            "end": "\\*/",
+            "patterns":
+            [
+                {"include": "$self"}
+            ]
+        },
+
+        "strings":
+        {
+            "name": "string.quoted.double.fel",
+            "begin": "\"",
+            "end": "\"",
+            "patterns":
+            [
+                {
+                    "name": "constant.character.escape.fel",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "characters":
+        {
+            "name": "string.quoted.single.fel",
+            "begin": "'",
+            "end": "'",
+            "patterns":
+            [
+                {
+                    "name": "constant.character.escape.fel",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "number":
+        {
+            "name": "constant.numeric.fel",
+            "match": "\\b([0-9]+(.[0-9]+)?)\\b"
+        }
+    }
+}
