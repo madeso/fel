@@ -59,6 +59,13 @@ ReadFile(const std::string& path)
 }
 
 
+struct Options
+{
+    bool print_log = true;
+    bool print_output = true;
+};
+
+
 int
 main(int argc, char* argv[])
 {
@@ -75,7 +82,8 @@ main(int argc, char* argv[])
             << aaa << "               run code\n"
             << "\n"
             << "options:\n"
-            << "  (none)\n"
+            << "  -s make silent\n"
+            << "  -S make super silent\n"
             << "\n"
             ;
     };
@@ -85,6 +93,7 @@ main(int argc, char* argv[])
         PrintUsage();
         return 0;
     }
+    Options opt;
     for(int i=1; i<argc; i+=1)
     {
         if(IsArgument(argv[i]))
@@ -94,6 +103,15 @@ main(int argc, char* argv[])
             {
                 PrintUsage();
                 return 0;
+            }
+            else if(a == "silent" || a == "s")
+            {
+                opt.print_output = false;
+            }
+            else if(a == "supersilent" || a == "S")
+            {
+                opt.print_output = false;
+                opt.print_log = false;
             }
             else
             {
@@ -109,15 +127,25 @@ main(int argc, char* argv[])
                 Log log;
                 auto reader = LexerReader{*file, &log};
                 auto tokens = GetAllTokensInFile(&reader);
-                Print(log);
-                if(log.IsEmpty())
+                if(opt.print_log)
                 {
-                    for(auto token : tokens)
+                    Print(log);
+                }
+                if(opt.print_output)
+                {
+                    if(log.IsEmpty())
                     {
-                        std::cout << token << "\n";
+                        for(auto token : tokens)
+                        {
+                            std::cout << token << "\n";
+                        }
                     }
                 }
+
+                return log.IsEmpty() ? 0 : -1;
             }
+
+            opt = Options{};
         }
     }
     
