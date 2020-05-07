@@ -1,0 +1,47 @@
+/* no special order */
+
+// remove print statement and use a custom print function
+
+// shebang support
+
+// arrays
+
+// iterators, yield & foreach
+
+// "optional" typesafety and non-nullable types
+
+// custom operators
+
+// enum types
+
+// extension methods?
+
+// switch statements
+// bonus: some sort of pattern matching?
+
+// functional functions
+
+// const and constexpr
+
+// shallow/deep/cow functions/constructs
+
+// elvis operator
+
+// short if: a==42 ? foo() : bar()
+
+// data classes
+
+// properties
+
+// lambdas
+
+// muliline strings (both like c++ and like python)
+
+// named and optional parameters/arguments
+
+// argument validators
+// attribute function that takes the same arguments as the main function but returns a bool
+// if true, no compiler error, if false compiler error, verifies arguments at compile time (and run time optionally)
+
+// string interpolation strings
+

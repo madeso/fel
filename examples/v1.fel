@@ -1,0 +1,80 @@
+var hello = "hello";
+var default_is_null;
+var same_as_above = null;
+
+// hello world
+print(hello + " world");
+
+// the above is a statement (but not in v2), not function call!
+// the syntax might change to without () when I get to implmentation..
+
+/* block comments */
+/* that also can be /* nested*/ */
+
+var integer = 42;
+var number = 4.2;
+
+var a_bool = true;
+var another_bool = false;
+
+var is_meaning_of_life = integer == 42;
+var is_ok = number < 10;
+var is_bad = !is_ok;
+
+var all_good = is_meaning_of_life && is_ok;
+var average = (number + 5) / 2
+
+if(all_good)
+{
+    print("yes");
+}
+else
+{
+    print("oh no");
+}
+
+var a = 1;
+while (a < 10)
+{
+    print(a);
+    a = a + 1;
+}
+
+var add = fun(a, b) { return a+b; }
+fun also_add(a, b) { return a+b; }
+
+fun identity(a) { return a; }
+
+// this prints "3".
+print( identity(add)(1, 2) );
+
+
+// captures
+fun create_function()
+{
+    var outside = "outside";
+
+    fun inner()
+    {
+        print(outside);
+    }
+
+    return inner;
+}
+
+var fn = create_function();
+fn();
+
+// objects/classes
+
+// todo(Gustav): how to handle seperators? , ; or space? class structures should look good but also
+// but also objects like this should look good...
+// declare vars and not just assign randoms properties...
+var obj = { animal = "dogs", fun say_something() { print("I love " + this.animal); } };
+obj.animal = "cats";
+obj.say_something();
+
+// todo(Gustav): should meta be available to api directyly or as higher level constructs only?
+var another = {animal = "many dogs";};
+fel.set_meta(another, obj);
+another.say_something();
