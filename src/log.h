@@ -11,7 +11,6 @@
 namespace fel
 {
     struct FilePointer;
-    struct Context;
 
     namespace log
     {
@@ -22,24 +21,19 @@ namespace fel
 
         enum class Type
         {
-            EosInString,
-
-            // expected symbol, found token
-            UnexpectedSymbol,
-
-            // found token
-            InvalidSymbol,
-
-            // unable to parse (text) to number
-            UnableToParseNumber,
-
-            // Invalid parser state (statename) but found (token)
-            InvalidParserState
+            EosInString
         };
 
         struct Entry
         {
-            Entry(const FilePointer& where, Intensity intensity, log::Type type, const std::vector<std::string>& args, const std::vector<std::string>& a_debug_context);
+            Entry
+            (
+                const FilePointer& where,
+                Intensity intensity,
+                log::Type type,
+                const std::vector<std::string>& args,
+                const std::vector<std::string>& a_debug_context
+            );
 
             std::string file;
             Location    location;
@@ -59,11 +53,16 @@ namespace fel
     struct Log
     {
         std::vector<log::Entry> entries;
+        
+        void AddError
+        (
+            const FilePointer& where,
+            log::Type type,
+            const std::vector<std::string>& args
+        );
 
-        void AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args, const Context& context);
-        void AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args);
-
-        bool IsEmpty() const;
+        bool
+        IsEmpty() const;
 
         // return true if it is empty
         operator bool() const;
@@ -71,6 +70,6 @@ namespace fel
 
     std::ostream&
     operator<<(std::ostream& o, const Log& log);
-}  // namespace fel
+}
 
 #endif  // FEL_LOG_H

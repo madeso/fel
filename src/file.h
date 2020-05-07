@@ -14,9 +14,8 @@ namespace fel
         std::string data;
 
         File(const std::string& a_filename, const std::string& a_content);
-        static std::optional<File>
-        Open(const std::string& a_filename);
     };
+
 
     struct FilePointer
     {
@@ -36,6 +35,6 @@ namespace fel
         char
         Peek(std::size_t = 1) const;
     };
-}  // namespace fel
+}
 
 #endif  // FEL_FILE_H

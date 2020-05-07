@@ -6,7 +6,6 @@
 #include <streambuf>
 #include <cassert>
 
-#include "context.h"
 #include "file.h"
 
 namespace fel::log
@@ -21,14 +20,23 @@ namespace fel::log
             && lhs.arguments == rhs.arguments;
     }
 
-    Entry::Entry(const FilePointer& a_where, Intensity a_intensity, log::Type a_type, const std::vector<std::string>& a_args, const std::vector<std::string>& a_debug_context)
-    : file(a_where.file.filename)
-    , location(a_where.location)
-    , intensity(a_intensity)
-    , type(a_type)
-    , arguments(a_args)
-    , debug_context(a_debug_context)
-    {}
+
+    Entry::Entry
+    (
+        const FilePointer& a_where,
+        Intensity a_intensity,
+        log::Type a_type,
+        const std::vector<std::string>& a_args,
+        const std::vector<std::string>& a_debug_context
+    )
+        : file(a_where.file.filename)
+        , location(a_where.location)
+        , intensity(a_intensity)
+        , type(a_type)
+        , arguments(a_args)
+        , debug_context(a_debug_context)
+    {
+    }
 
 
     std::ostream&
@@ -51,9 +59,11 @@ namespace fel::log
         }
     }
 
+    #if 0
     namespace
     {
-        std::string Arg(const Entry& entry, size_t i)
+        std::string
+        Arg(const Entry& entry, size_t i)
         {
             if(i >= entry.arguments.size())
             {
@@ -64,6 +74,8 @@ namespace fel::log
             return entry.arguments[i];
         }
     }
+    #endif
+
 
     std::ostream&
     operator<<(std::ostream& o, const Entry& entry)
@@ -73,18 +85,6 @@ namespace fel::log
         {
         case Type::EosInString:
             o << "'End Of Stream' detected in string";
-            break;
-        case Type::UnexpectedSymbol:
-            o << "Unexpected symbol " << Arg(entry, 1) << ", expected " << Arg(entry, 0);
-            break;
-        case Type::InvalidSymbol:
-            o << "Invalid symbol " << Arg(entry, 0);
-            break;
-        case Type::UnableToParseNumber:
-            o << "unable to parse number " << Arg(entry, 0);
-            break;
-        case Type::InvalidParserState:
-            o << "Unexpected token "<< Arg(entry, 1) << " in " << Arg(entry, 0);
             break;
         default:
             o << "Internal error: Unhandled error in switch.";
@@ -104,6 +104,7 @@ namespace fel::log
         return o;
     }
 }
+
 
 namespace fel
 {
@@ -132,18 +133,19 @@ namespace fel
         return o;
     }
 
-    void
-    Log::AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args, const Context& context)
-    {
-        entries.emplace_back(where, log::Intensity::Error, type, args, context.stack);
-    }
 
     void
-    Log::AddError(const FilePointer& where, log::Type type, const std::vector<std::string>& args)
+    Log::AddError
+    (
+        const FilePointer& where,
+        log::Type type,
+        const std::vector<std::string>& args
+    )
     {
         std::vector<std::string> dc;
         entries.emplace_back(where, log::Intensity::Error, type, args, dc);
     }
+
 
     bool
     Log::IsEmpty() const 
@@ -151,8 +153,9 @@ namespace fel
         return entries.empty();
     }
 
+
     Log::operator bool() const
     {
         return IsEmpty();
     }
-}  // namespace fel
+}

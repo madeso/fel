@@ -22,22 +22,10 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(src)
 
 add_library(fel STATIC
-    src/ast.cc
-    src/ast.h
-    src/bytecode.h
-    src/bytecode.cc
-    src/context.cc
-    src/context.h
-    src/file.cc
-    src/file.h
-    src/lexer.cc
-    src/lexer.h
-    src/location.cc
-    src/location.h
-    src/log.cc
-    src/log.h
-    src/parser.cc
-    src/parser.h
+    src/file.cc src/file.h
+    src/lexer.cc src/lexer.h
+    src/location.cc src/location.h
+    src/log.cc src/log.h
 )
 target_link_libraries(fel
     PRIVATE project_options project_warnings
@@ -56,9 +44,7 @@ include_directories(SYSTEM external/catch/)
 
 add_executable(tests
     test/main.cc
-    test/test_bytecode.cc
     test/test_lexer.cc
-    test/test_parser.cc
 )
 target_link_libraries(
     tests

@@ -1,12 +1,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 #include "lexer.h"
 #include "file.h"
 #include "log.h"
-#include "parser.h"
-#include "bytecode.h"
+
 
 using namespace fel;
 
@@ -34,26 +34,9 @@ bool IsArgument(char* s)
 }
 
 
-enum class FileMode
+std::optional<File>
+ReadFile(const std::string& path)
 {
-    Normal, Lexer, Parser, Bytecode
-};
-
-
-struct Options
-{
-    FileMode file_mode = FileMode::Normal;
-    bool file_as_commandline =false;
-};
-
-
-std::optional<File> ReadFile(const Options& options, const std::string& path)
-{
-    if(options.file_as_commandline)
-    {
-        return File{"commandline", path};
-    }
-    else
     if(path == "stdin")
     {
         const std::string content(
@@ -61,51 +44,18 @@ std::optional<File> ReadFile(const Options& options, const std::string& path)
                 std::istreambuf_iterator<char>());
         return File {"stdin", content};
     }
-    else if(auto f = File::Open(path))
+    else if(auto t = std::ifstream{path.c_str()}; t.good())
     {
-        return *f;
+        const std::string content(
+                (std::istreambuf_iterator<char>(t)),
+                std::istreambuf_iterator<char>());
+        return File {path, content};
     }
     else
     {
         std::cerr << "Failed to open " << path << "\n";
         return std::nullopt;
     }
-}
-
-
-void RunLexer(const File& file)
-{
-    Log log;
-    auto reader = LexerReader{file, &log};
-    auto tokens = GetAllTokensInFile(&reader);
-    Print(log);
-    if(log.IsEmpty())
-    {
-        for(auto token : tokens)
-        {
-            std::cout << token << "\n";
-        }
-    }
-}
-
-
-void RunParser(const File& file)
-{
-    Log log;
-    auto reader = LexerReader{file, &log};
-    auto statement = Parse(&reader, &log, false);
-    Print(log);
-
-    if(statement)
-    {
-        std::cout << PrintStatement(statement) << "\n";
-    }
-}
-
-void RunBytecode(const File&)
-{
-    // todo(Gustav): implement this
-    // parse text assembly and run in a vm
 }
 
 
@@ -125,15 +75,11 @@ main(int argc, char* argv[])
             << aaa << "               run code\n"
             << "\n"
             << "options:\n"
-            << "  -lex, -x    print the lexer result instead of running the code\n"
-            << "  -parse, -p  parse input instead of running it\n"
-            << "  -code, -c   force code as the argument\n"
-            << "  -byte, -b   load and run bytecode\n"
+            << "  (none)\n"
             << "\n"
             ;
     };
 
-    Options options;
     if(argc == 1)
     {
         PrintUsage();
@@ -144,21 +90,10 @@ main(int argc, char* argv[])
         if(IsArgument(argv[i]))
         {
             const auto a = std::string(argv[i]).substr(1);
-            if(a == "lex" || a == "x")
+            if(a == "help" || a == "h")
             {
-                options.file_mode = FileMode::Lexer;
-            }
-            else if(a == "parse" || a == "p")
-            {
-                options.file_mode = FileMode::Parser;
-            }
-            else if(a == "code" || a == "c")
-            {
-                options.file_as_commandline = true;
-            }
-            else if(a == "byte" || a == "b")
-            {
-                options.file_mode = FileMode::Bytecode;
+                PrintUsage();
+                return 0;
             }
             else
             {
@@ -169,25 +104,19 @@ main(int argc, char* argv[])
         }
         else
         {
-            if(const auto file = ReadFile(options, argv[i]))
+            if(const auto file = ReadFile(argv[i]))
             {
-                switch(options.file_mode)
+                Log log;
+                auto reader = LexerReader{*file, &log};
+                auto tokens = GetAllTokensInFile(&reader);
+                Print(log);
+                if(log.IsEmpty())
                 {
-                case FileMode::Normal:
-                    std::cerr << "It's currently unsupported to run " << file->filename << "\n";
-                    return -1;
-                case FileMode::Lexer:
-                    RunLexer(*file);
-                    break;
-                case FileMode::Parser:
-                    RunParser(*file);
-                    break;
-                case FileMode::Bytecode:
-                    RunBytecode(*file);
-                    break;
+                    for(auto token : tokens)
+                    {
+                        std::cout << token << "\n";
+                    }
                 }
-
-                options = Options{};
             }
         }
     }

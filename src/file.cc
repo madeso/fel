@@ -9,30 +9,24 @@
 namespace fel
 {
     File::File(const std::string& a_filename, const std::string& a_content)
-        : filename(a_filename), data(a_content)
-    {}
-
-    std::optional<File>
-    File::Open(const std::string& a_filename)
+        : filename(a_filename)
+        , data(a_content)
     {
-        std::ifstream t(a_filename.c_str());
-        if(!t.good())
-        {
-            return std::nullopt;
-        }
-        const std::string content(
-                (std::istreambuf_iterator<char>(t)),
-                std::istreambuf_iterator<char>());
-        return File {a_filename, content};
     }
 
-    FilePointer::FilePointer(const File& a_file) : file(a_file) {}
+
+    FilePointer::FilePointer(const File& a_file)
+        : file(a_file)
+    {
+    }
+
 
     bool
     FilePointer::HasMore() const
     {
         return next_index < file.data.size();
     }
+
 
     char
     FilePointer::Read()
@@ -58,14 +52,19 @@ namespace fel
         }
     }
 
+
     char
     FilePointer::Peek(std::size_t advance) const
     {
         // assert(next_index > 0);
         const auto index = next_index + advance - 1;
         if(index < file.data.size())
+        {
             return file.data[index];
+        }
         else
+        {
             return 0;
+        }
     }
-}  // namespace fel
+}
