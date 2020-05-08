@@ -1,54 +1,78 @@
 cmake_minimum_required(VERSION 3.12.4)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(fel CXX)
 
+
+##############################################################################
+## project setup
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/CompilerWarnings.cmake)
 include(cmake/Sanitizers.cmake)
 
 add_library(project_options INTERFACE)
-add_library(project_warnings INTERFACE)
-
 target_compile_features(project_options INTERFACE cxx_std_17)
-set_project_warnings(project_warnings)
 enable_sanitizers(project_options)
 
-set(EXTRA_FLAGS "" CACHE STRING "extra flags to both compile and link")
+add_library(project_warnings INTERFACE)
+set_project_warnings(project_warnings)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_FLAGS}")
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(src)
+
+##############################################################################
+## fel library
 
 add_library(fel STATIC
-    src/file.cc src/file.h
-    src/lexer.cc src/lexer.h
-    src/location.cc src/location.h
-    src/log.cc src/log.h
+    fel/file.cc fel/file.h
+    fel/lexer.cc fel/lexer.h
+    fel/location.cc fel/location.h
+    fel/log.cc fel/log.h
+)
+target_include_directories(fel
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(fel
-    PRIVATE project_options project_warnings
+    PRIVATE
+    project_options
+    project_warnings
 )
+
+
+
+##############################################################################
+## fel commandline
 
 add_executable(felapp
     cli/main.cc
 )
 target_link_libraries(felapp
-    PUBLIC fel
-    PRIVATE project_options project_warnings
+    PUBLIC
+    fel
+    PRIVATE
+    project_options
+    project_warnings
 )
 set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 
-include_directories(SYSTEM external/catch/)
+
+
+##############################################################################
+## fel (unit) tests
 
 add_executable(tests
     test/main.cc
     test/test_lexer.cc
 )
+target_include_directories(tests
+    PUBLIC
+    external/catch/
+)
 target_link_libraries(
     tests
-    PUBLIC fel ${CMAKE_THREAD_LIBS_INIT}
-    PRIVATE project_options project_warnings
+    PUBLIC
+    fel
+    ${CMAKE_THREAD_LIBS_INIT}
+    PRIVATE
+    project_options
+    project_warnings
 )
 
