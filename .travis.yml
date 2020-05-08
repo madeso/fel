@@ -15,13 +15,13 @@ matrix:
           compiler: gcc
           env:
               - CONF=debug
-              - GCOV_FLAGS='--coverage'
+              - EXTRA_CMAKE_FLAGS='-DENABLE_COVERAGE=ON'
           after_success:
               - pip install --user cpp-coveralls
               - $CXX --version
               - /usr/bin/gcov-9 --v
               - coveralls -h
-              - coveralls -r .. --gcov /usr/bin/gcov-9 --gcov-options '\-lp' -i src
+              - coveralls -r .. --gcov /usr/bin/gcov-9 --gcov-options '\-lp' -i fel
         - os: linux
           dist: bionic
           compiler: clang
@@ -51,7 +51,7 @@ script:
   - $CXX --version
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=$CONF -DEXTRA_FLAGS="$GCOV_FLAGS" ..
+  - cmake -DCMAKE_BUILD_TYPE=$CONF $EXTRA_CMAKE_FLAGS ..
   - cmake --build .
   - ./tests
 
