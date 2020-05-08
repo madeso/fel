@@ -9,4 +9,5 @@ namespace fel
     {
         return line == rhs.line && column == rhs.column;
     }
-}  // namespace fel
+}
+

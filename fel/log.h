@@ -6,7 +6,7 @@
 #include <map>
 #include <functional>
 
-#include "location.h"
+#include "fel/location.h"
 
 namespace fel
 {

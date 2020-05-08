@@ -2,9 +2,9 @@
 
 #include <sstream>
 #include <iostream>
-#include "lexer.h"
-#include "file.h"
-#include "log.h"
+#include "fel/lexer.h"
+#include "fel/file.h"
+#include "fel/log.h"
 
 using namespace fel;
 using Catch::Matchers::Equals;

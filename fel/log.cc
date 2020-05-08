@@ -6,7 +6,7 @@
 #include <streambuf>
 #include <cassert>
 
-#include "file.h"
+#include "fel/file.h"
 
 namespace fel::log
 {

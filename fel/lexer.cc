@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "log.h"
+#include "fel/log.h"
 
 namespace fel
 {

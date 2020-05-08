@@ -12,7 +12,8 @@ namespace fel
         bool
         operator==(const Location& rhs) const;
     };
-}  // namespace fel
+}
 
 
 #endif  // FEL_LOCATION_H
+

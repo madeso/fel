@@ -4,7 +4,7 @@
 #include <string>
 #include <optional>
 
-#include "location.h"
+#include "fel/location.h"
 
 namespace fel
 {
