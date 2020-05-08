@@ -19,9 +19,9 @@ namespace fel
 
     struct FilePointer
     {
-        const File&            file;
+        const File& file;
         std::string::size_type next_index = 0;
-        Location               location   = Location {1, 0};
+        Location location = Location {1, 0};
 
         explicit FilePointer(const File& file);
 

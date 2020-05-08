@@ -45,7 +45,7 @@ namespace fel
         std::string text;
     };
 
-    template<typename  Stream>
+    template<typename Stream>
     Stream& operator<<(Stream& stream, const Token& token)
     {
         stream << ToString(token.type) << ": " << token.text;

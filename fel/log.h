@@ -36,7 +36,7 @@ namespace fel
             );
 
             std::string file;
-            Location    location;
+            Location location;
             Intensity intensity;
             Type type;
             std::vector<std::string> arguments;
