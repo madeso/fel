@@ -62,9 +62,11 @@ namespace fel
         }
     }
 
+
     Lexer::Lexer(const File& a_file, Log* a_log) : file(a_file), log(a_log)
     {
     }
+
 
     namespace
     {
@@ -79,6 +81,7 @@ namespace fel
                 return false;
             }
         }
+
 
         bool
         IsWhitespace(char c)
@@ -97,6 +100,7 @@ namespace fel
             }
         }
 
+
         bool
         IsAlpha(char c)
         {
@@ -105,12 +109,14 @@ namespace fel
             return c == '_';
         }
 
+
         bool
         IsNumeric(char c)
         {
             if(c >='0' && c<='9') return true;
             return false;
         }
+
 
         void
         EatWhitespace(FilePointer* file)
@@ -144,11 +150,13 @@ namespace fel
             }
         }
 
+
         Token SingleChar(FilePointer* file, TokenType tt)
         {
             const auto c = file->Read();
             return {tt, std::string(1, c)};
         }
+
 
         Token CharAndChar(FilePointer* file, TokenType one_char, char second_char, TokenType two_chars)
         {
@@ -160,6 +168,7 @@ namespace fel
             }
             return {one_char, first_char};
         }
+
 
         Token ParseString(Log* log, FilePointer* file)
         {
@@ -186,6 +195,7 @@ namespace fel
             return {TokenType::String, buffer.str()};
         }
     }
+
 
     Token Lexer::GetNextToken()
     {
@@ -276,10 +286,12 @@ namespace fel
         }
     }
 
+
     LexerReader::LexerReader(const File& a_file, Log* a_log)
         : lexer(a_file, a_log)
     {
     }
+
 
     Token LexerReader::Peek()
     {
@@ -293,6 +305,7 @@ namespace fel
             return *token;
         }
     }
+
 
     Token LexerReader::Read()
     {
@@ -308,6 +321,7 @@ namespace fel
         }
     }
 
+
     std::vector<Token> GetAllTokensInFile(LexerReader* reader)
     {
         std::vector<Token> ret;
@@ -317,6 +331,5 @@ namespace fel
         }
         return ret;
     }
-
-
 }
+
