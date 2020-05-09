@@ -133,39 +133,100 @@ TEST_CASE("lexer", "[lexer]")
     {
         CHECK_THAT
         (
-            Tokenize(S("(..)"), &log),
-            Equals<TestToken>
-            (
-                {
-                    TokenType::OpenParen,
-                    TokenType::DotDot,
-                    TokenType::CloseParen
-                }
-            )
-        );
-        
-        CHECK_THAT
-        (
-            Tokenize(S("[if]"), &log),
-            Equals<TestToken>
-            (
-                {
-                    TokenType::OpenBracket,
-                    TokenType::KeywordIf,
-                    TokenType::CloseBracket
-                }
-            )
-        );
-        
-        CHECK_THAT
-        (
-            Tokenize(S("{.}"), &log),
+            Tokenize(S("{}()[]"), &log),
             Equals<TestToken>
             (
                 {
                     TokenType::BeginBrace,
+                    TokenType::EndBrace,
+                    TokenType::OpenParen,
+                    TokenType::CloseParen,
+                    TokenType::OpenBracket,
+                    TokenType::CloseBracket,
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S("+ - * / , : ;"), &log),
+            Equals<TestToken>
+            (
+                {
+                    TokenType::Plus,
+                    TokenType::Minus,
+                    TokenType::Mult,
+                    TokenType::Div,
+                    TokenType::Comma,
+                    TokenType::Colon,
+                    TokenType::Term,
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S(". .. == = < <= > >="), &log),
+            Equals<TestToken>
+            (
+                {
                     TokenType::Dot,
-                    TokenType::EndBrace
+                    TokenType::DotDot,
+                    TokenType::Equal,
+                    TokenType::Assign,
+                    TokenType::Less,
+                    TokenType::LessEqual,
+                    TokenType::Greater,
+                    TokenType::GreaterEqual,
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S("\"dog\" 'cat'"), &log),
+            Equals<TestToken>
+            (
+                {
+                    Token{TokenType::String, "dog"},
+                    Token{TokenType::String, "cat"}
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S("dog cat"), &log),
+            Equals<TestToken>
+            (
+                {
+                    Token{TokenType::Identifier, "dog"},
+                    Token{TokenType::Identifier, "cat"}
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S("if else for fun var true false null return"), &log),
+            Equals<TestToken>
+            (
+                {
+                    TokenType::KeywordIf,
+                    TokenType::KeywordElse,
+                    TokenType::KeywordFor,
+                    TokenType::KeywordFunction,
+                    TokenType::KeywordVar,
+                    TokenType::KeywordTrue,
+                    TokenType::KeywordFalse,
+                    TokenType::KeywordNull,
+                    TokenType::KeywordReturn
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            Tokenize(S("42 2.4"), &log),
+            Equals<TestToken>
+            (
+                {
+                    Token{TokenType::Int, "42"},
+                    Token{TokenType::Number, "2.4"}
                 }
             )
         );
