@@ -118,6 +118,12 @@ TEST_CASE("lexer", "[lexer]")
         
         CHECK_THAT
         (
+            Tokenize(S("  /* all /* dogs */ are nice */  "), &log),
+            Equals(empty)
+        );
+        
+        CHECK_THAT
+        (
             Tokenize(S("  // cats are cool"), &log),
             Equals(empty)
         );

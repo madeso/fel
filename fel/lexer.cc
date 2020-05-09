@@ -117,6 +117,34 @@ namespace fel
         }
 
 
+
+        bool
+        PeekBlockComment(FilePointer* file)
+        {
+            return file->Peek() == '/' && file->Peek(2) == '*';
+        }
+
+        void
+        EatBlockComment(FilePointer* file)
+        {
+            file->Read();
+
+            while(file->Peek() !=0 && !(file->Peek() == '*' && file->Peek(2) == '/'))
+            {
+                if(PeekBlockComment(file))
+                {
+                    EatBlockComment(file);
+                }
+                else
+                {
+                    file->Read();
+                }
+            }
+            file->Read();
+            file->Read();
+        }
+
+
         void
         EatWhitespace(FilePointer* file)
         {
@@ -133,14 +161,9 @@ namespace fel
                         file->Read();
                     }
                 }
-                else if(file->Peek() == '/' && file->Peek(2) == '*')
+                else if(PeekBlockComment(file))
                 {
-                    while(file->Peek() !=0 && !(file->Peek() == '*' && file->Peek(2) == '/'))
-                    {
-                        file->Read();
-                    }
-                    file->Read();
-                    file->Read();
+                    EatBlockComment(file);
                 }
                 else
                 {
