@@ -37,7 +37,8 @@ namespace
 
 
     template<typename Stream>
-    Stream& operator<<(Stream& stream, const TestToken& tt)
+    Stream&
+    operator<<(Stream& stream, const TestToken& tt)
     {
         if(tt.type) { stream << ToString(*tt.type); }
         else { stream << "<no type>"; }

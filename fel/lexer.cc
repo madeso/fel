@@ -96,7 +96,6 @@ namespace fel
 
             default:
                 return false;
-
             }
         }
 
@@ -179,7 +178,6 @@ namespace fel
                 auto c = file->Read();
                 if( c == 0)
                 {
-                    // todo(Gustav): add error
                     log->AddError(*file, log::Type::EosInString, {});
                     return {TokenType::String, buffer.str()};
                 }

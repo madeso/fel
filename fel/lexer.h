@@ -7,9 +7,11 @@
 
 #include "fel/file.h"
 
+
 namespace fel
 {
     struct Log;
+
 
     enum class TokenType
     {
@@ -37,7 +39,10 @@ namespace fel
         EndOfStream
     };
 
-    std::string ToString(const TokenType tt);
+
+    std::string
+    ToString(const TokenType tt);
+
 
     struct Token
     {
@@ -45,12 +50,14 @@ namespace fel
         std::string text;
     };
 
+
     template<typename Stream>
     Stream& operator<<(Stream& stream, const Token& token)
     {
         stream << ToString(token.type) << ": " << token.text;
         return stream;
     }
+
 
     struct Lexer
     {
@@ -63,6 +70,7 @@ namespace fel
         GetNextToken();
     };
 
+
     struct LexerReader
     {
         Lexer lexer;
@@ -70,11 +78,17 @@ namespace fel
 
         LexerReader(const File& a_file, Log* a_log);
 
-        Token Peek();
-        Token Read();
+        Token
+        Peek();
+
+        Token
+        Read();
     };
 
-    std::vector<Token> GetAllTokensInFile(LexerReader* reader);
+
+    std::vector<Token>
+    GetAllTokensInFile(LexerReader* reader);
 }
 
 #endif  // FEL_LEXER_H
+
