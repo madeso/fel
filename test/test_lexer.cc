@@ -129,6 +129,25 @@ TEST_CASE("lexer", "[lexer]")
         );
     }
 
+    SECTION("error")
+    {
+        CHECK_THAT
+        (
+            Tokenize(S("^"), &log),
+            Equals<TestToken>
+            (
+                {
+                    TokenType::Unknown
+                }
+            )
+        );
+
+        // todo(Gustav): check errors
+        CHECK_FALSE(log.IsEmpty());
+    }
+
+    // todo(Gustav): add utf8 tests, valid in stings, invalid outside
+
     SECTION("operators")
     {
         CHECK_THAT
@@ -142,7 +161,7 @@ TEST_CASE("lexer", "[lexer]")
                     TokenType::OpenParen,
                     TokenType::CloseParen,
                     TokenType::OpenBracket,
-                    TokenType::CloseBracket,
+                    TokenType::CloseBracket
                 }
             )
         );
@@ -158,7 +177,7 @@ TEST_CASE("lexer", "[lexer]")
                     TokenType::Div,
                     TokenType::Comma,
                     TokenType::Colon,
-                    TokenType::Term,
+                    TokenType::Term
                 }
             )
         );
@@ -175,7 +194,7 @@ TEST_CASE("lexer", "[lexer]")
                     TokenType::Less,
                     TokenType::LessEqual,
                     TokenType::Greater,
-                    TokenType::GreaterEqual,
+                    TokenType::GreaterEqual
                 }
             )
         );
