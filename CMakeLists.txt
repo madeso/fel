@@ -39,6 +39,24 @@ target_link_libraries(fel
 
 
 ##############################################################################
+## lsp library
+
+add_library(lsp STATIC
+    lsp/lsp.cc lsp/lsp.h
+)
+target_include_directories(lsp
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(fel
+    PRIVATE
+    project_options
+    project_warnings
+)
+
+
+
+##############################################################################
 ## fel commandline
 
 add_executable(felapp
@@ -47,9 +65,14 @@ add_executable(felapp
 target_link_libraries(felapp
     PUBLIC
     fel
+    lsp
     PRIVATE
     project_options
     project_warnings
+)
+target_include_directories(fel
+    PUBLIC
+    external/spdlog/
 )
 set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 
@@ -61,6 +84,7 @@ set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 add_executable(tests
     test/main.cc
     test/test_lexer.cc
+    test/test_lsp.cc
 )
 target_include_directories(tests
     PUBLIC
@@ -70,6 +94,7 @@ target_link_libraries(
     tests
     PUBLIC
     fel
+    lsp
     ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
     project_options

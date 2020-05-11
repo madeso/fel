@@ -1,38 +1,54 @@
 {
     "name": "fel",
-    "author":
-    {
+    "author": {
         "name": "Gustav"
     },
+    "preview": true,
     "displayName": "fel",
     "description": "Provides syntax colors and type hinting for the fel languge",
     "license": "MIT",
     "publisher": "madeso",
-    "repository":
-    {
+    "repository": {
         "url": "https://github.com/madeso/fel"
     },
     "version": "0.0.1",
-    "engines":
-    {
+    "engines": {
         "vscode": "^1.44.0"
     },
-    "categories":
-    [
+    "devDependencies": {
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.11.1",
+        "typescript": "^3.8.3",
+        "vscode": "^1.1.36"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^6.2.0-next.2"
+    },
+    "activationEvents": [
+        "onLanguage:fel"
+    ],
+    "main": "./out/extension.js",
+    "enableProposedApi": true,
+    "categories": [
         "Programming Languages"
     ],
-    "contributes":
-    {
-        "languages":
-        [
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
+        "update-vscode": "node ./node_modules/vscode/bin/install",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "contributes": {
+        "languages": [
             {
                 "id": "fel",
-                "extensions": [".fel"],
+                "extensions": [
+                    ".fel"
+                ],
                 "configuration": "./language-configuration.json"
             }
         ],
-        "grammars":
-        [
+        "grammars": [
             {
                 "language": "fel",
                 "scopeName": "source.fel",
