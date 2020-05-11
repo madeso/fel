@@ -1,7 +1,17 @@
 {
     "name": "fel",
+    "author":
+    {
+        "name": "Gustav"
+    },
     "displayName": "fel",
-    "description": "FEL languge",
+    "description": "Provides syntax colors and type hinting for the fel languge",
+    "license": "MIT",
+    "publisher": "madeso",
+    "repository":
+    {
+        "url": "https://github.com/madeso/fel"
+    },
     "version": "0.0.1",
     "engines":
     {
