@@ -19,12 +19,22 @@ import { Trace } from "vscode-jsonrpc";
 
 export function activate(context: ExtensionContext)
 {
-    let serverExe = 'C:\\WorkingFolder\\GitHub\\fel\\build\\Debug\\fel.exe';
-
-    // let serverCommand = context.asAbsolutePath(path.join('server', 'SampleServer.exe'));
-	// let commandOptions: ExecutableOptions = { stdio: 'pipe', detached: false };
+    // todo(Gustav): restart server if settings change
     
-    let run_command = { command: serverExe, args: ['--lsp'] };
+    let ws = workspace;
+    let fel_bin : string = ws == null ? "fel_ws" : ws.getConfiguration("fel.lsp").get("executable");
+    let fel_log  : string = ws == null ? "fel_ws" : ws.getConfiguration("fel.lsp").get("log");
+
+    let run_command =
+    {
+        command: fel_bin,
+        args:
+        [
+            '--log',
+            fel_log,
+            '--lsp'
+        ]
+    };
     let serverOptions: ServerOptions =
     {
         run: run_command,

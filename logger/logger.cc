@@ -46,6 +46,7 @@ namespace fel
     Logger::WriteError(const std::string& err)
     {
         SPDLOG_ERROR("{}", err);
+        impl->logger->flush();
     }
 
 
@@ -53,6 +54,7 @@ namespace fel
     Logger::WriteInfo(const std::string& inf)
     {
         SPDLOG_INFO("{}", inf);
+        impl->logger->flush();
     }
 }
 

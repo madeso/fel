@@ -3,6 +3,7 @@
 
 // temporary fix since spdlog has compile errors
 #include <memory>
+#include <string>
 
 namespace fel
 {

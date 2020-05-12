@@ -91,6 +91,8 @@ RunLanguageServer(const std::string& log_file)
 
     auto logger = Logger{log_file};
 
+    logger.WriteInfo("lsp startup");
+
     std::string message;
     while
     (
@@ -105,6 +107,8 @@ RunLanguageServer(const std::string& log_file)
         // todo(Gustav): parse json and respond...
         logger.WriteInfo(message);
     }
+
+    logger.WriteInfo("shutdown");
 }
 
 

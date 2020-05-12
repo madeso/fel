@@ -6,6 +6,25 @@
 
 namespace fel
 {
+    struct Str
+    {
+        std::ostringstream ss;
+
+        operator std::string() const
+        {
+            return ss.str();
+        }
+
+        template<typename T>
+        Str&
+        operator<<(const T& t)
+        {
+            ss << t;
+            return *this;
+        }
+    };
+
+
     std::istream&
     ReadHeaderLine(std::istream& in, std::string* line, ErrorFunction error)
     {
@@ -37,7 +56,7 @@ namespace fel
 
         set_line();
 
-        error("eol in headerline");
+        error(Str() << "eol in headerline: " << *line);
         return in;
     }
 
@@ -59,9 +78,7 @@ namespace fel
             const auto colon = line.find(':');
             if(colon == std::string::npos)
             {
-                std::ostringstream ss;
-                ss << "Missing colon in '" << line << "'";
-                error(ss.str());
+                error(Str() << "Missing colon in '" << line << "'");
                 continue;
             }
             const auto key = line.substr(0, colon);
@@ -87,18 +104,23 @@ namespace fel
             {
                 ss << c;
             }
+            else
+            {
+                break;
+            }
         }
 
         const auto r = ss.str();
         return r;
     }
 
+
     std::istream&
     ReadMessage(std::istream& in, std::string* message, ErrorFunction error)
     {
         assert(message);
         auto header = Header {};
-        while(in && ReadHeader(in, &header, error))
+        if(in && ReadHeader(in, &header, error))
         {
             // todo(Gustav): check content-type and verify utf8
             const auto found_length = header.find("Content-Length");
@@ -106,7 +128,7 @@ namespace fel
             {
                 // error
                 error("missing content-length");
-                continue;
+                return in;
             }
 
             auto in_length = std::istringstream(found_length->second);
