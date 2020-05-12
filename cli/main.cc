@@ -4,8 +4,9 @@
 #include <fstream>
 #include <cassert>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/rotating_file_sink.h"
+#include "lsp/lsp.h"
+
+#include "logger/logger.h"
 
 #include "fel/lexer.h"
 #include "fel/file.h"
@@ -79,143 +80,27 @@ struct Options
 #endif
 
 
-// todo(Gustav): move to a lsp library so we can test it
-
-std::istream&
-ReadHeaderLine(std::istream& in, std::string* line)
-{
-    assert(line);
-
-    char c = 0;
-    char last = 0;
-
-    std::ostringstream str;
-
-    auto set_line = [&]()
-    {
-        *line = str.str();
-    };
-
-    while(in && in.get(c))
-    {
-        if(last == '\r' && c == '\n')
-        {
-            set_line();
-            return in;
-        }
-        if(last != 0)
-        {
-            str << last;
-        }
-        last = c;
-    }
-
-    set_line();
-
-    SPDLOG_ERROR("eol in headerline");
-    return in;
-}
-
-
-using Header = std::map<std::string, std::string>;
-
-
-std::istream&
-ReadHeader(std::istream& in, Header* header)
-{
-    assert(header);
-    std::string line;
-
-    while(in && ReadHeaderLine(in, &line))
-    {
-        if(line.empty())
-        {
-            // empty line = end of header
-            SPDLOG_INFO("empty line in header -> closing header");
-            return in;
-        }
-
-        const auto colon = line.find(':');
-        if(colon == std::string::npos)
-        {
-            SPDLOG_ERROR("Missing colon in '{}'", line);
-            continue;
-        }
-        const auto key = line.substr(0, colon);
-        const auto value = line.substr(colon + 1);
-        SPDLOG_INFO("recieved header '{}' '{}'", key, value);
-        (*header)[key] = value;
-    }
-
-    SPDLOG_ERROR("eol in header");
-    return in;
-}
-
-
-std::string
-ReadMessage(std::istream& in, std::size_t length)
-{
-    std::ostringstream ss;
-    std::size_t i = 0;
-    
-    for(; in && i < length; i += 1)
-    {
-        char c = 0;
-        if(in.get(c))
-        {
-            ss << c;
-        }
-    }
-
-    const auto r = ss.str();
-    SPDLOG_INFO("Got {} {}", i, r);
-    return r;
-}
-
-std::istream&
-ReadMessage(std::istream& in, std::string* message)
-{
-    assert(message);
-    auto header = Header {};
-    while(in && ReadHeader(in, &header))
-    {
-        // todo(Gustav): check content-type and verify utf8
-        const auto found_length = header.find("Content-Length");
-        if(found_length == header.end())
-        {
-            // error
-            SPDLOG_ERROR("missing content-length");
-            continue;
-        }
-
-        auto in_length = std::istringstream(found_length->second);
-        std::size_t length = 0;
-        in_length >> length;
-        SPDLOG_INFO("reading {}", length);
-        *message = ReadMessage(in, length);
-    }
-
-    return in;
-}
-
-
 void
 RunLanguageServer(const std::string& log_file)
 {
     // make std::cin binary: https://stackoverflow.com/a/11259588/180307
     SET_BINARY_MODE(_fileno(stdin));
 
-    auto max_size = 1048576 * 5;
-    auto max_files = 3;
-    auto logger = spdlog::rotating_logger_mt("fel-lsp", log_file, max_size, max_files);
-    spdlog::set_default_logger(logger);
-    spdlog::flush_every(std::chrono::seconds(3));
+    auto logger = Logger{log_file};
 
     std::string message;
-    while(ReadMessage(std::cin, &message))
+    while
+    (
+        ReadMessage
+        (
+            std::cin,
+            &message,
+            [&](const std::string& err){logger.WriteError(err);}
+        )
+    )
     {
         // todo(Gustav): parse json and respond...
-        SPDLOG_INFO("recieved {}", message);
+        logger.WriteInfo(message);
     }
 }
 

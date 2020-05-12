@@ -48,10 +48,33 @@ target_include_directories(lsp
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(fel
+target_link_libraries(lsp
     PRIVATE
     project_options
     project_warnings
+)
+
+
+
+##############################################################################
+## logger library
+find_package(Threads REQUIRED)
+
+add_library(logger STATIC
+    logger/logger.cc logger/logger.h
+)
+target_include_directories(logger
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE
+    external/spdlog/
+)
+target_link_libraries(logger
+    PUBLIC
+    ${CMAKE_THREAD_LIBS_INIT}
+    PRIVATE
+    project_options
+    # project_warnings
 )
 
 
@@ -66,13 +89,10 @@ target_link_libraries(felapp
     PUBLIC
     fel
     lsp
+    logger
     PRIVATE
     project_options
     project_warnings
-)
-target_include_directories(fel
-    PUBLIC
-    external/spdlog/
 )
 set_property(TARGET felapp PROPERTY RUNTIME_OUTPUT_NAME fel)
 
@@ -87,7 +107,7 @@ add_executable(tests
     test/test_lsp.cc
 )
 target_include_directories(tests
-    PUBLIC
+    PRIVATE
     external/catch/
 )
 target_link_libraries(
