@@ -56,9 +56,10 @@ namespace fel
             last = c;
         }
 
+        str << last;
         set_line();
 
-        error(Str() << "eol in headerline: " << *line);
+        error(Str() << "eof in headerline: " << *line);
         return in;
     }
 
