@@ -200,6 +200,21 @@ TEST_CASE("lexer", "[lexer]")
         );
         CHECK_THAT
         (
+            Tokenize(S("~ ! & && | ||"), &log),
+            Equals<TestToken>
+            (
+                {
+                    TokenType::BitNot,
+                    TokenType::Not,
+                    TokenType::BitAnd,
+                    TokenType::And,
+                    TokenType::BitOr,
+                    TokenType::Or
+                }
+            )
+        );
+        CHECK_THAT
+        (
             Tokenize(S("\"dog\" 'cat'"), &log),
             Equals<TestToken>
             (

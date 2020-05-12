@@ -37,6 +37,14 @@ namespace fel
             X(Greater);
             X(GreaterEqual);
 
+
+            X(Not);
+            X(BitNot);
+            X(And);
+            X(Or);
+            X(BitAnd);
+            X(BitOr);
+
             X(String);
 
             X(Identifier);
@@ -245,6 +253,11 @@ namespace fel
         case '=': return CharAndChar(&file, TokenType::Assign, '=', TokenType::Equal);
         case '<': return CharAndChar(&file, TokenType::Less, '=', TokenType::LessEqual);
         case '>': return CharAndChar(&file, TokenType::Greater, '=', TokenType::GreaterEqual);
+
+        case '!': return SingleChar(&file, TokenType::Not);
+        case '~': return SingleChar(&file, TokenType::BitNot);
+        case '&': return CharAndChar(&file, TokenType::BitAnd, '&', TokenType::And);
+        case '|': return CharAndChar(&file, TokenType::BitOr, '|', TokenType::Or);
         
         case '"':
         case '\'':

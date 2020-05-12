@@ -27,6 +27,9 @@ namespace fel
         Less, LessEqual,
         Greater, GreaterEqual,
 
+        Not, BitNot,
+        And, Or, BitAnd, BitOr,
+
         String,
 
         Identifier,
