@@ -5,6 +5,8 @@
 #include <functional>
 #include <map>
 
+#include "rapidjson/document.h"
+
 
 namespace fel
 {
@@ -29,6 +31,10 @@ namespace fel
     // read a header and the corresponding message body
     std::istream&
     ReadMessage(std::istream& in, std::string* message, ErrorFunction error);
+
+    // read a header and the corresponding message body
+    std::istream&
+    ReadMessageJson(std::istream& in, rapidjson::Document* message, ErrorFunction error);
 }
 
 #endif  // FEL_LSP_H

@@ -3,6 +3,8 @@
 #include <cassert>
 #include <sstream>
 
+#include "rapidjson/error/en.h"
+
 
 namespace fel
 {
@@ -140,5 +142,26 @@ namespace fel
         return in;
     }
 
+
+    std::istream&
+    ReadMessageJson(std::istream& in, rapidjson::Document* message, ErrorFunction error)
+    {
+        assert(message);
+        std::string source;
+        ReadMessage(in, &source, error);
+        if(!in)
+        {
+            return in;
+        }
+
+        if(message->Parse(source.c_str()).HasParseError())
+        {
+            const auto offset = static_cast<unsigned>(message->GetErrorOffset());
+            const std::string err = rapidjson::GetParseError_En(message->GetParseError());
+            error(Str() << "json error(" << offset << "): " << err);
+        }
+
+        return in;
+    }
 }
 

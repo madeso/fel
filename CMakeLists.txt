@@ -47,6 +47,7 @@ add_library(lsp STATIC
 target_include_directories(lsp
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    external/rapidjson/
 )
 target_link_libraries(lsp
     PRIVATE
