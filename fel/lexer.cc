@@ -303,8 +303,7 @@ namespace fel
             {
                 auto c = file.Read();
                 const auto unknown_character = std::string{1, c};
-                // todo(Gustav): fix error message
-                log->AddError(file, log::Type::EosInString, {unknown_character});
+                log->AddError(file, log::Type::UnknownCharacter, {unknown_character});
                 return {TokenType::Unknown, unknown_character};
             }
         }

@@ -21,7 +21,7 @@ namespace fel
 
         enum class Type
         {
-            EosInString
+            EosInString, UnknownCharacter
         };
 
         struct Entry

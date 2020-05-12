@@ -59,7 +59,7 @@ namespace fel::log
         }
     }
 
-    #if 0
+
     namespace
     {
         std::string
@@ -74,17 +74,28 @@ namespace fel::log
             return entry.arguments[i];
         }
     }
-    #endif
 
 
     std::ostream&
     operator<<(std::ostream& o, const Entry& entry)
     {
-        o << entry.file << "(" << entry.location.line << ":" << entry.location.column << ") " << entry.intensity << ": ";
+        o
+            << entry.file
+            << "("
+            << entry.location.line << ":" << entry.location.column
+            << ") "
+            << entry.intensity
+            << ": "
+            ;
         switch(entry.type)
         {
         case Type::EosInString:
+            assert(entry.arguments.size() == 0);
             o << "'End Of Stream' detected in string";
+            break;
+        case Type::UnknownCharacter:
+            assert(entry.arguments.size() == 1);
+            o << "Found unknown character '" << Arg(entry, 0) << "'";
             break;
         default:
             o << "Internal error: Unhandled error in switch.";
