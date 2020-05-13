@@ -16,6 +16,19 @@ add_library(project_warnings INTERFACE)
 set_project_warnings(project_warnings)
 
 
+##############################################################################
+## rapidjson dependency
+
+add_library(rapidjson INTERFACE)
+target_compile_definitions(rapidjson
+  INTERFACE
+  RAPIDJSON_HAS_STDSTRING=1
+)
+target_include_directories(rapidjson
+    INTERFACE
+    external/rapidjson/
+)
+
 
 ##############################################################################
 ## fel library
@@ -47,9 +60,10 @@ add_library(lsp STATIC
 target_include_directories(lsp
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    external/rapidjson/
 )
 target_link_libraries(lsp
+    PUBLIC
+    rapidjson
     PRIVATE
     project_options
     project_warnings

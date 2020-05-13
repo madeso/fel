@@ -6,6 +6,11 @@
 #include <optional>
 #include <functional>
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/ostreamwrapper.h"
+
 #include "lsp/lsp.h"
 
 #include "logger/logger.h"
@@ -83,7 +88,67 @@ struct Options
 #endif
 
 
+std::string
+ToString(const rapidjson::Value& d, bool pretty)
+{
+    std::ostringstream ss;
+    rapidjson::OStreamWrapper osw(ss);
+
+    if(pretty)
+    {
+        rapidjson::PrettyWriter writer(osw);
+        d.Accept(writer);
+    }
+    else
+    {
+        rapidjson::Writer writer(osw);
+        d.Accept(writer);
+    }
+
+    return ss.str();
+}
+
+
 void
+Send(const rapidjson::Document& doc)
+{
+    const auto body = ToString(doc, false);
+
+    std::cout
+        << "Content-Length: " << body.length() << "\r\n"
+        << "\r\n"
+        << body;
+}
+
+
+void
+SetId(rapidjson::Value* dst, const rapidjson::Value& v, rapidjson::Document* doc)
+{
+    rapidjson::Value val;
+    if(v.IsString())
+    {
+        val.SetString(std::string(val.GetString()), doc->GetAllocator());
+    }
+    else
+    {
+        val.SetInt(v.GetInt());
+    }
+    dst->AddMember("id", val, doc->GetAllocator());
+}
+
+
+void
+SendNullResponse(const rapidjson::Value& id)
+{
+    rapidjson::Document doc;
+    doc.SetObject();
+    SetId(&doc, id, &doc);
+    doc["result"] = rapidjson::Value();
+    Send(doc);
+}
+
+
+int
 RunLanguageServer(const std::string& log_file)
 {
     // make std::cin binary: https://stackoverflow.com/a/11259588/180307
@@ -93,10 +158,12 @@ RunLanguageServer(const std::string& log_file)
 
     logger.WriteInfo("lsp startup");
 
-    std::string message;
+    bool got_shutdown = false;
+
+    rapidjson::Document message;
     while
     (
-        ReadMessage
+        ReadMessageJson
         (
             std::cin,
             &message,
@@ -104,11 +171,44 @@ RunLanguageServer(const std::string& log_file)
         )
     )
     {
-        // todo(Gustav): parse json and respond...
-        logger.WriteInfo(message);
+        const std::string rpc = message["jsonrpc"].GetString();
+        if(rpc != "2.0")
+        {
+            logger.WriteError("Invalid version");
+            continue;
+        }
+        const std::string method = message["method"].GetString();
+
+        if(method == "initialize")
+        {
+            logger.WriteInfo("todo: handle init");
+        }
+        else if(method == "shutdown")
+        {
+            logger.WriteInfo("shutting down");
+            got_shutdown = true;
+            SendNullResponse(message["id"]);
+        }
+        else if(method == "exit")
+        {
+            logger.WriteInfo("exiting lsp");
+            if(got_shutdown)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            logger.WriteInfo("Unknown method: " + method);
+        }
     }
 
-    logger.WriteInfo("shutdown");
+    logger.WriteError("end of input");
+    return -1;
 }
 
 
@@ -179,8 +279,7 @@ main(int argc, char* argv[])
             else if(a == "-lsp")
             {
                 // todo(Gustav): get log from cmdline
-                RunLanguageServer(opt.log_file);
-                return 0;
+                return RunLanguageServer(opt.log_file);
             }
             else
             {
