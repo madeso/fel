@@ -88,8 +88,13 @@ namespace fel
                 error(Str() << "Missing colon in '" << line << "'");
                 continue;
             }
+            if(line[colon+1] != ' ')
+            {
+                error(Str() << "Missing space in '" << line << "'");
+                continue;
+            }
             const auto key = line.substr(0, colon);
-            const auto value = line.substr(colon + 1);
+            const auto value = line.substr(colon + 2);
             (*header)[key] = value;
         }
 

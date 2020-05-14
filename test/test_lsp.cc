@@ -267,7 +267,7 @@ TEST_CASE("lsp", "[lsp]")
             Equals<std::string>
             (
                 {
-                    "missing space in cat:good"
+                    "Missing space in 'cat:good'"
                 }
             )
         );
