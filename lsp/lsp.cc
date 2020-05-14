@@ -88,6 +88,11 @@ namespace fel
                 error(Str() << "Missing colon in '" << line << "'");
                 continue;
             }
+            if(colon+2 >= line.length())
+            {
+                error(Str() << "No value in '" << line << "'");
+                continue;
+            }
             if(line[colon+1] != ' ')
             {
                 error(Str() << "Missing space in '" << line << "'");

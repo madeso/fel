@@ -174,6 +174,9 @@ TEST_CASE("lsp", "[lsp]")
         );
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // header
+
     using PSS = std::pair<std::string, std::string>;
 
     SECTION("read header single")
@@ -268,6 +271,72 @@ TEST_CASE("lsp", "[lsp]")
             (
                 {
                     "Missing space in 'cat:good'"
+                }
+            )
+        );
+    }
+
+    SECTION("read header no value")
+    {
+        auto header = Header{};
+        const auto parse_result = parse
+        (
+            "cat:\r\n\r\n",
+            [&](std::istream& in)
+            {
+                ReadHeader(in, &header, add_error);
+            }
+        );
+        CHECK(parse_result);
+        CHECK
+        (
+            MapEquals
+            (
+                header,
+                {
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            errors,
+            Equals<std::string>
+            (
+                {
+                    "No value in 'cat:'"
+                }
+            )
+        );
+    }
+
+    SECTION("read header no colon")
+    {
+        auto header = Header{};
+        const auto parse_result = parse
+        (
+            "catgood\r\n\r\n",
+            [&](std::istream& in)
+            {
+                ReadHeader(in, &header, add_error);
+            }
+        );
+        CHECK(parse_result);
+        CHECK
+        (
+            MapEquals
+            (
+                header,
+                {
+                }
+            )
+        );
+        CHECK_THAT
+        (
+            errors,
+            Equals<std::string>
+            (
+                {
+                    "Missing colon in 'catgood'"
                 }
             )
         );
