@@ -120,6 +120,7 @@ add_executable(tests
     test/main.cc
     test/test_lexer.cc
     test/test_lsp.cc
+    test/falsestring.cc test/falsestring.h
 )
 target_include_directories(tests
     PRIVATE
