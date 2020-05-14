@@ -2,7 +2,11 @@
 
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
+#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/error/en.h"
 
 
@@ -164,5 +168,116 @@ namespace fel
 
         return in;
     }
+
+
+    LspInterface::LspInterface(ErrorFunction e, ErrorFunction i)
+        : error(e)
+        , info(i)
+    {
+    }
+
+    
+    
+    std::string
+    ToString(const rapidjson::Value& d, bool pretty)
+    {
+        std::ostringstream ss;
+        rapidjson::OStreamWrapper osw(ss);
+
+        if(pretty)
+        {
+            rapidjson::PrettyWriter writer(osw);
+            d.Accept(writer);
+        }
+        else
+        {
+            rapidjson::Writer writer(osw);
+            d.Accept(writer);
+        }
+
+        return ss.str();
+    }
+
+
+    void
+    LspInterface::Send(const rapidjson::Document& doc)
+    {
+        const auto body = ToString(doc, false);
+
+        std::cout
+            << "Content-Length: " << body.length() << "\r\n"
+            << "\r\n"
+            << body;
+    }
+
+
+    void
+    SetId(rapidjson::Value* dst, const rapidjson::Value& v, rapidjson::Document* doc)
+    {
+        rapidjson::Value val;
+        if(v.IsString())
+        {
+            val.SetString(std::string(val.GetString()), doc->GetAllocator());
+        }
+        else
+        {
+            val.SetInt(v.GetInt());
+        }
+        dst->AddMember("id", val, doc->GetAllocator());
+    }
+
+
+    void
+    LspInterface::SendNullResponse(const rapidjson::Value& id)
+    {
+        rapidjson::Document doc;
+        doc.SetObject();
+        SetId(&doc, id, &doc);
+        doc["result"] = rapidjson::Value();
+        Send(doc);
+    }
+
+
+    std::optional<int>
+    LspInterface::Recieve(const rapidjson::Document& message)
+    {
+        const std::string rpc = message["jsonrpc"].GetString();
+        if(rpc != "2.0")
+        {
+            error("Invalid version");
+            return std::nullopt;
+        }
+        const std::string method = message["method"].GetString();
+
+        if(method == "initialize")
+        {
+            info("todo: handle init");
+        }
+        else if(method == "shutdown")
+        {
+            info("shutting down");
+            got_shutdown = true;
+            SendNullResponse(message["id"]);
+        }
+        else if(method == "exit")
+        {
+            info("exiting lsp");
+            if(got_shutdown)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            error("Unknown method: " + method);
+        }
+
+        return std::nullopt;
+    }
+
 }
 

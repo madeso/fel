@@ -4,6 +4,8 @@
 #include <istream>
 #include <functional>
 #include <map>
+#include <string>
+#include <optional>
 
 #include "rapidjson/document.h"
 
@@ -35,6 +37,28 @@ namespace fel
     // read a header and the corresponding message body
     std::istream&
     ReadMessageJson(std::istream& in, rapidjson::Document* message, ErrorFunction error);
+
+
+    struct LspInterface
+    {
+        ErrorFunction error;
+        ErrorFunction info;
+        bool got_shutdown = false;
+
+        LspInterface(ErrorFunction e, ErrorFunction i);
+
+        void
+        SendNullResponse(const rapidjson::Value& id);
+
+        virtual ~LspInterface() = default;
+
+        virtual
+        void
+        Send(const rapidjson::Document& doc);
+
+        std::optional<int>
+        Recieve(const rapidjson::Document& doc);
+    };
 }
 
 #endif  // FEL_LSP_H

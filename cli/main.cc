@@ -6,11 +6,6 @@
 #include <optional>
 #include <functional>
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/ostreamwrapper.h"
-
 #include "lsp/lsp.h"
 
 #include "logger/logger.h"
@@ -88,66 +83,6 @@ struct Options
 #endif
 
 
-std::string
-ToString(const rapidjson::Value& d, bool pretty)
-{
-    std::ostringstream ss;
-    rapidjson::OStreamWrapper osw(ss);
-
-    if(pretty)
-    {
-        rapidjson::PrettyWriter writer(osw);
-        d.Accept(writer);
-    }
-    else
-    {
-        rapidjson::Writer writer(osw);
-        d.Accept(writer);
-    }
-
-    return ss.str();
-}
-
-
-void
-Send(const rapidjson::Document& doc)
-{
-    const auto body = ToString(doc, false);
-
-    std::cout
-        << "Content-Length: " << body.length() << "\r\n"
-        << "\r\n"
-        << body;
-}
-
-
-void
-SetId(rapidjson::Value* dst, const rapidjson::Value& v, rapidjson::Document* doc)
-{
-    rapidjson::Value val;
-    if(v.IsString())
-    {
-        val.SetString(std::string(val.GetString()), doc->GetAllocator());
-    }
-    else
-    {
-        val.SetInt(v.GetInt());
-    }
-    dst->AddMember("id", val, doc->GetAllocator());
-}
-
-
-void
-SendNullResponse(const rapidjson::Value& id)
-{
-    rapidjson::Document doc;
-    doc.SetObject();
-    SetId(&doc, id, &doc);
-    doc["result"] = rapidjson::Value();
-    Send(doc);
-}
-
-
 int
 RunLanguageServer(const std::string& log_file)
 {
@@ -156,9 +91,13 @@ RunLanguageServer(const std::string& log_file)
 
     auto logger = Logger{log_file};
 
-    logger.WriteInfo("lsp startup");
+    auto interface = LspInterface
+    {
+        [&](const std::string& err) { logger.WriteError(err); },
+        [&](const std::string& info) { logger.WriteInfo(info); }
+    };
 
-    bool got_shutdown = false;
+    logger.WriteInfo("lsp startup");
 
     rapidjson::Document message;
     while
@@ -171,39 +110,10 @@ RunLanguageServer(const std::string& log_file)
         )
     )
     {
-        const std::string rpc = message["jsonrpc"].GetString();
-        if(rpc != "2.0")
+        auto recieved = interface.Recieve(message);
+        if(recieved)
         {
-            logger.WriteError("Invalid version");
-            continue;
-        }
-        const std::string method = message["method"].GetString();
-
-        if(method == "initialize")
-        {
-            logger.WriteInfo("todo: handle init");
-        }
-        else if(method == "shutdown")
-        {
-            logger.WriteInfo("shutting down");
-            got_shutdown = true;
-            SendNullResponse(message["id"]);
-        }
-        else if(method == "exit")
-        {
-            logger.WriteInfo("exiting lsp");
-            if(got_shutdown)
-            {
-                return 0;
-            }
-            else
-            {
-                return 1;
-            }
-        }
-        else
-        {
-            logger.WriteInfo("Unknown method: " + method);
+            return *recieved;
         }
     }
 
