@@ -89,7 +89,7 @@ target_link_libraries(logger
     ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
     project_options
-    # project_warnings
+    project_warnings
 )
 
 
