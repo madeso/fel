@@ -3,11 +3,7 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
-
-#include "rapidjson/writer.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/ostreamwrapper.h"
-#include "rapidjson/error/en.h"
+#include <iomanip>
 
 
 namespace fel
@@ -159,7 +155,7 @@ namespace fel
 
 
     std::istream&
-    ReadMessageJson(std::istream& in, rapidjson::Document* message, ErrorFunction error)
+    ReadMessageJson(std::istream& in, nlohmann::json* message, ErrorFunction error)
     {
         assert(message);
         std::string source;
@@ -169,13 +165,20 @@ namespace fel
             return in;
         }
 
-        if(message->Parse(source.c_str()).HasParseError())
+        try
         {
-            const auto offset = static_cast<unsigned>(message->GetErrorOffset());
-            const std::string err = rapidjson::GetParseError_En(message->GetParseError());
-            error(Str() << "json error(" << offset << "): " << err);
+            *message = nlohmann::json::parse(source);
         }
-
+        catch(nlohmann::json::parse_error& e)
+        {
+            // output exception information
+            error
+            (
+                Str() << "json parse error: " << e.what() << " "
+                    << "id: " << e.id << " "
+                    << "byte position of error: " << e.byte
+            );
+        }
         return in;
     }
 
@@ -189,28 +192,24 @@ namespace fel
     
     
     std::string
-    ToString(const rapidjson::Value& d, bool pretty)
+    ToString(const nlohmann::json& d, bool pretty)
     {
-        std::ostringstream ss;
-        rapidjson::OStreamWrapper osw(ss);
-
         if(pretty)
         {
-            rapidjson::PrettyWriter writer(osw);
-            d.Accept(writer);
+            std::ostringstream ss;
+            ss << std::setw(4);
+            ss << d;
+            return ss.str();
         }
         else
         {
-            rapidjson::Writer writer(osw);
-            d.Accept(writer);
+            return d.dump();
         }
-
-        return ss.str();
     }
 
 
     void
-    LspInterface::Send(const rapidjson::Document& doc)
+    LspInterface::Send(const nlohmann::json& doc)
     {
         const auto body = ToString(doc, false);
 
@@ -222,42 +221,25 @@ namespace fel
 
 
     void
-    SetId(rapidjson::Value* dst, const rapidjson::Value& v, rapidjson::Document* doc)
+    LspInterface::SendNullResponse(const nlohmann::json& id)
     {
-        rapidjson::Value val;
-        if(v.IsString())
-        {
-            val.SetString(std::string(val.GetString()), doc->GetAllocator());
-        }
-        else
-        {
-            val.SetInt(v.GetInt());
-        }
-        dst->AddMember("id", val, doc->GetAllocator());
-    }
-
-
-    void
-    LspInterface::SendNullResponse(const rapidjson::Value& id)
-    {
-        rapidjson::Document doc;
-        doc.SetObject();
-        SetId(&doc, id, &doc);
-        doc["result"] = rapidjson::Value();
+        nlohmann::json doc;
+        doc["id"] = id;
+        doc["result"] = nlohmann::json();
         Send(doc);
     }
 
 
     std::optional<int>
-    LspInterface::Recieve(const rapidjson::Document& message)
+    LspInterface::Recieve(const nlohmann::json& message)
     {
-        const std::string rpc = message["jsonrpc"].GetString();
+        const auto rpc = message["jsonrpc"].get<std::string>();
         if(rpc != "2.0")
         {
             error("Invalid version");
             return std::nullopt;
         }
-        const std::string method = message["method"].GetString();
+        const auto method = message["method"].get<std::string>();
 
         if(method == "initialize")
         {

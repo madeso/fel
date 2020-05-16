@@ -99,7 +99,7 @@ RunLanguageServer(const std::string& log_file)
 
     logger.WriteInfo("lsp startup");
 
-    rapidjson::Document message;
+    nlohmann::json message;
     while
     (
         ReadMessageJson

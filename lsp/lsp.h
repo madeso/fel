@@ -7,7 +7,7 @@
 #include <string>
 #include <optional>
 
-#include "rapidjson/document.h"
+#include "nlohmann/json.hpp"
 
 
 namespace fel
@@ -36,7 +36,7 @@ namespace fel
 
     // read a header and the corresponding message body
     std::istream&
-    ReadMessageJson(std::istream& in, rapidjson::Document* message, ErrorFunction error);
+    ReadMessageJson(std::istream& in, nlohmann::json* message, ErrorFunction error);
 
 
     struct LspInterface
@@ -48,16 +48,16 @@ namespace fel
         LspInterface(ErrorFunction e, ErrorFunction i);
 
         void
-        SendNullResponse(const rapidjson::Value& id);
+        SendNullResponse(const nlohmann::json& id);
 
         virtual ~LspInterface() = default;
 
         virtual
         void
-        Send(const rapidjson::Document& doc);
+        Send(const nlohmann::json& doc);
 
         std::optional<int>
-        Recieve(const rapidjson::Document& doc);
+        Recieve(const nlohmann::json& doc);
     };
 }
 

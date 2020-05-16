@@ -17,16 +17,12 @@ set_project_warnings(project_warnings)
 
 
 ##############################################################################
-## rapidjson dependency
+## json dependency
 
-add_library(rapidjson INTERFACE)
-target_compile_definitions(rapidjson
-  INTERFACE
-  RAPIDJSON_HAS_STDSTRING=1
-)
-target_include_directories(rapidjson
+add_library(json INTERFACE)
+target_include_directories(json
     INTERFACE
-    external/rapidjson/
+    external/nlohmann_json/
 )
 
 
@@ -63,7 +59,7 @@ target_include_directories(lsp
 )
 target_link_libraries(lsp
     PUBLIC
-    rapidjson
+    json
     PRIVATE
     project_options
     project_warnings
