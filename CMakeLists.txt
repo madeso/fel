@@ -68,25 +68,12 @@ target_link_libraries(lsp
 
 
 ##############################################################################
-## logger library
+## spdlog library
 find_package(Threads REQUIRED)
 
-add_library(logger STATIC
-    logger/logger.cc logger/logger.h
-)
-target_include_directories(logger
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE
-    external/spdlog/
-)
-target_link_libraries(logger
-    PUBLIC
-    ${CMAKE_THREAD_LIBS_INIT}
-    PRIVATE
-    project_options
-    project_warnings
-)
+add_library(spdlog INTERFACE)
+target_include_directories(spdlog INTERFACE external/spdlog/)
+target_link_libraries(spdlog INTERFACE ${CMAKE_THREAD_LIBS_INIT})
 
 
 
@@ -100,7 +87,7 @@ target_link_libraries(felapp
     PUBLIC
     fel
     lsp
-    logger
+    spdlog
     PRIVATE
     project_options
     project_warnings

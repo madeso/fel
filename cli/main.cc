@@ -6,9 +6,10 @@
 #include <optional>
 #include <functional>
 
-#include "lsp/lsp.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
-#include "logger/logger.h"
+#include "lsp/lsp.h"
 
 #include "fel/lexer.h"
 #include "fel/file.h"
@@ -89,15 +90,33 @@ RunLanguageServer(const std::string& log_file)
     // make std::cin binary: https://stackoverflow.com/a/11259588/180307
     SET_BINARY_MODE(_fileno(stdin));
 
-    auto logger = Logger{log_file};
+    static constexpr std::size_t max_size = 1048576 * 5;
+    static constexpr std::size_t max_files = 3;
 
-    auto interface = LspInterface
+    auto logger = spdlog::rotating_logger_mt
+    (
+        "fel-lsp",
+        log_file,
+        max_size,
+        max_files
+    );
+    spdlog::set_default_logger(logger);
+    spdlog::flush_every(std::chrono::seconds(3));
+
+    auto write_error = [&](const std::string& err)
     {
-        [&](const std::string& err) { logger.WriteError(err); },
-        [&](const std::string& info) { logger.WriteInfo(info); }
+        SPDLOG_ERROR("{}", err);
+        logger->flush();
+    };
+    auto write_info = [&](const std::string& info)
+    {
+        SPDLOG_INFO("{}", info);
+        logger->flush();
     };
 
-    logger.WriteInfo("lsp startup");
+    auto interface = LspInterface{write_error, write_info};
+
+    write_info("lsp startup");
 
     nlohmann::json message;
     while
@@ -106,7 +125,7 @@ RunLanguageServer(const std::string& log_file)
         (
             std::cin,
             &message,
-            [&](const std::string& err){logger.WriteError(err);}
+            write_error
         )
     )
     {
@@ -117,7 +136,7 @@ RunLanguageServer(const std::string& log_file)
         }
     }
 
-    logger.WriteError("end of input");
+    write_error("end of input");
     return -1;
 }
 
