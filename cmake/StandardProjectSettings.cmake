@@ -23,7 +23,7 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(ENABLE_IPO
-       "Enable Iterprocedural Optimization, aka Link Time Optimization (LTO)"
+       "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)"
        OFF)
 
 if(ENABLE_IPO)
@@ -35,5 +35,4 @@ if(ENABLE_IPO)
     message(SEND_ERROR "IPO is not supported: ${output}")
   endif()
 endif()
-
 
