@@ -114,7 +114,7 @@ RunLanguageServer(const std::string& log_file)
         logger->flush();
     };
 
-    auto interface = LspInterface{write_error, write_info};
+    auto interface = LspInterfaceCallback{write_error, write_info};
 
     write_info("lsp startup");
 

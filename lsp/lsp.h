@@ -38,14 +38,15 @@ namespace fel
     std::istream&
     ReadMessageJson(std::istream& in, nlohmann::json* message, ErrorFunction error);
 
-
     struct LspInterface
     {
-        ErrorFunction error;
-        ErrorFunction info;
         bool got_shutdown = false;
 
-        LspInterface(ErrorFunction e, ErrorFunction i);
+        virtual void
+        error(const std::string& err) = 0;
+
+        virtual void
+        info(const std::string& info) = 0;
 
         void
         SendNullResponse(const nlohmann::json& id);
@@ -54,10 +55,28 @@ namespace fel
 
         virtual
         void
-        Send(const nlohmann::json& doc);
+        Send(const nlohmann::json& doc) = 0;
 
         std::optional<int>
         Recieve(const nlohmann::json& doc);
+    };
+
+    struct LspInterfaceCallback : public LspInterface
+    {
+        ErrorFunction error_callback;
+        ErrorFunction info_callback;
+        bool got_shutdown = false;
+
+        LspInterfaceCallback(ErrorFunction e, ErrorFunction i);
+
+        void
+        error(const std::string& err) override;
+
+        void
+        info(const std::string& info) override;
+
+        void
+        Send(const nlohmann::json& doc);
     };
 }
 

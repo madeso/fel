@@ -183,14 +183,6 @@ namespace fel
     }
 
 
-    LspInterface::LspInterface(ErrorFunction e, ErrorFunction i)
-        : error(e)
-        , info(i)
-    {
-    }
-
-    
-    
     std::string
     ToString(const nlohmann::json& d, bool pretty)
     {
@@ -209,18 +201,6 @@ namespace fel
 
 
     void
-    LspInterface::Send(const nlohmann::json& doc)
-    {
-        const auto body = ToString(doc, false);
-
-        std::cout
-            << "Content-Length: " << body.length() << "\r\n"
-            << "\r\n"
-            << body;
-    }
-
-
-    void
     LspInterface::SendNullResponse(const nlohmann::json& id)
     {
         nlohmann::json doc;
@@ -230,16 +210,29 @@ namespace fel
     }
 
 
+    std::optional<std::string>
+    GetOptionalString(const nlohmann::json& m, const std::string& key)
+    {
+        const auto f = m.find(key);
+        if(f == m.end())
+        {
+            return std::nullopt;
+        }
+
+        return f->get<std::string>();
+    }
+
+
     std::optional<int>
     LspInterface::Recieve(const nlohmann::json& message)
     {
-        const auto rpc = message["jsonrpc"].get<std::string>();
+        const auto rpc = GetOptionalString(message, "jsonrpc").value_or("missing rpc version");
         if(rpc != "2.0")
         {
             error("Invalid version");
             return std::nullopt;
         }
-        const auto method = message["method"].get<std::string>();
+        const auto method = GetOptionalString(message, "method").value_or("missing method");
 
         if(method == "initialize")
         {
@@ -270,6 +263,38 @@ namespace fel
 
         return std::nullopt;
     }
+    
 
+    LspInterfaceCallback::LspInterfaceCallback(ErrorFunction e, ErrorFunction i)
+        : error_callback(e)
+        , info_callback(i)
+    {
+    }
+
+
+    void
+    LspInterfaceCallback::error(const std::string& err)
+    {
+        error_callback(err);
+    }
+
+
+    void
+    LspInterfaceCallback::info(const std::string& info)
+    {
+        info_callback(info);
+    }
+
+
+    void
+    LspInterfaceCallback::Send(const nlohmann::json& doc)
+    {
+        const auto body = ToString(doc, false);
+
+        std::cout
+            << "Content-Length: " << body.length() << "\r\n"
+            << "\r\n"
+            << body;
+    }
 }
 

@@ -395,4 +395,57 @@ TEST_CASE("lsp", "[lsp]")
             )
         );
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // read message test
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // lsp interface
+
+    struct LspTest : public LspInterface
+    {
+        std::vector<std::string> log;
+        std::vector<nlohmann::json> sent;
+
+        void
+        Send(const nlohmann::json& doc) override
+        {
+            sent.push_back(doc);
+        }
+
+        void
+        info(const std::string& in) override
+        {
+            log.emplace_back("inf: " + in);
+        }
+
+        void
+        error(const std::string& in) override
+        {
+            log.emplace_back("err: " + in);
+        }
+    };
+
+    SECTION("lsp inteface")
+    {
+        using namespace nlohmann;
+
+        auto interface = LspTest {};
+
+        SECTION("send null null response doesnt crash")
+        {
+            interface.SendNullResponse(json {});
+        }
+
+        SECTION("recieve null message doesnt crash")
+        {
+            interface.Recieve(json {});
+        }
+
+        SECTION("recieve empty object doesnt crash")
+        {
+            interface.Recieve(json({}));
+        }
+    }
 }
