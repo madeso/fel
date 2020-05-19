@@ -342,4 +342,57 @@ TEST_CASE("lsp", "[lsp]")
         );
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // body
+
+    SECTION("5+2 chars body")
+    {
+        std::string first_body = "";
+        std::string second_body = "";
+
+        const auto parse_result = parse
+        (
+            "1234567890",
+            [&](std::istream& in)
+            {
+                first_body = ReadMessageBody(in, 5);
+                second_body = ReadMessageBody(in, 2);
+            }
+        );
+        CHECK(parse_result);
+        CHECK(first_body == "12345");
+        CHECK(second_body == "67");
+        CHECK_THAT
+        (
+            errors,
+            Equals<std::string>
+            (
+                no_errors
+            )
+        );
+    }
+
+    SECTION("5 chars body with input that only have 3")
+    {
+        std::string body = "";
+
+        const auto parse_result = parse
+        (
+            "123",
+            [&](std::istream& in)
+            {
+                body = ReadMessageBody(in, 5);
+            }
+        );
+        CHECK_FALSE(parse_result);
+        CHECK(body == "123");
+        CHECK_THAT
+        (
+            errors,
+            Equals<std::string>
+            (
+                no_errors
+            )
+        );
+    }
 }
