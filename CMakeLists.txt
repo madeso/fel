@@ -55,6 +55,7 @@ target_link_libraries(fel
 
 add_library(lsp STATIC
     lsp/lsp.cc lsp/lsp.h
+    lsp/str.cc lsp/str.h
 )
 target_include_directories(lsp
     PUBLIC

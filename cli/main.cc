@@ -5,15 +5,17 @@
 #include <cassert>
 #include <optional>
 #include <functional>
+#include <exception>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 
-#include "lsp/lsp.h"
-
 #include "fel/lexer.h"
 #include "fel/file.h"
 #include "fel/log.h"
+
+#include "lsp/lsp.h"
+#include "lsp/str.h"
 
 
 using namespace fel;
@@ -118,25 +120,37 @@ RunLanguageServer(const std::string& log_file)
 
     write_info("lsp startup");
 
-    nlohmann::json message;
-    while
-    (
-        ReadMessageJson
-        (
-            std::cin,
-            &message,
-            write_error
-        )
-    )
+    try
     {
-        auto recieved = interface.Recieve(message);
-        if(recieved)
+        nlohmann::json message;
+        while
+        (
+            ReadMessageJson
+            (
+                std::cin,
+                &message,
+                write_error
+            )
+        )
         {
-            return *recieved;
+            auto recieved = interface.Recieve(message);
+            if(recieved)
+            {
+                write_info("exiting as requested");
+                return *recieved;
+            }
         }
+        write_error("end of input");
     }
-
-    write_error("end of input");
+    catch(const std::exception& ex)
+    {
+        write_error(Str() << "Exception: " << ex.what());
+    }
+    catch(...)
+    {
+        write_error("exiting due to unknown exception");
+    }
+    
     return -1;
 }
 

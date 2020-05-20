@@ -5,28 +5,11 @@
 #include <iostream>
 #include <iomanip>
 
+#include "lsp/str.h"
+
 
 namespace fel
 {
-    struct Str
-    {
-        std::ostringstream ss;
-
-        operator std::string() const
-        {
-            return ss.str();
-        }
-
-        template<typename T>
-        Str&
-        operator<<(const T& t)
-        {
-            ss << t;
-            return *this;
-        }
-    };
-
-
     std::istream&
     ReadHeaderLine(std::istream& in, std::string* line, ErrorFunction error)
     {
