@@ -9,6 +9,7 @@ include(cmake/StandardProjectSettings.cmake)
 include(cmake/CompilerWarnings.cmake)
 include(cmake/Sanitizers.cmake)
 include(cmake/Defines.cmake)
+include(ExternalProject)
 
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
@@ -70,17 +71,6 @@ target_link_libraries(lsp
 )
 
 
-
-##############################################################################
-## spdlog library
-find_package(Threads REQUIRED)
-
-add_library(spdlog INTERFACE)
-target_include_directories(spdlog INTERFACE external/spdlog/)
-target_link_libraries(spdlog INTERFACE ${CMAKE_THREAD_LIBS_INIT})
-
-
-
 ##############################################################################
 ## fel commandline
 
@@ -91,7 +81,6 @@ target_link_libraries(felapp
     PUBLIC
     fel
     lsp
-    spdlog
     PRIVATE
     project_options
     project_warnings

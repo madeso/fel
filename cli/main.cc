@@ -7,9 +7,6 @@
 #include <functional>
 #include <exception>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/rotating_file_sink.h"
-
 #include "fel/lexer.h"
 #include "fel/file.h"
 #include "fel/log.h"
@@ -87,33 +84,30 @@ struct Options
 
 
 int
-RunLanguageServer(const std::string& log_file)
+RunLanguageServer(const std::string& log_path)
 {
     // make std::cin binary: https://stackoverflow.com/a/11259588/180307
     SET_BINARY_MODE(_fileno(stdin));
 
-    static constexpr std::size_t max_size = 1048576 * 5;
-    static constexpr std::size_t max_files = 3;
+    auto log_file = std::ofstream{log_path};
+    if(!log_file.good())
+    {
+        return -2;
+    }
 
-    auto logger = spdlog::rotating_logger_mt
-    (
-        "fel-lsp",
-        log_file,
-        max_size,
-        max_files
-    );
-    spdlog::set_default_logger(logger);
-    spdlog::flush_every(std::chrono::seconds(3));
+    auto logger = [&log_file](const std::string& category, const std::string& to_log)
+    {
+        log_file << category << ": " << to_log << "\n";
+        log_file.flush();
+    };
 
     auto write_error = [&](const std::string& err)
     {
-        SPDLOG_ERROR("{}", err);
-        logger->flush();
+        logger("error", err);
     };
     auto write_info = [&](const std::string& info)
     {
-        SPDLOG_INFO("{}", info);
-        logger->flush();
+        logger("info", info);
     };
 
     auto interface = LspInterfaceCallback{write_error, write_info};
