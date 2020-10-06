@@ -76,7 +76,7 @@ namespace fel
         info(const std::string& info) override;
 
         void
-        Send(const nlohmann::json& doc);
+        Send(const nlohmann::json& doc) override;
     };
 }
 
