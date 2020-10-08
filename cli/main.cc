@@ -11,6 +11,10 @@
 #include "fel/file.h"
 #include "fel/log.h"
 
+// testing
+#include "fel/ast.h"
+#include "fel/ast_printer.h"
+
 #include "lsp/lsp.h"
 #include "lsp/str.h"
 
@@ -150,6 +154,28 @@ RunLanguageServer(const std::string& log_path)
 
 
 int
+RunTest()
+{
+    auto expression = std::make_shared<BinaryExpression>
+    (
+        std::make_shared<UnaryExpression>
+        (
+            Token{TokenType::Minus, "-", nullptr, {}},
+            std::make_shared<LiteralExpression>(Object::FromInt(123))
+        ),
+        Token{TokenType::Mult, "*", nullptr, {}},
+        std::make_shared<GroupingExpression>
+        (
+            std::make_shared<LiteralExpression>(Object::FromFloat(45.67f))
+        )
+    );
+
+    std::cout << AstPrinter{}.Visit(expression.get()) << "\n";
+    return 0;
+}
+
+
+int
 main(int argc, char* argv[])
 {
     const auto app = std::string(argv[0]);
@@ -212,6 +238,10 @@ main(int argc, char* argv[])
                 {
                     opt.log_file = v;
                 };
+            }
+            else if(a =="-test")
+            {
+                return RunTest();
             }
             else if(a == "-lsp")
             {

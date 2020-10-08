@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "fel/file.h"
+#include "fel/object.h"
 
 
 namespace fel
@@ -49,15 +50,19 @@ namespace fel
 
     struct Token
     {
+        Token(TokenType t, const std::string& lex, std::shared_ptr<Object> lit, const Location& w);
+
         TokenType type;
-        std::string text;
+        std::string lexeme;
+        std::shared_ptr<Object> literal;
+        Location where;
     };
 
 
     template<typename Stream>
     Stream& operator<<(Stream& stream, const Token& token)
     {
-        stream << ToString(token.type) << ": " << token.text;
+        stream << ToString(token.type) << ": " << token.lexeme;
         return stream;
     }
 

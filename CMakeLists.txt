@@ -38,6 +38,9 @@ add_library(fel STATIC
     fel/lexer.cc fel/lexer.h
     fel/location.cc fel/location.h
     fel/log.cc fel/log.h
+    fel/ast.cc fel/ast.h
+    fel/ast_printer.cc fel/ast_printer.h
+    fel/object.cc fel/object.h
 )
 target_include_directories(fel
     PUBLIC

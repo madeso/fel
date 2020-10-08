@@ -71,6 +71,21 @@ namespace fel
     }
 
 
+    Token::Token
+    (
+        TokenType t,
+        const std::string& lex,
+        std::shared_ptr<Object> lit,
+        const Location& w
+    )
+        : type(t)
+        , lexeme(lex)
+        , literal(lit)
+        , where(w)
+    {
+    }
+
+
     Lexer::Lexer(const File& a_file, Log* a_log) : file(a_file), log(a_log)
     {
     }
@@ -183,25 +198,28 @@ namespace fel
 
         Token SingleChar(FilePointer* file, TokenType tt)
         {
+            const auto location = file->location;
             const auto c = file->Read();
-            return {tt, std::string(1, c)};
+            return {tt, std::string(1, c), nullptr, location};
         }
 
 
         Token CharAndChar(FilePointer* file, TokenType one_char, char second_char, TokenType two_chars)
         {
+            const auto location = file->location;
             auto first_char = std::string(1, file->Read());
             if(file->Peek() == second_char)
             {
                 file->Read();
-                return {two_chars, first_char + std::string(1, second_char)};
+                return {two_chars, first_char + std::string(1, second_char), nullptr, location};
             }
-            return {one_char, first_char};
+            return {one_char, first_char, nullptr, location};
         }
 
 
         Token ParseString(Log* log, FilePointer* file)
         {
+            const auto location = file->location;
             std::ostringstream buffer;
             auto end = file->Read();
             while(file->Peek() != end)
@@ -210,7 +228,8 @@ namespace fel
                 if( c == 0)
                 {
                     log->AddError(*file, log::Type::EosInString, {});
-                    return {TokenType::String, buffer.str()};
+                    const auto str = buffer.str();
+                    return {TokenType::String, str, Object::FromString(str), location};
                 }
                 if(c == '\\')
                 {
@@ -221,7 +240,8 @@ namespace fel
                 buffer << c;
             }
             file->Read();
-            return {TokenType::String, buffer.str()};
+            const auto str = buffer.str();
+            return {TokenType::String, str, Object::FromString(str), location};
         }
     }
 
@@ -233,7 +253,7 @@ namespace fel
         switch(file.Peek())
         {
         case 0:
-            return {TokenType::EndOfStream, ""};
+            return {TokenType::EndOfStream, "", nullptr, file.location};
 
         case '{': return SingleChar(&file, TokenType::BeginBrace);
         case '}': return SingleChar(&file, TokenType::EndBrace);
@@ -268,30 +288,32 @@ namespace fel
             if(IsAlpha(file.Peek()))
             {
                 std::ostringstream buffer;
+                const auto location = file.location;
                 buffer << file.Read();
                 while( IsAlpha(file.Peek()) || IsNumeric(file.Peek()) )
                 {
                     buffer << file.Read();
                 }
                 auto s = buffer.str();
-                if(s == "if") { return {TokenType::KeywordIf, s}; }
-                else if(s == "if") { return {TokenType::KeywordIf, s}; }
-                else if(s == "else") { return {TokenType::KeywordElse, s}; }
-                else if(s == "for") { return {TokenType::KeywordFor, s}; }
-                else if(s == "fun") { return {TokenType::KeywordFunction, s}; }
-                else if(s == "return") { return {TokenType::KeywordReturn, s}; }
-                else if(s == "var") { return {TokenType::KeywordVar, s}; }
-                else if(s == "true") { return {TokenType::KeywordTrue, s}; }
-                else if(s == "false") { return {TokenType::KeywordFalse, s}; }
-                else if(s == "null") { return {TokenType::KeywordNull, s}; }
+                if(s == "if") { return {TokenType::KeywordIf, s, nullptr, location}; }
+                else if(s == "if") { return {TokenType::KeywordIf, s, nullptr, location}; }
+                else if(s == "else") { return {TokenType::KeywordElse, s, nullptr, location}; }
+                else if(s == "for") { return {TokenType::KeywordFor, s, nullptr, location}; }
+                else if(s == "fun") { return {TokenType::KeywordFunction, s, nullptr, location}; }
+                else if(s == "return") { return {TokenType::KeywordReturn, s, nullptr, location}; }
+                else if(s == "var") { return {TokenType::KeywordVar, s, nullptr, location}; }
+                else if(s == "true") { return {TokenType::KeywordTrue, s, nullptr, location}; }
+                else if(s == "false") { return {TokenType::KeywordFalse, s, nullptr, location}; }
+                else if(s == "null") { return {TokenType::KeywordNull, s, nullptr, location}; }
                 else
                 {
-                    return {TokenType::Identifier, s};
+                    return {TokenType::Identifier, s, nullptr, location};
                 }
                 
             }
             else if(IsNumeric(file.Peek()))
             {
+                const auto location = file.location;
                 std::ostringstream buffer;
                 buffer << file.Read();
                 while( IsNumeric(file.Peek()) )
@@ -307,17 +329,18 @@ namespace fel
                         buffer << file.Read();
                     }
                     auto s = buffer.str();
-                    return {TokenType::Number, s};
+                    return {TokenType::Number, s, Object::FromFloat(std::stof(s)), location};
                 }
                 auto s = buffer.str();
-                return {TokenType::Int, s};
+                return {TokenType::Int, s, Object::FromInt(std::stoi(s)), location};
             }
             else
             {
+                const auto location = file.location;
                 auto c = file.Read();
                 const auto unknown_character = std::string{1, c};
                 log->AddError(file, log::Type::UnknownCharacter, {unknown_character});
-                return {TokenType::Unknown, unknown_character};
+                return {TokenType::Unknown, unknown_character, nullptr, location};
             }
         }
     }

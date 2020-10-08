@@ -22,7 +22,14 @@ namespace
     {
         TestToken(const Token& token)
             : type(token.type)
-            , text(token.text)
+            , text(token.lexeme)
+        {
+        }
+
+
+        TestToken(TokenType t, const std::string& l)
+            : type(t)
+            , text(l)
         {
         }
 
@@ -219,8 +226,8 @@ TEST_CASE("lexer", "[lexer]")
             Equals<TestToken>
             (
                 {
-                    Token{TokenType::String, "dog"},
-                    Token{TokenType::String, "cat"}
+                    {TokenType::String, "dog"},
+                    {TokenType::String, "cat"}
                 }
             )
         );
@@ -230,8 +237,8 @@ TEST_CASE("lexer", "[lexer]")
             Equals<TestToken>
             (
                 {
-                    Token{TokenType::Identifier, "dog"},
-                    Token{TokenType::Identifier, "cat"}
+                    {TokenType::Identifier, "dog"},
+                    {TokenType::Identifier, "cat"}
                 }
             )
         );
@@ -259,8 +266,8 @@ TEST_CASE("lexer", "[lexer]")
             Equals<TestToken>
             (
                 {
-                    Token{TokenType::Int, "42"},
-                    Token{TokenType::Number, "2.4"}
+                    {TokenType::Int, "42"},
+                    {TokenType::Number, "2.4"}
                 }
             )
         );
