@@ -41,6 +41,8 @@ add_library(fel STATIC
     fel/ast.cc fel/ast.h
     fel/ast_printer.cc fel/ast_printer.h
     fel/object.cc fel/object.h
+    fel/parser.cc fel/parser.h
+    fel/where.cc fel/where.h
 )
 target_include_directories(fel
     PUBLIC

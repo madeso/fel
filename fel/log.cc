@@ -13,8 +13,7 @@ namespace fel::log
     bool
     operator==(const Entry& lhs, const Entry& rhs)
     {
-        return lhs.file == rhs.file
-            && lhs.location == rhs.location
+        return lhs.where == rhs.where
             && lhs.intensity == rhs.intensity
             && lhs.type == rhs.type
             && lhs.arguments == rhs.arguments;
@@ -23,14 +22,13 @@ namespace fel::log
 
     Entry::Entry
     (
-        const FilePointer& a_where,
+        const Where& a_where,
         Intensity a_intensity,
         log::Type a_type,
         const std::vector<std::string>& a_args,
         const std::vector<std::string>& a_debug_context
     )
-        : file(a_where.file.filename)
-        , location(a_where.location)
+        : where(a_where)
         , intensity(a_intensity)
         , type(a_type)
         , arguments(a_args)
@@ -80,12 +78,8 @@ namespace fel::log
     operator<<(std::ostream& o, const Entry& entry)
     {
         o
-            << entry.file
-            << "("
-            << entry.location.line << ":" << entry.location.column
-            << ") "
-            << entry.intensity
-            << ": "
+            << entry.where << " "
+            << entry.intensity << ": "
             ;
         switch(entry.type)
         {
@@ -97,8 +91,16 @@ namespace fel::log
             assert(entry.arguments.size() == 1);
             o << "Found unknown character '" << Arg(entry, 0) << "'";
             break;
+        case Type::MissingCloseParen:
+            assert(entry.arguments.size() == 0);
+            o << "Missing close paren";
+            break;
+        case Type::ExpectedExpression:
+            assert(entry.arguments.size() == 0);
+            o << "Expected expression";
+            break;
         default:
-            o << "Internal error: Unhandled error in switch.";
+            o << "Internal error: Unhandled error type in switch.";
             break;
         }
         if(!entry.debug_context.empty())
@@ -149,6 +151,18 @@ namespace fel
     Log::AddError
     (
         const FilePointer& where,
+        log::Type type,
+        const std::vector<std::string>& args
+    )
+    {
+        AddError(Where{where.file.filename, where.location}, type, args);
+    }
+
+
+    void
+    Log::AddError
+    (
+        const Where& where,
         log::Type type,
         const std::vector<std::string>& args
     )

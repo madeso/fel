@@ -5,9 +5,10 @@
 
 namespace fel
 {
-    void AstPrinter::Visit(Expression* expression)
+    std::string
+    AstPrinter::Visit(Expression* expression)
     {
-        expression->Visit(this);
+        return expression->Visit(this);
     }
 
 

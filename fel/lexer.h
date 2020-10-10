@@ -7,7 +7,7 @@
 
 #include "fel/file.h"
 #include "fel/object.h"
-
+#include "fel/where.h"
 
 namespace fel
 {
@@ -17,19 +17,20 @@ namespace fel
     enum class TokenType
     {
         Unknown,
-        BeginBrace, EndBrace,
-        OpenParen, CloseParen,
-        OpenBracket, CloseBracket,
+        BeginBrace, EndBrace, // {}
+        OpenParen, CloseParen, // ()
+        OpenBracket, CloseBracket, // []
         
-        Plus, Minus, Mult, Div, Comma, Colon, Term,
+        Plus, Minus, Mult, Div, Comma, Colon,
+        Term, // ;
 
         Dot, DotDot,
         Equal, Assign,
         Less, LessEqual,
         Greater, GreaterEqual,
 
-        Not, BitNot,
-        And, Or, BitAnd, BitOr,
+        Not, NotEqual,
+        And, Or, BitNot, BitAnd, BitOr,
 
         String,
 
@@ -37,6 +38,10 @@ namespace fel
 
         KeywordIf, KeywordElse, KeywordFor, KeywordFunction, KeywordVar,
         KeywordTrue, KeywordFalse, KeywordNull, KeywordReturn,
+        KeywordWhile,
+
+        // todo(Gustav): remove this when functions work
+        KeywordPrint,
 
         Int, Number,
         
@@ -50,12 +55,12 @@ namespace fel
 
     struct Token
     {
-        Token(TokenType t, const std::string& lex, std::shared_ptr<Object> lit, const Location& w);
+        Token(TokenType t, const std::string& lex, std::shared_ptr<Object> lit, const Where& w);
 
         TokenType type;
         std::string lexeme;
         std::shared_ptr<Object> literal;
-        Location where;
+        Where where;
     };
 
 
@@ -83,6 +88,7 @@ namespace fel
     {
         Lexer lexer;
         std::optional<Token> token;
+        std::optional<Token> previous;
 
         LexerReader(const File& a_file, Log* a_log);
 

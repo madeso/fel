@@ -37,6 +37,22 @@ namespace fel
             return ss.str();
         }
     };
+
+
+    struct BoolObject : public Object
+    {
+        bool b;
+
+        explicit BoolObject(bool bb) : b(bb) {}
+
+
+        std::string
+        ToString() override
+        {
+            if(b) { return "true";  }
+            else  { return "false"; }
+        }
+    };
     
 
     struct StringObject : public Object
@@ -62,6 +78,12 @@ namespace fel
     std::shared_ptr<Object> Object::FromFloat(float f)
     {
         return std::make_shared<FloatObject>(f);
+    }
+
+
+    std::shared_ptr<Object> Object::FromBool(bool b)
+    {
+        return std::make_shared<BoolObject>(b);
     }
 
 

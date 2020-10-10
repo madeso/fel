@@ -8,7 +8,7 @@ namespace fel
 
     struct AstPrinter : public ExpressionVisitorString
     {
-        void Visit(Expression* expression);
+        std::string Visit(Expression* expression);
 
         std::string Visit(BinaryExpression* exp) override;
         std::string Visit(GroupingExpression* exp) override;

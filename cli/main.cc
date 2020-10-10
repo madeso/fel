@@ -14,6 +14,7 @@
 // testing
 #include "fel/ast.h"
 #include "fel/ast_printer.h"
+#include "fel/parser.h"
 
 #include "lsp/lsp.h"
 #include "lsp/str.h"
@@ -45,22 +46,50 @@ bool IsArgument(char* s)
 }
 
 
-std::optional<File>
-ReadFile(const std::string& path)
+enum class Mode
 {
-    if(path == "stdin")
+    Tokenize,
+    Parse,
+
+    // not implemented
+    Run
+};
+
+
+struct Options
+{
+    Mode mode = Mode::Run;
+    bool treat_file_as_code = false;
+    bool print_log = true;
+    bool print_output = true;
+    std::string log_file = "fel-lsp.log";
+};
+
+
+std::optional<File>
+ReadFile(const std::string& path, const Options& opt)
+{
+    if(opt.treat_file_as_code)
     {
-        const std::string content(
-                (std::istreambuf_iterator<char>(std::cin)),
-                std::istreambuf_iterator<char>());
-        return File {"stdin", content};
+        return File{"commandline", path};
+    }
+    else if(path == "stdin")
+    {
+        const auto content = std::string
+        (
+            std::istreambuf_iterator<char>(std::cin),
+            std::istreambuf_iterator<char>()
+        );
+        return File{"stdin", content};
     }
     else if(auto t = std::ifstream{path.c_str()}; t.good())
     {
-        const std::string content(
-                (std::istreambuf_iterator<char>(t)),
-                std::istreambuf_iterator<char>());
-        return File {path, content};
+        const auto content = std::string
+        (
+            std::istreambuf_iterator<char>(t),
+            std::istreambuf_iterator<char>()
+        );
+        return File{path, content};
     }
     else
     {
@@ -68,14 +97,6 @@ ReadFile(const std::string& path)
         return std::nullopt;
     }
 }
-
-
-struct Options
-{
-    bool print_log = true;
-    bool print_output = true;
-    std::string log_file = "fel-lsp.log";
-};
 
 
 #ifdef _WIN32
@@ -154,24 +175,48 @@ RunLanguageServer(const std::string& log_path)
 
 
 int
-RunTest()
+HandleTokenize(const File& file, const Options& opt)
 {
-    auto expression = std::make_shared<BinaryExpression>
-    (
-        std::make_shared<UnaryExpression>
-        (
-            Token{TokenType::Minus, "-", nullptr, {}},
-            std::make_shared<LiteralExpression>(Object::FromInt(123))
-        ),
-        Token{TokenType::Mult, "*", nullptr, {}},
-        std::make_shared<GroupingExpression>
-        (
-            std::make_shared<LiteralExpression>(Object::FromFloat(45.67f))
-        )
-    );
+    Log log;
+    auto reader = LexerReader{file, &log};
+    auto tokens = GetAllTokensInFile(&reader);
+    if(opt.print_log)
+    {
+        Print(log);
+    }
+    if(opt.print_output)
+    {
+        if(log.IsEmpty())
+        {
+            for(auto token : tokens)
+            {
+                std::cout << token << "\n";
+            }
+        }
+    }
 
-    std::cout << AstPrinter{}.Visit(expression.get()) << "\n";
-    return 0;
+    return log.IsEmpty() ? 0 : -1;
+}
+
+
+int
+HandleParse(const File& file, const Options& opt)
+{
+    Log log;
+    auto parser = Parser{file, &log};
+    auto parsed_expression = parser.Parse();
+
+    if(opt.print_log)
+    {
+        Print(log);
+    }
+
+    if(opt.print_output && parsed_expression != nullptr)
+    {
+        std::cout << AstPrinter{}.Visit(parsed_expression.get()) << "\n";
+    }
+
+    return log.IsEmpty() && parsed_expression != nullptr ? 0 : -1;
 }
 
 
@@ -183,20 +228,29 @@ main(int argc, char* argv[])
     {
         auto aaa = std::string(app.size(), ' ');
         std::cout
+            << "-----------------------------------------------\n"
             << "Fast Embedded Lightweight terminal application.\n"
-            << "----------------------------------------------\n"
+            << "-----------------------------------------------\n"
+            << app << " -h               print theese instructions\n"
+            << app << " [lsp] --lsp      run as a language server\n"
+            << app << " [options] FILE   run code\n"
             << "\n"
-            << app << " -h             print theese instructions.\n"
-            << app << " [lsp] --lsp    run as a language server.\n"
-            << app << " [options] FILE/CODE/stdin\n"
-            << aaa << "                run code\n"
+            << "FILE can either be\n"
+            << "  * a path to a file\n"
+            << "  * standard input, if the stdin keyword is passed\n"
+            << "  * code to 'execute', if -x is passed\n"
             << "\n"
             << "options:\n"
             << "  -s     make silent\n"
             << "  -S     make super silent\n"
+            << "  -x     the FILE is not a file but code\n"
+            << "\n"
+            << "mode selection:\n"
+            << "  --tokenize   instead of running, just tokenize the input\n"
+            << "  --parse      instead of running, just parse the input\n"
             << "\n"
             << "lsp:\n"
-            << "  --log  rotating log for language server to use\n"
+            << "  --log  log for language server to use\n"
             << "\n"
             ;
     };
@@ -218,7 +272,7 @@ main(int argc, char* argv[])
         else if(IsArgument(argv[i]))
         {
             const auto a = std::string(argv[i]).substr(1);
-            if(a == "help" || a == "h")
+            if(a == "help" || a == "h" || a == "-help" || a == "?" || a == "-?")
             {
                 PrintUsage();
                 return 0;
@@ -232,6 +286,10 @@ main(int argc, char* argv[])
                 opt.print_output = false;
                 opt.print_log = false;
             }
+            else if(a == "x")
+            {
+                opt.treat_file_as_code = true;
+            }
             else if(a == "-log")
             {
                 next_option = [&](const std::string& v)
@@ -239,9 +297,13 @@ main(int argc, char* argv[])
                     opt.log_file = v;
                 };
             }
-            else if(a =="-test")
+            else if(a =="-tokenize")
             {
-                return RunTest();
+                opt.mode = Mode::Tokenize;
+            }
+            else if(a =="-parse")
+            {
+                opt.mode = Mode::Parse;
             }
             else if(a == "-lsp")
             {
@@ -257,27 +319,26 @@ main(int argc, char* argv[])
         }
         else
         {
-            if(const auto file = ReadFile(argv[i]))
+            if(const auto file = ReadFile(argv[i], opt))
             {
-                Log log;
-                auto reader = LexerReader{*file, &log};
-                auto tokens = GetAllTokensInFile(&reader);
-                if(opt.print_log)
+                const int return_value = [&]()
                 {
-                    Print(log);
-                }
-                if(opt.print_output)
-                {
-                    if(log.IsEmpty())
+                    switch(opt.mode)
                     {
-                        for(auto token : tokens)
-                        {
-                            std::cout << token << "\n";
-                        }
+                    case Mode::Tokenize:
+                        return HandleTokenize(*file, opt);
+                    case Mode::Parse:
+                        return HandleParse(*file, opt);
+                    default:
+                        std::cerr << "Unknown mode!\n";
+                        return -2;
                     }
-                }
+                }();
 
-                return log.IsEmpty() ? 0 : -1;
+                if(return_value != 0)
+                {
+                    return return_value;
+                }
             }
 
             opt = Options{};

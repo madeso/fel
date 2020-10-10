@@ -76,7 +76,7 @@ namespace fel
         TokenType t,
         const std::string& lex,
         std::shared_ptr<Object> lit,
-        const Location& w
+        const Where& w
     )
         : type(t)
         , lexeme(lex)
@@ -198,7 +198,7 @@ namespace fel
 
         Token SingleChar(FilePointer* file, TokenType tt)
         {
-            const auto location = file->location;
+            const auto location = Where{*file};
             const auto c = file->Read();
             return {tt, std::string(1, c), nullptr, location};
         }
@@ -206,7 +206,7 @@ namespace fel
 
         Token CharAndChar(FilePointer* file, TokenType one_char, char second_char, TokenType two_chars)
         {
-            const auto location = file->location;
+            const auto location = Where{*file};
             auto first_char = std::string(1, file->Read());
             if(file->Peek() == second_char)
             {
@@ -219,7 +219,7 @@ namespace fel
 
         Token ParseString(Log* log, FilePointer* file)
         {
-            const auto location = file->location;
+            const auto location = Where{*file};
             std::ostringstream buffer;
             auto end = file->Read();
             while(file->Peek() != end)
@@ -253,7 +253,7 @@ namespace fel
         switch(file.Peek())
         {
         case 0:
-            return {TokenType::EndOfStream, "", nullptr, file.location};
+            return {TokenType::EndOfStream, "", nullptr, Where{file}};
 
         case '{': return SingleChar(&file, TokenType::BeginBrace);
         case '}': return SingleChar(&file, TokenType::EndBrace);
@@ -274,7 +274,7 @@ namespace fel
         case '<': return CharAndChar(&file, TokenType::Less, '=', TokenType::LessEqual);
         case '>': return CharAndChar(&file, TokenType::Greater, '=', TokenType::GreaterEqual);
 
-        case '!': return SingleChar(&file, TokenType::Not);
+        case '!': return CharAndChar(&file, TokenType::Not, '=', TokenType::NotEqual);
         case '~': return SingleChar(&file, TokenType::BitNot);
         case '&': return CharAndChar(&file, TokenType::BitAnd, '&', TokenType::And);
         case '|': return CharAndChar(&file, TokenType::BitOr, '|', TokenType::Or);
@@ -288,7 +288,7 @@ namespace fel
             if(IsAlpha(file.Peek()))
             {
                 std::ostringstream buffer;
-                const auto location = file.location;
+                const auto location = Where{file};
                 buffer << file.Read();
                 while( IsAlpha(file.Peek()) || IsNumeric(file.Peek()) )
                 {
@@ -301,6 +301,8 @@ namespace fel
                 else if(s == "for") { return {TokenType::KeywordFor, s, nullptr, location}; }
                 else if(s == "fun") { return {TokenType::KeywordFunction, s, nullptr, location}; }
                 else if(s == "return") { return {TokenType::KeywordReturn, s, nullptr, location}; }
+                else if(s == "while") { return {TokenType::KeywordWhile, s, nullptr, location}; }
+                else if(s == "print") { return {TokenType::KeywordPrint, s, nullptr, location}; }
                 else if(s == "var") { return {TokenType::KeywordVar, s, nullptr, location}; }
                 else if(s == "true") { return {TokenType::KeywordTrue, s, nullptr, location}; }
                 else if(s == "false") { return {TokenType::KeywordFalse, s, nullptr, location}; }
@@ -313,7 +315,7 @@ namespace fel
             }
             else if(IsNumeric(file.Peek()))
             {
-                const auto location = file.location;
+                const auto location = Where{file};
                 std::ostringstream buffer;
                 buffer << file.Read();
                 while( IsNumeric(file.Peek()) )
@@ -336,7 +338,7 @@ namespace fel
             }
             else
             {
-                const auto location = file.location;
+                const auto location = Where{file};
                 auto c = file.Read();
                 const auto unknown_character = std::string{1, c};
                 log->AddError(file, log::Type::UnknownCharacter, {unknown_character});
@@ -372,12 +374,14 @@ namespace fel
         {
             const auto r = *token;
             token.reset();
-            return r;
+            previous = r;
         }
         else
         {
-            return lexer.GetNextToken();
+            previous = lexer.GetNextToken();
         }
+
+        return *previous;
     }
 
 

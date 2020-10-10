@@ -7,6 +7,7 @@
 #include <functional>
 
 #include "fel/location.h"
+#include "fel/where.h"
 
 namespace fel
 {
@@ -21,22 +22,21 @@ namespace fel
 
         enum class Type
         {
-            EosInString, UnknownCharacter
+            EosInString, UnknownCharacter, MissingCloseParen, ExpectedExpression
         };
 
         struct Entry
         {
             Entry
             (
-                const FilePointer& where,
+                const Where& where,
                 Intensity intensity,
                 log::Type type,
                 const std::vector<std::string>& args,
                 const std::vector<std::string>& a_debug_context
             );
 
-            std::string file;
-            Location location;
+            Where where;
             Intensity intensity;
             Type type;
             std::vector<std::string> arguments;
@@ -57,6 +57,13 @@ namespace fel
         void AddError
         (
             const FilePointer& where,
+            log::Type type,
+            const std::vector<std::string>& args
+        );
+
+        void AddError
+        (
+            const Where& where,
             log::Type type,
             const std::vector<std::string>& args
         );
