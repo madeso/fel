@@ -238,12 +238,12 @@ main(int argc, char* argv[])
             << "FILE can either be\n"
             << "  * a path to a file\n"
             << "  * standard input, if the stdin keyword is passed\n"
-            << "  * code to 'execute', if -x is passed\n"
+            << "  * code to 'execute', if --code is passed\n"
             << "\n"
             << "options:\n"
             << "  -s     make silent\n"
             << "  -S     make super silent\n"
-            << "  -x     the FILE is not a file but code\n"
+            << "  --code the FILE is not a file but code\n"
             << "\n"
             << "mode selection:\n"
             << "  --tokenize   instead of running, just tokenize the input\n"
@@ -286,7 +286,7 @@ main(int argc, char* argv[])
                 opt.print_output = false;
                 opt.print_log = false;
             }
-            else if(a == "x")
+            else if(a == "-code")
             {
                 opt.treat_file_as_code = true;
             }
