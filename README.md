@@ -8,13 +8,18 @@ Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thin
 [![Build Status](https://travis-ci.org/madeso/fel.svg?branch=master)](https://travis-ci.org/madeso/fel)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/fel/badge.svg?branch=master)](https://coveralls.io/github/madeso/fel?branch=master)
 
-# Key features
+# Key ideas (or key features if you like)
   * 0 based arrays (as opposed to luas 1)
-  * optional/gradual typesafety
+  * optional/gradual typesafety (similar to python or typescript)
   * JIT as a feature, not as a external library
   * Embedable by design, grab the source and add it to your favorite buildsystem.
-  * Editor/intellisense support(mainly having a [LSP](https://github.com/Microsoft/language-server-protocol)-enabled server).
+  * Editor/intellisense support(mainly having a [LSP](https://github.com/Microsoft/language-server-protocol)-enabled server and a official (fully featured) vs code plugin).
   * Operator overloading support. (like lua, unlike js)
+  * debugging library with a 'dear imgui' implementation
+  * [jupyter kernel](https://jupyter-client.readthedocs.io/en/stable/kernels.html) via [xeus](https://github.com/jupyter-xeus/xeus/blob/master/example/src/custom_interpreter.cpp) for documentation of the language and playing around
+  * Compile time function execution (like converting a string to a hashed value)
+  * Easily inspect and reflect compiled code
+  * 'visual scripting enabled' with a 'dear imgui' implementation
 
 # Workplan
 1. Make sure the basic barebones features work.
