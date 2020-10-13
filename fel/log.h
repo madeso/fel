@@ -29,7 +29,7 @@ namespace fel
 
             InvalidOperationOnNull,
             InvalidBinaryOperation,
-            ThisEvaluatesTo, // this evalues to {0: value}
+            ThisEvaluatesTo, // this evalues to {0: type} {0: value}
 
             InternalError // unhandled code path {0: reason}
         };

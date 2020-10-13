@@ -7,6 +7,21 @@ namespace fel
 {
     // ------------------------------------------------------------------------
 
+    std::string
+    Stringify(std::shared_ptr<Object> object)
+    {
+        if(object == nullptr)
+        {
+            return "null";
+        }
+        else
+        {
+            return object->ToString();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
     IntObject::IntObject(int ii)
         : i(ii)
     {

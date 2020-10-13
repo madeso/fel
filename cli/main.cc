@@ -15,6 +15,7 @@
 #include "fel/ast.h"
 #include "fel/ast_printer.h"
 #include "fel/parser.h"
+#include "fel/interpreter.h"
 
 #include "lsp/lsp.h"
 #include "lsp/str.h"
@@ -221,6 +222,34 @@ HandleParse(const File& file, const Options& opt)
 
 
 int
+HandleRun(const File& file, const Options& opt)
+{
+    Log log;
+    auto parser = Parser{file, &log};
+    auto parsed_expression = parser.Parse();
+
+    if(opt.print_log) { Print(log); }
+
+    if(!(log.IsEmpty() && parsed_expression != nullptr))
+    {
+        return -1;
+    }
+
+    auto interpreter = Interpreter{&log};
+    auto result = interpreter.Evaluate(parsed_expression);
+    
+    if(opt.print_log) { Print(log); }
+
+    if(opt.print_output && log.IsEmpty())
+    {
+        std::cout << Stringify(result) << "\n";
+    }
+    
+    return log.IsEmpty() ? 0 : -2;
+}
+
+
+int
 main(int argc, char* argv[])
 {
     const auto app = std::string(argv[0]);
@@ -329,6 +358,8 @@ main(int argc, char* argv[])
                         return HandleTokenize(*file, opt);
                     case Mode::Parse:
                         return HandleParse(*file, opt);
+                    case Mode::Run:
+                        return HandleRun(*file, opt);
                     default:
                         std::cerr << "Unknown mode!\n";
                         return -2;

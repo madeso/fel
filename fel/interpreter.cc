@@ -47,8 +47,30 @@ namespace fel
     }
 
 
+    bool CanCastToNumber(std::shared_ptr<Object> object)
+    {
+        const auto type = object->GetType();
+        return type == ObjectType::Int || type == ObjectType::Number;
+    }
+
+    float CastToNumber(std::shared_ptr<Object> object)
+    {
+        const auto type = object->GetType();
+        if(type == ObjectType::Int)
+        {
+            return static_cast<float>(static_cast<IntObject*>(object.get())->i);
+        }
+        if(type == ObjectType::Number)
+        {
+            return static_cast<FloatObject*>(object.get())->f;
+        }
+        assert(false && "invalid number type");
+        return 0.0f;
+    }
+
+
     std::shared_ptr<Object>
-    BinaryHelper
+    BinaryHelper 
     (
         Log* log,
         const Where& where,
@@ -74,8 +96,8 @@ namespace fel
         if(left == nullptr || right == nullptr)
         {
             log->AddError(where, log::Type::InvalidOperationOnNull);
-            log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left)});
-            log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right)});
+            log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
+            log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
             return nullptr;
         }
 
@@ -91,32 +113,13 @@ namespace fel
             }
         }
 
-        const auto can_cast_to_number = [](std::shared_ptr<Object> object) -> bool
-        {
-            const auto type = object->GetType();
-            return type == ObjectType::Int || type == ObjectType::Number;
-        };
+        
 
-        const auto cast_to_number = [](std::shared_ptr<Object> object) -> float
-        {
-            const auto type = object->GetType();
-            if(type == ObjectType::Int)
-            {
-                return static_cast<float>(static_cast<IntObject*>(object.get())->i);
-            }
-            if(type == ObjectType::Number)
-            {
-                return static_cast<FloatObject*>(object.get())->f;
-            }
-            assert(false && "invalid number type");
-            return 0.0f;
-        };
-
-        if(number_function && can_cast_to_number(left) && can_cast_to_number(right))
+        if(number_function && CanCastToNumber(left) && CanCastToNumber(right))
         {
             return Object::FromFloat
             (
-                (*number_function)(cast_to_number(left), can_cast_to_number(right))
+                (*number_function)(CastToNumber(left), CanCastToNumber(right))
             );
         }
 
@@ -130,8 +133,103 @@ namespace fel
         }
 
         log->AddError(where, log::Type::InvalidBinaryOperation);
-        log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left)});
-        log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right)});
+        log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
+        log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
+        return nullptr;
+    }
+
+
+    std::shared_ptr<Object>
+    CompareHelper 
+    (
+        Log* log,
+        const Where& where,
+        std::shared_ptr<Expression> lhs,
+        std::shared_ptr<Expression> rhs,
+        std::shared_ptr<Object> left,
+        std::shared_ptr<Object> right,
+        std::function<bool (float, float)> compare_function
+    )
+    {
+        if(left == nullptr || right == nullptr)
+        {
+            log->AddError(where, log::Type::InvalidOperationOnNull);
+            log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
+            log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
+            return nullptr;
+        }
+
+        
+        if(CanCastToNumber(left) && CanCastToNumber(right))
+        {
+            return Object::FromBool
+            (
+                compare_function(CastToNumber(left), CanCastToNumber(right))
+            );
+        }
+
+        // todo(Gustav): allow comparing of strings?
+
+        log->AddError(where, log::Type::InvalidBinaryOperation);
+        log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
+        log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
+        return nullptr;
+    }
+
+
+    std::shared_ptr<Object>
+    EqualHelper 
+    (
+        Log* log,
+        const Where& where,
+        std::shared_ptr<Expression> lhs,
+        std::shared_ptr<Expression> rhs,
+        std::shared_ptr<Object> left,
+        std::shared_ptr<Object> right,
+        bool invert_result
+    )
+    {
+        if(left == nullptr && right == nullptr) { return Object::FromBool(true); }
+        if(left == nullptr || right == nullptr) { return Object::FromBool(false); }
+
+        const auto lt = left->GetType();
+        const auto rt = right->GetType();
+
+        if(lt == rt)
+        {
+            if(lt == ObjectType::Bool)
+            {
+                return Object::FromBool
+                (
+                    invert_result
+                    ||
+                    (
+                        static_cast<BoolObject*>(left.get())->b
+                        ==
+                        static_cast<BoolObject*>(right.get())->b
+                    )
+                );
+            }
+            else if(lt == ObjectType::Int)
+            {
+                return Object::FromBool
+                (
+                    invert_result
+                    ||
+                    (
+                        static_cast<IntObject*>(left.get())->i
+                        ==
+                        static_cast<IntObject*>(right.get())->i
+                    )
+                );
+            }
+        }
+
+        // todo(Gustav): allow comparing of strings?
+
+        log->AddError(where, log::Type::InvalidBinaryOperation);
+        log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
+        log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
         return nullptr;
     }
 
@@ -197,6 +295,48 @@ namespace fel
 
                     return std::nullopt;
                 }
+            );
+            case TokenType::Less: return CompareHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                [](float lhs, float rhs) -> bool { return lhs < rhs; }
+            );
+            case TokenType::LessEqual: return CompareHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                [](float lhs, float rhs) -> bool { return lhs <= rhs; }
+            );
+            case TokenType::Greater: return CompareHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                [](float lhs, float rhs) -> bool { return lhs > rhs; }
+            );
+            case TokenType::GreaterEqual: return CompareHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                [](float lhs, float rhs) -> bool { return lhs >= rhs; }
+            );
+            case TokenType::Equal: return EqualHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                false
+            );
+            case TokenType::NotEqual: return EqualHelper
+            (
+                log, exp->op.where,
+                exp->left, exp->right,
+                left, right,
+                true
             );
 
             default:

@@ -27,6 +27,10 @@ namespace fel
     };
 
 
+    std::string
+    Stringify(std::shared_ptr<Object> object);
+
+
     struct IntObject : public Object
     {
         int i;

@@ -99,6 +99,18 @@ namespace fel::log
             assert(entry.arguments.size() == 0);
             o << "Expected expression";
             break;
+        case Type::InvalidOperationOnNull:
+            assert(entry.arguments.size() == 0);
+            o << "Invalid operation on null";
+            break;
+        case Type::InvalidBinaryOperation:
+            assert(entry.arguments.size() == 0);
+            o << "Invalid binary operation";
+            break;
+        case Type::ThisEvaluatesTo:
+            assert(entry.arguments.size() == 2);
+            o << "this evaluates to " << Arg(entry, 1) << " (type: " << Arg(entry, 0) << ")";
+            break;
         case Type::InternalError:
             assert(entry.arguments.size() == 1);
             o << "Internal error: " << Arg(entry, 0);

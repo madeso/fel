@@ -43,6 +43,7 @@ add_library(fel STATIC
     fel/object.cc fel/object.h
     fel/parser.cc fel/parser.h
     fel/where.cc fel/where.h
+    fel/interpreter.cc fel/interpreter.h
 )
 target_include_directories(fel
     PUBLIC
