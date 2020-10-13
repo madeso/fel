@@ -99,8 +99,12 @@ namespace fel::log
             assert(entry.arguments.size() == 0);
             o << "Expected expression";
             break;
+        case Type::InternalError:
+            assert(entry.arguments.size() == 1);
+            o << "Internal error: " << Arg(entry, 0);
+            break;
         default:
-            o << "Internal error: Unhandled error type in switch.";
+            o << "Internal error handling: Unhandled error type in switch.";
             break;
         }
         if(!entry.debug_context.empty())

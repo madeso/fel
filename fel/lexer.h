@@ -21,7 +21,7 @@ namespace fel
         OpenParen, CloseParen, // ()
         OpenBracket, CloseBracket, // []
         
-        Plus, Minus, Mult, Div, Comma, Colon,
+        Plus, Minus, Mult, Div, Mod, Comma, Colon,
         Term, // ;
 
         Dot, DotDot,

@@ -114,13 +114,13 @@ namespace fel
     Expr
     Parser::ParsePrimary()
     {
-        if(ParseMatch({TokenType::KeywordFalse})) return std::make_shared<LiteralExpression>(Object::FromBool(false));
-        if(ParseMatch({TokenType::KeywordTrue})) return std::make_shared<LiteralExpression>(Object::FromBool(true));
-        if(ParseMatch({TokenType::KeywordNull})) return std::make_shared<LiteralExpression>(nullptr);
+        if(ParseMatch({TokenType::KeywordFalse})) return std::make_shared<LiteralExpression>(Object::FromBool(false), GetPreviousToken().where);
+        if(ParseMatch({TokenType::KeywordTrue})) return std::make_shared<LiteralExpression>(Object::FromBool(true), GetPreviousToken().where);
+        if(ParseMatch({TokenType::KeywordNull})) return std::make_shared<LiteralExpression>(nullptr, GetPreviousToken().where);
 
         if(ParseMatch({TokenType::Int, TokenType::Number, TokenType::String}))
         {
-            return std::make_shared<LiteralExpression>(GetPreviousToken().literal);
+            return std::make_shared<LiteralExpression>(GetPreviousToken().literal, GetPreviousToken().where);
         }
 
         if(ParseMatch({TokenType::OpenParen}))

@@ -30,4 +30,6 @@ namespace fel
     operator<<(std::ostream& o, const Where& w);
 }
 
+#define FEL_WHERE_HERE ::fel::Where{__FILE__, {__LINE__}}
+
 #endif  // FEL_WHERE_H

@@ -22,7 +22,16 @@ namespace fel
 
         enum class Type
         {
-            EosInString, UnknownCharacter, MissingCloseParen, ExpectedExpression
+            EosInString,
+            UnknownCharacter,
+            MissingCloseParen,
+            ExpectedExpression,
+
+            InvalidOperationOnNull,
+            InvalidBinaryOperation,
+            ThisEvaluatesTo, // this evalues to {0: value}
+
+            InternalError // unhandled code path {0: reason}
         };
 
         struct Entry
@@ -58,14 +67,14 @@ namespace fel
         (
             const FilePointer& where,
             log::Type type,
-            const std::vector<std::string>& args
+            const std::vector<std::string>& args = {}
         );
 
         void AddError
         (
             const Where& where,
             log::Type type,
-            const std::vector<std::string>& args
+            const std::vector<std::string>& args = {}
         );
 
         bool

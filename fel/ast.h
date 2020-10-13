@@ -25,12 +25,28 @@ namespace fel
         virtual std::string Visit(UnaryExpression* exp) = 0;
     };
 
+    struct ExpressionVisitorObject
+    {
+        virtual ~ExpressionVisitorObject() = default;
+
+        virtual std::shared_ptr<Object> Visit(BinaryExpression* exp) = 0;
+        virtual std::shared_ptr<Object> Visit(GroupingExpression* exp) = 0;
+        virtual std::shared_ptr<Object> Visit(LiteralExpression* exp) = 0;
+        virtual std::shared_ptr<Object> Visit(UnaryExpression* exp) = 0;
+    };
+
     struct Expression
     {
         virtual ~Expression() = default;
 
-        virtual
-        std::string Visit(ExpressionVisitorString* visitor) = 0;
+        virtual Where
+        GetLocation() = 0;
+
+        virtual std::string
+        Visit(ExpressionVisitorString* visitor) = 0;
+
+        virtual std::shared_ptr<Object>
+        Visit(ExpressionVisitorObject* visitor) = 0;
     };
 
 
@@ -47,10 +63,14 @@ namespace fel
             std::shared_ptr<Expression> r
         );
 
-        std::string Visit(ExpressionVisitorString* visitor) override
-        {
-            return visitor->Visit(this);
-        }
+        Where
+        GetLocation() override;
+
+        std::string
+        Visit(ExpressionVisitorString* visitor) override;
+
+        std::shared_ptr<Object>
+        Visit(ExpressionVisitorObject* visitor) override;
     };
 
     struct GroupingExpression : public Expression
@@ -59,22 +79,31 @@ namespace fel
 
         explicit GroupingExpression(std::shared_ptr<Expression> e);
 
-        std::string Visit(ExpressionVisitorString* visitor) override
-        {
-            return visitor->Visit(this);
-        }
+        Where
+        GetLocation() override;
+
+        std::string
+        Visit(ExpressionVisitorString* visitor) override;
+
+        std::shared_ptr<Object>
+        Visit(ExpressionVisitorObject* visitor) override;
     };
 
     struct LiteralExpression : public Expression
     {
         std::shared_ptr<Object> value;
+        Where where;
 
-        explicit LiteralExpression(std::shared_ptr<Object> v);
+        LiteralExpression(std::shared_ptr<Object> v, const Where& w);
 
-        std::string Visit(ExpressionVisitorString* visitor) override
-        {
-            return visitor->Visit(this);
-        }
+        Where
+        GetLocation() override;
+
+        std::string
+        Visit(ExpressionVisitorString* visitor) override;
+
+        std::shared_ptr<Object>
+        Visit(ExpressionVisitorObject* visitor) override;
     };
     
     struct UnaryExpression : public Expression
@@ -88,10 +117,14 @@ namespace fel
             std::shared_ptr<Expression> r
         );
 
-        std::string Visit(ExpressionVisitorString* visitor) override
-        {
-            return visitor->Visit(this);
-        }
+        Where
+        GetLocation() override;
+
+        std::string
+        Visit(ExpressionVisitorString* visitor) override;
+
+        std::shared_ptr<Object>
+        Visit(ExpressionVisitorObject* visitor) override;
     };
 
 }

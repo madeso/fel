@@ -265,6 +265,7 @@ namespace fel
         case '-': return SingleChar(&file, TokenType::Minus);
         case '*': return SingleChar(&file, TokenType::Mult);
         case '/': return SingleChar(&file, TokenType::Div);
+        case '%': return SingleChar(&file, TokenType::Mod);
         case ',': return SingleChar(&file, TokenType::Comma);
         case ':': return SingleChar(&file, TokenType::Colon);
         case ';': return SingleChar(&file, TokenType::Term);

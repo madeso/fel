@@ -5,89 +5,128 @@
 
 namespace fel
 {
+    // ------------------------------------------------------------------------
 
-    struct IntObject : public Object
+    IntObject::IntObject(int ii)
+        : i(ii)
     {
-        int i;
+    }
 
-        explicit IntObject(int ii) : i(ii) {}
 
-        std::string
-        ToString() override
-        {
-            std::ostringstream ss;
-            ss << i;
-            return ss.str();
-        }
-    };
+    ObjectType
+    IntObject::GetType()
+    {
+        return ObjectType::Int;
+    }
+
+
+    std::string
+    IntObject::ToString()
+    {
+        std::ostringstream ss;
+        ss << i;
+        return ss.str();
+    }
+
+
+    // ------------------------------------------------------------------------
     
 
-    struct FloatObject : public Object
+    FloatObject::FloatObject(float ff)
+        : f(ff)
     {
-        float f;
-
-        explicit FloatObject(float ff) : f(ff) {}
+    }
 
 
-        std::string
-        ToString() override
-        {
-            std::ostringstream ss;
-            ss << f;
-            return ss.str();
-        }
-    };
-
-
-    struct BoolObject : public Object
+    ObjectType
+    FloatObject::GetType()
     {
-        bool b;
+        return ObjectType::Number;
+    }
 
-        explicit BoolObject(bool bb) : b(bb) {}
+
+    std::string
+    FloatObject::ToString()
+    {
+        std::ostringstream ss;
+        ss << f;
+        return ss.str();
+    }
 
 
-        std::string
-        ToString() override
-        {
-            if(b) { return "true";  }
-            else  { return "false"; }
-        }
-    };
+    // ------------------------------------------------------------------------
+
+
+    BoolObject::BoolObject(bool bb)
+        : b(bb)
+    {
+    }
+
+
+    ObjectType
+    BoolObject::GetType()
+    {
+        return ObjectType::Bool;
+    }
+
+
+    std::string
+    BoolObject::ToString()
+    {
+        if(b) { return "true";  }
+        else  { return "false"; }
+    }
+
+
+    // ------------------------------------------------------------------------
     
 
-    struct StringObject : public Object
+    StringObject::StringObject(const std::string& ss)
+        : s(ss)
     {
-        std::string s;
-
-        explicit StringObject(const std::string& ss) : s(ss) {}
-
-        std::string
-        ToString() override
-        {
-            return s;
-        }
-    };
+    }
 
 
-    std::shared_ptr<Object> Object::FromInt(int i)
+    ObjectType
+    StringObject::GetType()
+    {
+        return ObjectType::String;
+    }
+
+
+    std::string
+    StringObject::ToString()
+    {
+        return s;
+    }
+
+
+    // ------------------------------------------------------------------------
+
+
+    std::shared_ptr<Object>
+    Object::FromInt(int i)
     {
         return std::make_shared<IntObject>(i);
     }
 
 
-    std::shared_ptr<Object> Object::FromFloat(float f)
+    std::shared_ptr<Object>
+    Object::FromFloat(float f)
     {
         return std::make_shared<FloatObject>(f);
     }
 
 
-    std::shared_ptr<Object> Object::FromBool(bool b)
+    std::shared_ptr<Object>
+    Object::FromBool(bool b)
     {
         return std::make_shared<BoolObject>(b);
     }
 
 
-    std::shared_ptr<Object> Object::FromString(const std::string& str)
+    std::shared_ptr<Object>
+    Object::FromString(const std::string& str)
     {
         return std::make_shared<StringObject>(str);
     }
