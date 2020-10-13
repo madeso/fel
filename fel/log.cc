@@ -100,12 +100,12 @@ namespace fel::log
             o << "Expected expression";
             break;
         case Type::InvalidOperationOnNull:
-            assert(entry.arguments.size() == 0);
-            o << "Invalid operation on null";
+            assert(entry.arguments.size() == 1);
+            o << "Invalid operation on null: " << Arg(entry, 0);
             break;
         case Type::InvalidBinaryOperation:
-            assert(entry.arguments.size() == 0);
-            o << "Invalid binary operation";
+            assert(entry.arguments.size() == 1);
+            o << "Invalid binary operation: " << Arg(entry, 0);
             break;
         case Type::ThisEvaluatesTo:
             assert(entry.arguments.size() == 2);

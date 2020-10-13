@@ -73,7 +73,7 @@ namespace fel
     BinaryHelper 
     (
         Log* log,
-        const Where& where,
+        const Token& op,
         std::shared_ptr<Expression> lhs,
         std::shared_ptr<Expression> rhs,
         std::shared_ptr<Object> left,
@@ -95,7 +95,7 @@ namespace fel
     {
         if(left == nullptr || right == nullptr)
         {
-            log->AddError(where, log::Type::InvalidOperationOnNull);
+            log->AddError(op.where, log::Type::InvalidOperationOnNull, {op.lexeme});
             log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
             log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
             return nullptr;
@@ -132,7 +132,7 @@ namespace fel
             }
         }
 
-        log->AddError(where, log::Type::InvalidBinaryOperation);
+        log->AddError(op.where, log::Type::InvalidBinaryOperation, {op.lexeme});
         log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
         log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
         return nullptr;
@@ -143,7 +143,7 @@ namespace fel
     CompareHelper 
     (
         Log* log,
-        const Where& where,
+        const Token& op,
         std::shared_ptr<Expression> lhs,
         std::shared_ptr<Expression> rhs,
         std::shared_ptr<Object> left,
@@ -153,7 +153,7 @@ namespace fel
     {
         if(left == nullptr || right == nullptr)
         {
-            log->AddError(where, log::Type::InvalidOperationOnNull);
+            log->AddError(op.where, log::Type::InvalidOperationOnNull, {op.lexeme});
             log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
             log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
             return nullptr;
@@ -170,7 +170,7 @@ namespace fel
 
         // todo(Gustav): allow comparing of strings?
 
-        log->AddError(where, log::Type::InvalidBinaryOperation);
+        log->AddError(op.where, log::Type::InvalidBinaryOperation, {op.lexeme});
         log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
         log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
         return nullptr;
@@ -181,7 +181,7 @@ namespace fel
     EqualHelper 
     (
         Log* log,
-        const Where& where,
+        const Token& op,
         std::shared_ptr<Expression> lhs,
         std::shared_ptr<Expression> rhs,
         std::shared_ptr<Object> left,
@@ -227,7 +227,7 @@ namespace fel
 
         // todo(Gustav): allow comparing of strings?
 
-        log->AddError(where, log::Type::InvalidBinaryOperation);
+        log->AddError(op.where, log::Type::InvalidBinaryOperation, {op.lexeme});
         log->AddError(lhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(left), Stringify(left)});
         log->AddError(rhs->GetLocation(), log::Type::ThisEvaluatesTo, {TypeToString(right), Stringify(right)});
         return nullptr;
@@ -244,7 +244,7 @@ namespace fel
         {
             case TokenType::Minus: return BinaryHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](int lhs, int rhs) -> int {return lhs - rhs;},
@@ -252,7 +252,7 @@ namespace fel
             );
             case TokenType::Mult: return BinaryHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](int lhs, int rhs) -> int {return lhs * rhs;},
@@ -260,7 +260,7 @@ namespace fel
             );
             case TokenType::Div: return BinaryHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 nullptr,
@@ -268,7 +268,7 @@ namespace fel
             );
             case TokenType::Mod: return BinaryHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](int lhs, int rhs) -> int {return lhs % rhs;},
@@ -276,7 +276,7 @@ namespace fel
             );
             case TokenType::Plus: return BinaryHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](int lhs, int rhs) -> int {return lhs + rhs;},
@@ -298,42 +298,42 @@ namespace fel
             );
             case TokenType::Less: return CompareHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](float lhs, float rhs) -> bool { return lhs < rhs; }
             );
             case TokenType::LessEqual: return CompareHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](float lhs, float rhs) -> bool { return lhs <= rhs; }
             );
             case TokenType::Greater: return CompareHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](float lhs, float rhs) -> bool { return lhs > rhs; }
             );
             case TokenType::GreaterEqual: return CompareHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 [](float lhs, float rhs) -> bool { return lhs >= rhs; }
             );
             case TokenType::Equal: return EqualHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 false
             );
             case TokenType::NotEqual: return EqualHelper
             (
-                log, exp->op.where,
+                log, exp->op,
                 exp->left, exp->right,
                 left, right,
                 true
