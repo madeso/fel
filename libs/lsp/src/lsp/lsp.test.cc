@@ -1,8 +1,10 @@
 #include "catch.hpp"
 
-#include "falsestring.h"
 #include <sstream>
 #include <set>
+#include "fmt/core.h"
+
+#include "catchy/falsestring.h"
 
 #include "lsp/lsp.h"
 
@@ -11,26 +13,8 @@ using namespace fel;
 using Catch::Matchers::Equals;
 
 
-struct Str
-{
-    std::ostringstream ss;
-
-    template<typename T>
-    Str& operator<<(const T& t)
-    {
-        ss << t;
-        return *this;
-    }
-
-    operator std::string() const
-    {
-        return ss.str();
-    }
-};
-
-
 template<typename K, typename V>
-FalseString
+catchy::FalseString
 MapEquals(const std::map<K, V>& lhs, const std::map<K, V>& rhs)
 {
     std::set<K> keys_in_rhs;
@@ -43,7 +27,7 @@ MapEquals(const std::map<K, V>& lhs, const std::map<K, V>& rhs)
         const auto found = rhs.find(s.first);
         if(found == rhs.end())
         {
-            errors.push_back(Str() << "missing key " << s.first);
+            errors.push_back(fmt::format("missing key {}", s.first));
             continue;
         }
 
@@ -53,20 +37,17 @@ MapEquals(const std::map<K, V>& lhs, const std::map<K, V>& rhs)
         {
             errors.push_back
             (
-                Str() << "value different for " << s.first << ": "
-                "<" << s.second << ">"
-                " != "
-                "<" << found->second << ">"
+                fmt::format("value different for {}: <{}> != <{}>", s.first, s.second, found->second)
             );
         }
     }
 
     for(const auto& k: keys_in_rhs)
     {
-        errors.push_back(Str() << k << " missing from lhs");
+        errors.push_back(fmt::format("{} missing from lhs", k));
     }
 
-    if(errors.empty()) { return FalseString::True(); }
+    if(errors.empty()) { return catchy::FalseString::True(); }
 
     std::ostringstream ss;
     bool first = true;
@@ -77,7 +58,7 @@ MapEquals(const std::map<K, V>& lhs, const std::map<K, V>& rhs)
         ss << e;
     }
 
-    return FalseString::False(ss.str());
+    return catchy::FalseString::False(ss.str());
 }
 
 

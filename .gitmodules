@@ -1,0 +1,3 @@
+[submodule "external/catchy"]
+	path = external/catchy
+	url = git@github.com:madeso/catchy.git

@@ -7,6 +7,8 @@
 #include <functional>
 #include <exception>
 
+#include "fmt/core.h"
+
 #include "fel/lexer.h"
 #include "fel/file.h"
 #include "fel/log.h"
@@ -18,7 +20,6 @@
 #include "fel/interpreter.h"
 
 #include "lsp/lsp.h"
-#include "lsp/str.h"
 
 
 using namespace fel;
@@ -164,13 +165,13 @@ RunLanguageServer(const std::string& log_path)
     }
     catch(const std::exception& ex)
     {
-        write_error(Str() << "Exception: " << ex.what());
+        write_error(fmt::format("Exception: {}", ex.what()));
     }
     catch(...)
     {
         write_error("exiting due to unknown exception");
     }
-    
+
     return -1;
 }
 
@@ -237,14 +238,14 @@ HandleRun(const File& file, const Options& opt)
 
     auto interpreter = Interpreter{&log};
     auto result = interpreter.Evaluate(parsed_expression);
-    
+
     if(opt.print_log) { Print(log); }
 
     if(opt.print_output && log.IsEmpty())
     {
         std::cout << Stringify(result) << "\n";
     }
-    
+
     return log.IsEmpty() ? 0 : -2;
 }
 
@@ -381,6 +382,6 @@ main(int argc, char* argv[])
         std::cerr << "missing value";
         return -2;
     }
-    
+
     return 0;
 }

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "lsp/str.h"
+#include "fmt/core.h"
 
 
 namespace fel
@@ -42,7 +42,7 @@ namespace fel
         str << last;
         set_line();
 
-        error(Str() << "eof in headerline: " << *line);
+        error(fmt::format("eof in headerline: {}", *line));
         return in;
     }
 
@@ -64,17 +64,17 @@ namespace fel
             const auto colon = line.find(':');
             if(colon == std::string::npos)
             {
-                error(Str() << "Missing colon in '" << line << "'");
+                error(fmt::format("Missing colon in '{}'", line));
                 continue;
             }
             if(colon+2 >= line.length())
             {
-                error(Str() << "No value in '" << line << "'");
+                error(fmt::format("No value in '{}'", line));
                 continue;
             }
             if(line[colon+1] != ' ')
             {
-                error(Str() << "Missing space in '" << line << "'");
+                error(fmt::format("Missing space in '{}'", line));
                 continue;
             }
             const auto key = line.substr(0, colon);
@@ -92,7 +92,7 @@ namespace fel
     {
         std::ostringstream ss;
         std::size_t i = 0;
-        
+
         for(; in && i < length; i += 1)
         {
             char c = 0;
@@ -157,9 +157,7 @@ namespace fel
             // output exception information
             error
             (
-                Str() << "json parse error: " << e.what() << " "
-                    << "id: " << e.id << " "
-                    << "byte position of error: " << e.byte
+                fmt::format("json parse error: {} id: {} byte position of error: {}", e.what(), e.id, e.byte)
             );
         }
         return in;
@@ -246,7 +244,7 @@ namespace fel
 
         return std::nullopt;
     }
-    
+
 
     LspInterfaceCallback::LspInterfaceCallback(ErrorFunction e, ErrorFunction i)
         : error_callback(e)
