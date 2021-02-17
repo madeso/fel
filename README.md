@@ -5,7 +5,7 @@ Fast Embedded Lightweight scripting engine. Despite it standing for something it
 
 Fel also means wrong/error/bad in swedish. Given that it is considerd a bad thing to create your own language instead of using an existing language this not bad name for a language. Finally, one aim of the language is also to generate errors at "compile" time instead of at run time and we have yet another meaning behind the name. It is also probably a bad idea to allow modifications to the language syntax as a core feature (that's another thing I want to add further down the line).
 
-[![Build Status](https://travis-ci.org/madeso/fel.svg?branch=master)](https://travis-ci.org/madeso/fel)
+
 [![Coverage Status](https://coveralls.io/repos/github/madeso/fel/badge.svg?branch=master)](https://coveralls.io/github/madeso/fel?branch=master)
 
 # Key ideas (or key features if you like)
