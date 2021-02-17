@@ -1,0 +1,48 @@
+name: coverage-coveralls
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" $GITHUB_WORKSPACE
+
+    - name: Build
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C $BUILD_TYPE
+
+    - name: Generate coverage
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: |
+          sudo apt install lcov
+          lcov --capture  --base-directory .. --directory libs --output-file coverage.info
+          lcov --remove coverage.info '/usr/include/*' -o coverage.info
+
+    - name: Upload to coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ${{github.workspace}}/build/coverage.info
+
