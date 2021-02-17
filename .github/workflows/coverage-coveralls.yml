@@ -38,7 +38,7 @@ jobs:
       run: |
           sudo apt install lcov
           lcov --capture  --base-directory .. --directory libs --output-file coverage.info
-          lcov --remove coverage.info '/usr/include/*' -o coverage.info
+          lcov --remove coverage.info '/usr/include/*' '*/external/*' -o coverage.info
 
     - name: Upload to coveralls
       uses: coverallsapp/github-action@master
