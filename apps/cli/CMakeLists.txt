@@ -5,6 +5,7 @@ target_link_libraries(felapp
     PUBLIC
     fel
     lsp
+    fmt::fmt
     PRIVATE
     project_options
     project_warnings
