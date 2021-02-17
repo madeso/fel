@@ -145,7 +145,7 @@ namespace fel
         }
 
         throw Error(Peek(), log_type, args);
-        return Token{TokenType::EndOfStream, "<invalid token>", nullptr, {}};
+        // return Token{TokenType::EndOfStream, "<invalid token>", nullptr, {}};
     }
 
     ParseError
