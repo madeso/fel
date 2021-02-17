@@ -20,4 +20,4 @@ target_link_libraries(
     project_options
     project_warnings
 )
-
+catch_discover_tests(tests)

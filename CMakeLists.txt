@@ -3,6 +3,9 @@ project(fel CXX)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CTest)
+enable_testing()
+
 ##############################################################################
 ## project setup
 include(cmake/StandardProjectSettings.cmake)
