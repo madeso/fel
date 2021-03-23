@@ -1,8 +1,10 @@
 # Todo
   * functions can error and have return values
   * parse scopes
+  * (dear) imgui debugger
   * variables
   * if statements
+  * callstack /error handling from functions
   * double type
   * more (and valid) arithmetics (-/*% operators) and ()
     parse with https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing seems sensible?
@@ -20,4 +22,5 @@
   * meta objects/tables
   * optional types
   * Customaizable syntax. Don't like {}, switch them out in a header before building
+  * generate c++ code
 
